@@ -110,10 +110,15 @@ html:has(.landing-root) {
 /* 랜딩 본문 단락 */
 @utility landing-lead {
   max-width: 30em;
-  font-size: clamp(17px, 1.5vw, 20px);
+  font-size: clamp(18px, 1.5vw, 21px);
+  font-weight: 500;
   line-height: 1.75;
-  color: var(--color-landing-mist);
-  text-shadow: 0 1px 18px rgb(18 6 11 / 0.95);
+  color: #f6eaef;
+  /* 3D 타일 위에서도 읽히도록 글자 바로 뒤에 짙은 그림자를 겹친다 */
+  text-shadow:
+    0 1px 2px rgb(18 6 11 / 0.95),
+    0 0 12px rgb(18 6 11 / 0.9),
+    0 1px 24px rgb(18 6 11 / 0.95);
 }
 
 /* 3D 배경 위에서 글이 읽히도록 글 뒤에 깔리는 어두운 번짐 */
@@ -128,8 +133,8 @@ html:has(.landing-root) {
     pointer-events: none;
     background: radial-gradient(
       closest-side at 50% 50%,
-      rgb(18 6 11 / 0.74) 0%,
-      rgb(18 6 11 / 0.5) 55%,
+      rgb(18 6 11 / 0.82) 0%,
+      rgb(18 6 11 / 0.6) 55%,
       rgb(18 6 11 / 0) 100%
     );
   }

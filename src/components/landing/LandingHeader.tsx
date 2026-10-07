@@ -10,7 +10,7 @@ export default function LandingHeader() {
         </a>
         <nav aria-label="주요 메뉴" className="flex gap-[30px]">
           {LANDING_NAV.map((item) => (
-            <a key={item.href} href={item.href} className="text-[15px] text-landing-mist no-underline hover:text-white">
+            <a key={item.href} href={item.href} className="text-[16px] font-medium text-[#f6eaef] no-underline hover:text-white">
               {item.label}
             </a>
           ))}

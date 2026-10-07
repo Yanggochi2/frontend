@@ -18,14 +18,14 @@ export default function LandingPanel({ rows, className = "" }: { rows: LandingRo
         >
           <div>
             <strong className="block text-[16px] font-bold text-white">{row.title}</strong>
-            <small className="block text-[14px] text-landing-mist">{row.sub}</small>
+            <small className="block text-[15px] text-[#ecdbe2]">{row.sub}</small>
           </div>
           {row.tag ? (
             <span className={`flex-none rounded-full px-[13px] py-[5px] text-[14px] font-bold ${TAG_TONE[row.tag.tone]}`}>
               {row.tag.label}
             </span>
           ) : (
-            <small className="text-[14px] text-landing-mist">{row.time}</small>
+            <small className="text-[15px] text-[#ecdbe2]">{row.time}</small>
           )}
         </div>
       ))}

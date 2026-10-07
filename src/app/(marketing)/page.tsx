@@ -28,7 +28,7 @@ export default function LandingPage() {
       <main className="relative z-[1]">
         <section id="hero" className={`${SECTION} justify-center pt-[110px]`}>
           <div className={WRAP}>
-            <div className="relative max-w-[640px] [&>*]:animate-landing-rise [&>*:nth-child(2)]:[animation-delay:.12s] [&>*:nth-child(3)]:[animation-delay:.24s] [&>*:nth-child(4)]:[animation-delay:.36s] motion-reduce:[&>*]:animate-none">
+            <div className="landing-shade max-w-[640px] [&>*]:animate-landing-rise [&>*:nth-child(2)]:[animation-delay:.12s] [&>*:nth-child(3)]:[animation-delay:.24s] [&>*:nth-child(4)]:[animation-delay:.36s] motion-reduce:[&>*]:animate-none">
               <h1 className="landing-heading text-[clamp(64px,12.5vw,196px)]">
                 근무표,
                 <br />
@@ -41,7 +41,7 @@ export default function LandingPage() {
                   더 알아보기
                 </LandingButton>
               </div>
-              <p className="mt-9 flex items-center gap-2.5 text-[15px] text-landing-mist">
+              <p className="mt-9 flex items-center gap-2.5 text-[16px] font-medium text-[#f6eaef] [text-shadow:0_1px_2px_rgb(18_6_11/0.95),0_0_12px_rgb(18_6_11/0.9)]">
                 <i className="size-2 flex-none rounded-full bg-landing-brand-hi shadow-[0_0_0_6px_rgb(184_50_95/0.28)]" />
                 화면을 눌러 오뚜기를 밀어 보세요. 몇 번을 넘어져도 다시 일어나요.
               </p>
