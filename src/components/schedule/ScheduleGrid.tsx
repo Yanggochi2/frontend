@@ -39,11 +39,11 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
               <th
                 key={d.date}
                 scope="col"
-                className={`sticky top-0 z-20 border-t border-r border-b border-grid p-0 font-normal ${headH} bg-surface`}
+                className={`sticky top-0 z-20 border-t border-r border-b border-grid p-0 font-normal ${headH} ${d.isToday ? "bg-line" : "bg-surface"}`}
               >
                 <div className="flex flex-col items-center justify-center gap-0.5 leading-none">
                   <span className={`${isMonth ? "text-[12px]" : "text-[15px]"} font-medium ${WEEKDAY_TEXT[d.tone]}`}>{d.weekday}</span>
-                  <span className={`${isMonth ? "text-[16px]" : "text-[22px]"} font-bold ${d.isToday ? "min-w-[1.6em] rounded-full bg-ink px-1 text-center text-white" : DAY_TEXT[d.tone]}`}>{d.date}</span>
+                  <span className={`${isMonth ? "text-[16px]" : "text-[22px]"} font-bold ${DAY_TEXT[d.tone]}`}>{d.date}</span>
                 </div>
               </th>
             ))}
