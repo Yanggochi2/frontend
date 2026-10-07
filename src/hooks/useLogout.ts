@@ -15,8 +15,7 @@ export function useLogout() {
     setError(null);
     try {
       await logout();
-      // TODO: 로그인 화면이 Figma에 없어 route가 없다. 확정 전까지 홈으로 보낸다.
-      router.replace("/");
+      router.replace("/login");
       router.refresh();
     } catch (e) {
       setError(toErrorMessage(e));
