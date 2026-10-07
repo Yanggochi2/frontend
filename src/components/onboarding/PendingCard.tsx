@@ -10,7 +10,7 @@ export default function PendingCard({ info }: Props) {
     <OnboardingCard className="flex w-full max-w-160 flex-col items-center gap-[18px] px-12 py-14 text-center">
       <div
         aria-hidden="true"
-        className="flex size-24 items-center justify-center rounded-full bg-brand-soft text-[40px] font-bold text-brand"
+        className="flex size-24 items-center justify-center rounded-full bg-primary-soft text-[40px] font-bold text-primary"
       >
         …
       </div>

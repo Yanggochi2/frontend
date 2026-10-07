@@ -79,7 +79,7 @@ export default function CreateWardForm({ defaults }: Props) {
               onClick={() => setPresetId(p.id)}
               className={`flex h-14 cursor-pointer items-center justify-center rounded-[14px] px-5 text-lg ${
                 selected
-                  ? "border-2 border-brand bg-brand-soft font-bold text-brand"
+                  ? "border-2 border-primary bg-primary-soft font-bold text-primary"
                   : "bg-surface font-medium text-ink-sub"
               }`}
             >

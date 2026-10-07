@@ -20,7 +20,7 @@ export default function MyProfileCard({ profile }: { profile: MyProfile }) {
   return (
     <MyCard>
       <div className="flex items-center gap-[18px]">
-        <div className="flex size-[72px] shrink-0 items-center justify-center rounded-full bg-brand-soft text-[30px] leading-normal font-bold text-brand">
+        <div className="flex size-[72px] shrink-0 items-center justify-center rounded-full bg-primary-soft text-[30px] leading-normal font-bold text-primary">
           {profile.name.slice(0, 1)}
         </div>
         <div className="flex flex-col items-start gap-1.5">

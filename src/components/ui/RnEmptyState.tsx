@@ -15,7 +15,7 @@ export default function RnEmptyState({
     <section className="flex w-full flex-col items-center justify-center gap-[18px] rounded-[24px] border border-line bg-white px-10 py-[72px]">
       <div
         aria-hidden
-        className="flex size-24 items-center justify-center rounded-full bg-brand-soft text-[40px] font-bold text-brand"
+        className="flex size-24 items-center justify-center rounded-full bg-primary-soft text-[40px] font-bold text-primary"
       >
         {icon}
       </div>

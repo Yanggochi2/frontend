@@ -77,7 +77,7 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
                       type="button"
                       disabled={pendingId === r.id}
                       onClick={() => update(r, { enabled: !(r.enabled ?? true) })}
-                      className="text-brand disabled:opacity-50"
+                      className="text-primary disabled:opacity-50"
                     >
                       {(r.enabled ?? true) ? "끄기" : "켜기"}
                     </button>
@@ -85,7 +85,7 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
                       type="button"
                       disabled={pendingId === r.id}
                       onClick={() => update(r, { strength: r.strength === "REQUIRED" ? "RECOMMENDED" : "REQUIRED" })}
-                      className="text-brand disabled:opacity-50"
+                      className="text-primary disabled:opacity-50"
                     >
                       강도
                     </button>

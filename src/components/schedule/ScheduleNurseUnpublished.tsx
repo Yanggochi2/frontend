@@ -4,10 +4,10 @@ import ScheduleButton from "@/components/ui/ScheduleButton";
 export default function ScheduleNurseUnpublished() {
   return (
     <div className="flex w-full flex-col items-center justify-center gap-[18px] rounded-[24px] border border-line bg-white px-10 py-[60px] text-center">
-      <div className="flex size-[96px] items-center justify-center gap-1 rounded-full bg-brand-soft" aria-hidden>
-        <span className="size-1.5 rounded-full bg-brand" />
-        <span className="size-1.5 rounded-full bg-brand" />
-        <span className="size-1.5 rounded-full bg-brand" />
+      <div className="flex size-[96px] items-center justify-center gap-1 rounded-full bg-primary-soft" aria-hidden>
+        <span className="size-1.5 rounded-full bg-primary" />
+        <span className="size-1.5 rounded-full bg-primary" />
+        <span className="size-1.5 rounded-full bg-primary" />
       </div>
       <p className="max-w-[640px] text-[26px] font-bold text-ink">아직 공개된 근무표가 없어요</p>
       <p className="max-w-[560px] text-[18px] font-medium text-ink-sub">

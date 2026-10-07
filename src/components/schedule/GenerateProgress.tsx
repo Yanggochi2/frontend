@@ -6,7 +6,7 @@ import type { GenerationProgress } from "@/types/schedule.type";
 
 const STATUS = {
   done: { label: "완료", tone: "gray", card: "border-line bg-white" },
-  active: { label: "진행 중", tone: "brand", card: "border-brand bg-brand-soft" },
+  active: { label: "진행 중", tone: "brand", card: "border-primary bg-primary-soft" },
   pending: { label: "대기", tone: "gray", card: "border-line bg-white" },
 } as const;
 

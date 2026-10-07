@@ -13,7 +13,7 @@ export default function AdminEmptyState({
 }) {
   return (
     <section className="flex w-full flex-col items-center justify-center gap-[18px] rounded-3xl border border-line bg-white px-10 py-[72px] text-center">
-      <div className="flex size-24 items-center justify-center rounded-full bg-brand-soft text-[40px] leading-normal font-bold text-brand">
+      <div className="flex size-24 items-center justify-center rounded-full bg-primary-soft text-[40px] leading-normal font-bold text-primary">
         {icon}
       </div>
       <p className="max-w-[640px] text-[26px] leading-normal font-bold text-ink">{title}</p>

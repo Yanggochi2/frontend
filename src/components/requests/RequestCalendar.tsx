@@ -73,9 +73,9 @@ export default function RequestCalendar({
             onClick={() => pick(d)}
             className={`flex h-14 items-center justify-center rounded-[12px] text-[20px] ${
               selected
-                ? "bg-brand font-bold text-white"
+                ? "bg-primary font-bold text-white"
                 : d === today
-                  ? `border-2 border-brand font-bold ${color}`
+                  ? `border-2 border-primary font-bold ${color}`
                   : `font-medium ${color}`
             }`}
           >

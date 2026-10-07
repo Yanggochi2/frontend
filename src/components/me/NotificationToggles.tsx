@@ -40,7 +40,7 @@ export default function NotificationToggles({ items }: { items: NotificationSett
               aria-label={item.title}
               onClick={() => toggle(item.id)}
               className={`flex h-8 w-14 shrink-0 items-center rounded-full px-1 ${
-                on ? "justify-end bg-brand" : "justify-start bg-[#d1d6db]"
+                on ? "justify-end bg-primary" : "justify-start bg-[#d1d6db]"
               }`}
             >
               <span className="size-6 rounded-full bg-white" />

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 const TONE = {
   gray: "bg-surface text-ink-sub",
-  brand: "bg-brand-soft text-brand",
+  brand: "bg-primary-soft text-primary",
   danger: "bg-danger-soft text-danger",
 } as const;
 

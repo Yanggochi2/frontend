@@ -8,7 +8,7 @@ export default function MyRequestsCard({ requests }: { requests: MyRequest[] }) 
     <MyCard
       title="내 신청 내역"
       action={
-        <Link href="/requests" className="text-[16px] font-bold whitespace-pre text-brand">
+        <Link href="/requests" className="text-[16px] font-bold whitespace-pre text-primary">
           {"전체 보기  ›"}
         </Link>
       }

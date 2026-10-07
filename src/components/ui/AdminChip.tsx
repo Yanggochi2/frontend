@@ -4,7 +4,7 @@ export type AdminChipTone = "gray" | "blue" | "red";
 
 const tones: Record<AdminChipTone, string> = {
   gray: "bg-surface text-ink-sub",
-  blue: "bg-brand-soft text-brand",
+  blue: "bg-primary-soft text-primary",
   red: "bg-danger-soft text-danger",
 };
 

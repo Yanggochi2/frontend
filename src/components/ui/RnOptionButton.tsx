@@ -21,7 +21,7 @@ export default function RnOptionButton({
       onClick={onClick}
       className={`flex h-[52px] items-center justify-center whitespace-nowrap rounded-[14px] ${className} ${
         selected
-          ? "border-2 border-brand bg-brand-soft font-bold text-brand"
+          ? "border-2 border-primary bg-primary-soft font-bold text-primary"
           : "bg-surface font-medium text-ink-sub"
       }`}
     >

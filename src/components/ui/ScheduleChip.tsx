@@ -4,7 +4,7 @@ type Tone = "gray" | "brand" | "danger" | "ok";
 
 const TONE: Record<Tone, string> = {
   gray: "bg-surface text-ink-sub",
-  brand: "bg-brand-soft text-brand",
+  brand: "bg-primary-soft text-primary",
   danger: "bg-danger-soft text-danger",
   ok: "bg-ok-soft text-ok",
 };

@@ -65,10 +65,10 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
                   aria-checked={selected}
                   onClick={() => setKind(o.value)}
                   className={`flex flex-col items-start gap-1.5 rounded-[16px] px-5 py-[18px] text-left ${
-                    selected ? "border-2 border-brand bg-brand-soft" : "border border-line bg-white"
+                    selected ? "border-2 border-primary bg-primary-soft" : "border border-line bg-white"
                   }`}
                 >
-                  <span className={`text-[22px] font-bold ${selected ? "text-brand" : "text-ink"}`}>
+                  <span className={`text-[22px] font-bold ${selected ? "text-primary" : "text-ink"}`}>
                     {o.label}
                   </span>
                   <span className="text-[16px] font-medium text-ink-sub">{o.description}</span>
