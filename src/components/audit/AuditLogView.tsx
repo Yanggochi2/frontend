@@ -1,6 +1,6 @@
 import AdminChip from "@/components/ui/AdminChip";
 import AdminFilterChip from "@/components/ui/AdminFilterChip";
-import { AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
+import { AdminTableEmptyRow, AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
 import type { AuditLogData } from "@/types/audit.type";
 
 // 보기 전용: 수정·삭제 UI를 두지 않는다.
@@ -26,6 +26,7 @@ export default function AuditLogView({ filters, entries }: AuditLogData) {
           </tr>
         </thead>
         <tbody>
+          {entries.length === 0 ? <AdminTableEmptyRow colSpan={5}>기록이 없어요</AdminTableEmptyRow> : null}
           {entries.map((e) => (
             <AdminTr key={e.id}>
               <AdminTd first>{e.occurredAt}</AdminTd>

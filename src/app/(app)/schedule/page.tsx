@@ -1,9 +1,9 @@
 import ScheduleEmptyState from "@/components/schedule/ScheduleEmptyState";
-import ScheduleErrorState from "@/components/schedule/ScheduleErrorState";
 import ScheduleNurseUnpublished from "@/components/schedule/ScheduleNurseUnpublished";
 import ScheduleSheet from "@/components/schedule/ScheduleSheet";
+import ApiOfflineBanner from "@/components/ui/ApiOfflineBanner";
 import SchedulePageHeader from "@/components/ui/SchedulePageHeader";
-import { getSchedulePage } from "@/services/scheduleApi";
+import { getOfflineSheet, getSchedulePage } from "@/services/scheduleApi";
 import type { SchedulePageData } from "@/types/schedule.type";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -21,10 +21,11 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   }
 
   if (!data) {
+    // 서버에 연결하지 못해도 근무표 틀(날짜 열, 도구 모음, 버튼)은 그대로 보여 준다.
     return (
-      <div className="flex flex-col gap-8 px-12 pt-12 pb-10">
-        <SchedulePageHeader title="근무표" />
-        <ScheduleErrorState retryHref="/schedule" />
+      <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col gap-3 px-6 py-4">
+        <ApiOfflineBanner retryHref="/schedule" />
+        <ScheduleSheet key={`offline-${sp.view ?? ""}`} sheet={getOfflineSheet(first(sp.view))} />
       </div>
     );
   }

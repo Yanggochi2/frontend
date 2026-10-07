@@ -59,3 +59,14 @@ export function AdminTd({
     </td>
   );
 }
+
+// 표 본문에 행이 없을 때 쓰는 한 줄
+export function AdminTableEmptyRow({ colSpan, children }: { colSpan: number; children: ReactNode }) {
+  return (
+    <tr>
+      <td colSpan={colSpan} className="h-[72px] pl-5 text-[17px] font-medium text-ink-mute">
+        {children}
+      </td>
+    </tr>
+  );
+}

@@ -1,10 +1,15 @@
 import RequestsBoard from "@/components/requests/RequestsBoard";
 import RnButton from "@/components/ui/RnButton";
 import RnEmptyState from "@/components/ui/RnEmptyState";
-import RnErrorState from "@/components/ui/RnErrorState";
+import ApiOfflineBanner from "@/components/ui/ApiOfflineBanner";
 import RnPageHeader from "@/components/ui/RnPageHeader";
 import { getRequests } from "@/services/requestsApi";
 import type { RequestListResult } from "@/types/requests.type";
+
+const currentMonthLabel = () => {
+  const now = new Date();
+  return `${now.getFullYear()}년 ${now.getMonth() + 1}월`;
+};
 
 export default async function RequestsPage() {
   let result: RequestListResult | null = null;
@@ -18,8 +23,17 @@ export default async function RequestsPage() {
     <div className="flex flex-col gap-8 px-12 pt-12 pb-10">
       {result === null ? (
         <>
-          <RnPageHeader title="신청 관리" subtitle="신청 목록을 불러오지 못했어요" />
-          <RnErrorState message="신청 목록을 불러오지 못했어요" retryHref="/requests" />
+          <RnPageHeader
+            title="신청 관리"
+            subtitle="대기 중인 신청 0건"
+            action={
+              <RnButton variant="primary" href="/requests/new" className="px-6 text-[18px]">
+                새 신청
+              </RnButton>
+            }
+          />
+          <ApiOfflineBanner retryHref="/requests" />
+          <RequestsBoard items={[]} monthLabel={currentMonthLabel()} />
         </>
       ) : result.items.length === 0 ? (
         <>

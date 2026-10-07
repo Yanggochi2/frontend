@@ -23,26 +23,29 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function WardSettingsView({ ward }: { ward: WardSettingsData }) {
-  const { D, E, N } = ward.dailyRequired;
+// ward가 null이면(서버 연결 실패) 값 없이 화면 틀만 보여 준다.
+export default function WardSettingsView({ ward }: { ward: WardSettingsData | null }) {
   return (
     <>
       <Card title="병동 정보">
-        <InfoRow label="병원" value={ward.hospitalName} />
-        <InfoRow label="병동" value={ward.wardName} />
-        <InfoRow label="함께 일하는 간호사" value={`${ward.nurseCount}명`} />
-        <InfoRow label="하루 필요 인원" value={`D ${D}  ·  E ${E}  ·  N ${N}`} />
-        {ward.ruleStartLabel ? <InfoRow label="규칙 시작 방식" value={ward.ruleStartLabel} /> : null}
+        <InfoRow label="병원" value={ward?.hospitalName ?? "-"} />
+        <InfoRow label="병동" value={ward?.wardName ?? "-"} />
+        <InfoRow label="함께 일하는 간호사" value={ward ? `${ward.nurseCount}명` : "-"} />
+        <InfoRow
+          label="하루 필요 인원"
+          value={ward ? `D ${ward.dailyRequired.D}  ·  E ${ward.dailyRequired.E}  ·  N ${ward.dailyRequired.N}` : "-"}
+        />
+        {ward?.ruleStartLabel ? <InfoRow label="규칙 시작 방식" value={ward.ruleStartLabel} /> : null}
         <AdminButton>정보 고치기</AdminButton>
       </Card>
       <Card title="병동 코드">
-        <JoinCodeSection initialCode={ward.wardCode} />
+        <JoinCodeSection initialCode={ward?.wardCode ?? "-"} />
         <p className="text-[16px] leading-normal font-medium text-ink-sub">
           코드를 다시 만들면 이전 코드로는 가입할 수 없어요. 이미 들어온 사람에게는 영향이 없어요.
         </p>
       </Card>
       <Card title="수간호사 권한">
-        {ward.headNurses.map((h) => (
+        {(ward?.headNurses ?? []).map((h) => (
           <div key={h.id} className="flex items-center gap-3">
             <p className="text-[20px] leading-normal font-bold text-ink">
               {h.name}

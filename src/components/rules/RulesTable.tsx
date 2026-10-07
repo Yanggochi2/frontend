@@ -3,7 +3,7 @@
 import { useState } from "react";
 import AdminChip from "@/components/ui/AdminChip";
 import AdminFilterChip from "@/components/ui/AdminFilterChip";
-import { AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
+import { AdminTableEmptyRow, AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
 import { ApiError } from "@/lib/apiClient";
 import { patchRule } from "@/services/rulesApi";
 import type { RuleCategory, RuleItem, RulesData } from "@/types/rules.type";
@@ -59,6 +59,7 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
           </tr>
         </thead>
         <tbody>
+          {visible.length === 0 ? <AdminTableEmptyRow colSpan={5}>규칙이 없어요</AdminTableEmptyRow> : null}
           {visible.map((r) => (
             <AdminTr key={r.id}>
               <AdminTd first>{r.name}</AdminTd>

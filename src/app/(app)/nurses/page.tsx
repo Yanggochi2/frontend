@@ -1,7 +1,7 @@
 import NursesBoard from "@/components/nurses/NursesBoard";
 import RnButton from "@/components/ui/RnButton";
 import RnEmptyState from "@/components/ui/RnEmptyState";
-import RnErrorState from "@/components/ui/RnErrorState";
+import ApiOfflineBanner from "@/components/ui/ApiOfflineBanner";
 import RnPageHeader from "@/components/ui/RnPageHeader";
 import { getNurses } from "@/services/nursesApi";
 import type { NurseListResult } from "@/types/nurses.type";
@@ -18,8 +18,17 @@ export default async function NursesPage() {
     <div className="flex flex-col gap-8 px-12 pt-12 pb-10">
       {result === null ? (
         <>
-          <RnPageHeader title="간호사 명단" subtitle="명단을 불러오지 못했어요" />
-          <RnErrorState message="간호사 명단을 불러오지 못했어요" retryHref="/nurses" />
+          <RnPageHeader
+            title="간호사 명단"
+            subtitle="재직 0명"
+            action={
+              <RnButton variant="primary" href="/nurses/new" className="px-[22px] text-[18px]">
+                간호사 등록
+              </RnButton>
+            }
+          />
+          <ApiOfflineBanner retryHref="/nurses" />
+          <NursesBoard items={[]} />
         </>
       ) : result.items.length === 0 ? (
         <>

@@ -1,7 +1,8 @@
 import AuditLogView from "@/components/audit/AuditLogView";
+import ApiOfflineBanner from "@/components/ui/ApiOfflineBanner";
 import AdminEmptyState from "@/components/ui/AdminEmptyState";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
-import { AdminErrorState } from "@/components/ui/AdminStatus";
+import { AUDIT_FILTER_CHIPS } from "@/constants/audit.constants";
 import { getAuditLog } from "@/services/auditApi";
 import type { AuditLogData } from "@/types/audit.type";
 
@@ -25,7 +26,10 @@ export default async function AuditLogPage() {
         }
       />
       {!data ? (
-        <AdminErrorState />
+        <>
+          <ApiOfflineBanner retryHref="/audit-log" />
+          <AuditLogView filters={AUDIT_FILTER_CHIPS} entries={[]} />
+        </>
       ) : isEmpty ? (
         <AdminEmptyState
           icon="—"

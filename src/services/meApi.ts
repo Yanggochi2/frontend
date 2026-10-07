@@ -68,3 +68,27 @@ export async function markNotificationRead(id: string, read = true): Promise<Api
     body: { read },
   });
 }
+
+// 서버에 연결하지 못했을 때 화면 틀만 보여 주기 위한 빈 값. 가짜 정보는 넣지 않는다.
+export function getEmptyMyPage(): MyPageData {
+  return {
+    role: "NURSE",
+    profile: {
+      name: "-",
+      email: "-",
+      wardLabel: "-",
+      roleLabel: "-",
+      roleTone: "gray",
+      joinedAt: "-",
+      editHint: "",
+    },
+    stats: undefined,
+    requests: [],
+    notifications: NOTIFICATION_SETTING_COPY.map((c) => ({
+      id: c.key,
+      title: c.title,
+      description: c.description,
+      enabled: false,
+    })),
+  };
+}

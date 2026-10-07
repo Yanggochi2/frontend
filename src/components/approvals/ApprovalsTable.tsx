@@ -1,5 +1,5 @@
 import AdminChip from "@/components/ui/AdminChip";
-import { AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
+import { AdminTableEmptyRow, AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
 import ApprovalRowActions from "./ApprovalRowActions";
 import type { JoinRequest } from "@/types/approvals.type";
 
@@ -16,6 +16,7 @@ export default function ApprovalsTable({ requests }: { requests: JoinRequest[] }
         </tr>
       </thead>
       <tbody>
+        {requests.length === 0 ? <AdminTableEmptyRow colSpan={5}>기다리는 가입 신청이 없어요</AdminTableEmptyRow> : null}
         {requests.map((r) => (
           <AdminTr key={r.id}>
             <AdminTd first>{r.name}</AdminTd>

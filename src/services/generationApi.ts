@@ -85,3 +85,25 @@ export async function getGenerationFailure(jobId?: string): Promise<GenerationFa
     options: [],
   };
 }
+
+// 서버에 연결하지 못했을 때 화면 틀만 보여 주기 위한 빈 값
+export function getEmptyGenerationProgress(): GenerationProgress {
+  const now = new Date();
+  return {
+    periodLabel: `${now.getFullYear()}년 ${now.getMonth() + 1}월`,
+    steps: [],
+    metrics: [
+      { label: "경과 시간", value: "-", tone: "default" },
+      { label: "남은 하드 위반", value: "-", tone: "default" },
+    ],
+  };
+}
+
+export function getEmptyGenerationFailure(): GenerationFailure {
+  return {
+    title: "조건을 모두 맞추는 근무표를 찾지 못했어요",
+    subtitle: "",
+    cause: { tag: "충돌 원인", headline: "", detail: "" },
+    options: [],
+  };
+}

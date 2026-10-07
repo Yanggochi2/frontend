@@ -127,6 +127,30 @@ export async function getSchedulePage(params: SchedulePageParams = {}): Promise<
   return { kind: "sheet", sheet: toSheet(schedule, violations, params.view === "month" ? "month" : "week") };
 }
 
+// 서버에 연결하지 못했을 때 보여 줄 빈 근무표 틀. 날짜 열은 실제 오늘 날짜로 만들고 간호사 행은 없다.
+export function getOfflineSheet(view?: string): ScheduleSheetData {
+  const v = view === "month" ? "month" : "week";
+  const { yearMonth, day } = currentYearMonthAndDay();
+  const all = monthDates(yearMonth);
+  const weekCount = Math.ceil(all.length / 7);
+  const activeWeek = Math.min(weekCount, Math.ceil(day / 7));
+  const dates = v === "month" ? all : all.slice((activeWeek - 1) * 7, activeWeek * 7);
+  const today = `${yearMonth}-${String(day).padStart(2, "0")}`;
+  return {
+    view: v,
+    title: v === "month" ? `${Number(yearMonth.slice(5))}월 근무` : "이번 주 근무",
+    days: dates.map((d) => toDay(d, today)),
+    rows: [],
+    coverage: null,
+    selectedCell: null,
+    activeWeek,
+    weekCount,
+    lastSavedLabel: "-",
+    unassigned: false,
+    api: { scheduleId: "", version: 0, dates, editable: false },
+  };
+}
+
 // SCH-02 (구성원)
 export function getScheduleByYearMonth(yearMonth: string): Promise<ApiSchedule> {
   return apiRequest<ApiSchedule>(SCHEDULES, { query: { yearMonth } });

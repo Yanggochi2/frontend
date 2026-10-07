@@ -1,7 +1,8 @@
 import RulesTable from "@/components/rules/RulesTable";
+import ApiOfflineBanner from "@/components/ui/ApiOfflineBanner";
 import AdminButton from "@/components/ui/AdminButton";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
-import { AdminErrorState } from "@/components/ui/AdminStatus";
+import { RULE_FILTER_CHIPS } from "@/constants/rules.constants";
 import { getRules } from "@/services/rulesApi";
 import type { RulesData } from "@/types/rules.type";
 
@@ -20,7 +21,14 @@ export default async function RulesPage() {
         subtitle="프리셋으로 시작한 뒤 하나씩 고칠 수 있어요"
         action={<AdminButton>프리셋 다시 적용</AdminButton>}
       />
-      {data ? <RulesTable filters={data.filters} rules={data.rules} /> : <AdminErrorState />}
+      {data ? (
+        <RulesTable filters={data.filters} rules={data.rules} />
+      ) : (
+        <>
+          <ApiOfflineBanner retryHref="/rules" />
+          <RulesTable filters={RULE_FILTER_CHIPS} rules={[]} />
+        </>
+      )}
     </div>
   );
 }

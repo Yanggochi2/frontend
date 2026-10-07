@@ -1,6 +1,6 @@
 import { OFF_SHORTAGE_WARN_DAYS } from "@/constants/rules.constants";
 import AdminChip from "@/components/ui/AdminChip";
-import { AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
+import { AdminTableEmptyRow, AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
 import type { FairnessRow } from "@/types/stats.type";
 
 function offLabel(row: FairnessRow) {
@@ -26,6 +26,7 @@ export default function StatsTable({ rows }: { rows: FairnessRow[] }) {
         </tr>
       </thead>
       <tbody>
+        {rows.length === 0 ? <AdminTableEmptyRow colSpan={8}>통계가 없어요</AdminTableEmptyRow> : null}
         {rows.map((r) => {
           const off = offLabel(r);
           return (

@@ -1,11 +1,16 @@
 import StatsTable from "@/components/stats/StatsTable";
+import ApiOfflineBanner from "@/components/ui/ApiOfflineBanner";
 import AdminButton from "@/components/ui/AdminButton";
 import AdminEmptyState from "@/components/ui/AdminEmptyState";
 import AdminFilterChip from "@/components/ui/AdminFilterChip";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
-import { AdminErrorState } from "@/components/ui/AdminStatus";
 import { getStats } from "@/services/statsApi";
 import type { StatsData } from "@/types/stats.type";
+
+const currentMonthLabel = () => {
+  const now = new Date();
+  return `${now.getFullYear()}년 ${now.getMonth() + 1}월`;
+};
 
 export default async function StatsPage() {
   // TODO: 통계 API 명세 없음 — 지금은 항상 빈 결과라 빈 상태 화면이 나온다.
@@ -29,7 +34,14 @@ export default async function StatsPage() {
         }
       />
       {!data ? (
-        <AdminErrorState />
+        <>
+          <ApiOfflineBanner retryHref="/stats" />
+          <div className="flex w-full flex-wrap items-center gap-2.5">
+            <AdminFilterChip active>{currentMonthLabel()}</AdminFilterChip>
+            <AdminFilterChip>확정본 기준</AdminFilterChip>
+          </div>
+          <StatsTable rows={[]} />
+        </>
       ) : isEmpty ? (
         <AdminEmptyState
           icon="—"
