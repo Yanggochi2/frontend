@@ -1,11 +1,11 @@
-import type { DutyCode } from "@/types/schedule.type";
+import type { EditableDutyCode } from "@/types/schedule.type";
 import { DUTY_ORDER, DUTY_STYLE } from "./dutyStyle";
 
 type Props = {
   top: number;
   left: number;
   above: boolean;
-  onPick: (code: DutyCode) => void;
+  onPick: (code: EditableDutyCode) => void;
 };
 
 // 화면 좌표(fixed)로 놓아 시트 스크롤 영역에 잘리지 않게 한다.
@@ -24,7 +24,7 @@ export default function ScheduleCellPopover({ top, left, above, onPick }: Props)
             key={code}
             type="button"
             onClick={() => onPick(code)}
-            className={`flex h-[52px] w-[66px] items-center justify-center rounded-[12px] border-2 ${DUTY_STYLE[code].cell} ${DUTY_STYLE[code].edge} ${code === "AL" ? "text-[17px]" : "text-[20px]"}`}
+            className={`flex h-[52px] w-[66px] items-center justify-center rounded-[12px] border-2 ${DUTY_STYLE[code].cell} ${DUTY_STYLE[code].edge} text-[20px]`}
           >
             {DUTY_STYLE[code].weekLabel}
           </button>

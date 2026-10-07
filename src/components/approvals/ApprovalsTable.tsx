@@ -1,6 +1,6 @@
-import AdminButton from "@/components/ui/AdminButton";
 import AdminChip from "@/components/ui/AdminChip";
 import { AdminTableShell, AdminTd, AdminTh, AdminTr } from "@/components/ui/AdminTable";
+import ApprovalRowActions from "./ApprovalRowActions";
 import type { JoinRequest } from "@/types/approvals.type";
 
 export default function ApprovalsTable({ requests }: { requests: JoinRequest[] }) {
@@ -25,10 +25,7 @@ export default function ApprovalsTable({ requests }: { requests: JoinRequest[] }
               <AdminChip>{r.grantedRoleLabel}</AdminChip>
             </AdminTd>
             <AdminTd>
-              <div className="flex gap-3">
-                <AdminButton variant="primary">승인</AdminButton>
-                <AdminButton>반려</AdminButton>
-              </div>
+              <ApprovalRowActions id={r.id} />
             </AdminTd>
           </AdminTr>
         ))}

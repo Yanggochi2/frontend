@@ -45,3 +45,9 @@ page는 `searchParams.state`(`empty` | `error` | `loading`)를 서비스에 넘�
 
 ## 역할 미리보기 (임시)
 역할은 서버가 판정한다. 백엔드 전에는 `?role=nurse`로 일반 간호사 화면(사이드바, 근무표, 마이페이지)을 미리 본다. 백엔드 연결 시 제거한다.
+
+## 근무표·자동 생성 서비스
+- `services/scheduleApi.ts`(조회·셀 변경·확정·내보내기), `services/generationApi.ts`(자동 생성 GEN-01~05). `NEXT_PUBLIC_API_BASE_URL`이 있으면 실제 API, 없으면 mock.
+- 타입: `types/scheduleApi.type.ts`(API 모델), `types/schedule.type.ts`(화면용). 매핑은 scheduleApi.ts에서 한다.
+- `ScheduleSheet`는 셀 변경 시 화면을 먼저 바꾸고 `patchScheduleCells`로 저장한다(실패 시 되돌림, Undo 스택은 클라이언트 메모리). 연차(AL)는 표시만 하고 직접 입력하지 않는다.
+- 자동 생성 화면은 `?jobId=`로 작업을 지정한다 (TODO: 라우팅 확정 후 결정).

@@ -7,6 +7,7 @@ type Props = {
   href?: string;
   type?: "button" | "submit";
   onClick?: () => void;
+  disabled?: boolean;
   className?: string;
   children: ReactNode;
 };
@@ -18,6 +19,7 @@ export default function RnButton({
   href,
   type = "button",
   onClick,
+  disabled,
   className = "",
   children,
 }: Props) {
@@ -33,7 +35,7 @@ export default function RnButton({
     );
   }
   return (
-    <button type={type} onClick={onClick} className={cls}>
+    <button type={type} onClick={onClick} disabled={disabled} className={`${cls} disabled:opacity-50`}>
       {children}
     </button>
   );

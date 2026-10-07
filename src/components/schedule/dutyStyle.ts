@@ -1,4 +1,4 @@
-import type { DutyCode } from "@/types/schedule.type";
+import type { DutyCode, EditableDutyCode } from "@/types/schedule.type";
 
 // Tailwind가 클래스를 찾을 수 있게 전체 문자열로 적는다.
 export const DUTY_STYLE: Record<
@@ -10,9 +10,12 @@ export const DUTY_STYLE: Record<
   N: { cell: "bg-duty-n text-duty-n-ink font-bold", edge: "border-duty-n-edge", weekLabel: "N", monthLabel: "N", brushLabel: "N 나이트" },
   O: { cell: "bg-duty-off text-duty-off-ink font-medium", edge: "border-duty-off-edge", weekLabel: "OFF", monthLabel: "O", brushLabel: "OFF 휴무" },
   AL: { cell: "bg-duty-al text-duty-al-ink font-bold", edge: "border-duty-al-edge", weekLabel: "연차", monthLabel: "AL", brushLabel: "연차" },
+  // TODO(🔶 ED 교육): 미확정. 표시 스타일만 임시로 OFF와 같게 둔다. 입력 UI 없음.
+  ED: { cell: "bg-duty-off text-duty-off-ink font-medium", edge: "border-duty-off-edge", weekLabel: "교육", monthLabel: "ED", brushLabel: "교육" },
 };
 
-export const DUTY_ORDER: DutyCode[] = ["D", "E", "N", "O", "AL"];
+// 직접 입력할 수 있는 코드. AL(연차)은 신청 승인으로만 들어가므로 직접 입력할 수 없다 (docs/API.md).
+export const DUTY_ORDER: EditableDutyCode[] = ["D", "E", "N", "O"];
 
 // 브러시 버튼 배경 (OFF는 Figma에서 회색 칩 색)
 export const BRUSH_BG: Record<DutyCode, string> = {
@@ -21,6 +24,7 @@ export const BRUSH_BG: Record<DutyCode, string> = {
   N: "bg-duty-n text-duty-n-ink",
   O: "bg-surface text-ink-sub",
   AL: "bg-duty-al text-duty-al-ink",
+  ED: "bg-surface text-ink-sub",
 };
 
 export const BRUSH_RING: Record<DutyCode, string> = {
@@ -29,4 +33,5 @@ export const BRUSH_RING: Record<DutyCode, string> = {
   N: "ring-duty-n-edge",
   O: "ring-duty-off-edge",
   AL: "ring-duty-al-edge",
+  ED: "ring-duty-off-edge",
 };

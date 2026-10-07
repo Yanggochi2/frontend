@@ -36,7 +36,7 @@ export default async function MyPage({
             <NotificationToggles items={data.notifications} />
           </div>
           <div className="flex min-w-0 flex-col gap-6">
-            <MyDutyStatsCard stats={data.stats} />
+            {data.stats ? <MyDutyStatsCard stats={data.stats} /> : null}
             <MyRequestsCard requests={data.requests} />
             <MyAccountCard />
           </div>

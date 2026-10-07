@@ -35,16 +35,20 @@ export default function NursesTable({ items }: { items: Nurse[] }) {
                 <RnChip tone={n.role === "HEAD_NURSE" ? "brand" : "gray"}>{NURSE_ROLE_LABEL[n.role]}</RnChip>
               </td>
               <td className={`${cell} w-[150px]`}>
-                <RnChip tone={n.dutyRole === "CHARGE" ? "brand" : n.dutyRole === "NEWBIE" ? "danger" : "gray"}>
-                  {DUTY_ROLE_LABEL[n.dutyRole]}
-                </RnChip>
+                {n.dutyRole ? (
+                  <RnChip tone={n.dutyRole === "CHARGE" ? "brand" : n.dutyRole === "NEW" ? "danger" : "gray"}>
+                    {DUTY_ROLE_LABEL[n.dutyRole]}
+                  </RnChip>
+                ) : (
+                  "-"
+                )}
               </td>
               <td className={`${cell} w-[120px]`}>
-                <RnChip>{NURSE_STATUS_LABEL[n.status]}</RnChip>
+                {n.status ? <RnChip>{NURSE_STATUS_LABEL[n.status]}</RnChip> : "-"}
               </td>
-              <td className={`${cell} w-[130px] ${text}`}>{`${n.careerYears}년 ${n.careerMonths}개월`}</td>
-              <td className={`${cell} w-[110px] ${text}`}>{n.skill}</td>
-              <td className={`${cell} w-[260px] ${text}`}>{n.periodLabel}</td>
+              <td className={`${cell} w-[130px] ${text}`}>{n.careerYears === undefined ? "-" : `${n.careerYears}년 ${n.careerMonths ?? 0}개월`}</td>
+              <td className={`${cell} w-[110px] ${text}`}>{n.skill ?? "-"}</td>
+              <td className={`${cell} w-[260px] ${text}`}>{n.periodLabel ?? "-"}</td>
               <td className={`${cell} ${text}`}>
                 {/* TODO: 간호사 정보 수정(NUR-04) 화면은 미제작 */}
                 수정

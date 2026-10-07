@@ -130,7 +130,7 @@
 - mock으로 "서버가 하는 일"(권한 판정, 저장, 검증)을 구현하지 않는다. UI 상태 전환 정도만 흉내 낸다.
 
 ## 10. API 연동 작업 흐름 (백엔드 준비 후)
-> 지금은 하지 않는다. 백엔드 담당이 API를 제공하고 연동을 요청했을 때만 진행한다.
+> API 명세는 `docs/API.md`에 있다. 서비스 계층(`src/services`)은 `NEXT_PUBLIC_API_BASE_URL`이 설정되면 `src/lib/apiClient.ts`로 실제 API를 호출하고, 비어 있으면 mock으로 동작한다. 명세에 없는 필드·동작은 만들지 않고 `TODO`로 남긴다. 실제 서버와의 연동 확인은 백엔드가 준비된 뒤에 한다.
 
 1. router.md에서 페이지 책임 확인
 2. Architecture.md에서 API 연동 위치 확인

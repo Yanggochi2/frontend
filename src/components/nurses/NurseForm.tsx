@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import RnButton from "@/components/ui/RnButton";
 import RnOptionButton from "@/components/ui/RnOptionButton";
 import {
@@ -10,6 +11,8 @@ import {
   REGISTRABLE_STATUSES,
   SKILL_LEVELS,
 } from "@/constants/nurses.constants";
+import { formatApiError } from "@/lib/formatApiError";
+import { createNurse } from "@/services/nursesApi";
 import type { DutyRole, NurseRole, NurseStatus } from "@/types/nurses.type";
 
 const inputCls =
@@ -28,24 +31,54 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 }
 
 const ROLES: NurseRole[] = ["NURSE", "HEAD_NURSE"];
-const DUTY_ROLES: DutyRole[] = ["GENERAL", "CHARGE", "PRECEPTOR", "NEWBIE"];
+const DUTY_ROLES: DutyRole[] = ["GENERAL", "CHARGE", "PRECEPTOR", "NEW"];
 
 export default function NurseForm() {
   const [role, setRole] = useState<NurseRole>("NURSE");
   const [dutyRole, setDutyRole] = useState<DutyRole>("GENERAL");
   const [status, setStatus] = useState<NurseStatus>("ACTIVE");
   const [skill, setSkill] = useState(3);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const str = (k: string) => String(form.get(k) ?? "").trim();
+    const num = (k: string) => Number(form.get(k) || 0);
+    setBusy(true);
+    setError(null);
+    try {
+      // TODO: 권한(role) 선택은 NUR-01 본문에 없어 보내지 않는다. 수간호사 지정은 WARD-09.
+      // TODO: preceptorOf 선택 UI는 시안에 없다.
+      const created = await createNurse({
+        name: str("name"),
+        dutyRole,
+        status,
+        joinedAt: str("hireDate"),
+        careerMonths: num("careerYears") * 12 + num("careerMonths"),
+        skillLevel: skill,
+        affiliationStart: str("periodStart"),
+      });
+      // null이면 API 미설정(화면만 동작)이라 이동하지 않는다.
+      if (created !== null) router.push("/nurses");
+    } catch (err) {
+      setError(formatApiError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    // TODO: 등록 제출/검증은 백엔드 확정 후 연결 (지금은 화면만)
-    <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-8">
+    <form onSubmit={onSubmit} className="flex flex-col gap-8">
       <div className="flex items-start gap-6">
         <div className="grid w-full max-w-[904px] flex-1 grid-cols-2 gap-x-6 gap-y-7 rounded-[20px] border border-line bg-white p-8">
           <Field label="이름">
-            <input type="text" name="name" placeholder="이름을 입력해요" className={inputCls} />
+            <input type="text" name="name" required maxLength={50} placeholder="이름을 입력해요" className={inputCls} />
           </Field>
           <Field label="입사일">
-            <input type="date" name="hireDate" aria-label="입사일" className={inputCls} />
+            <input type="date" name="hireDate" required aria-label="입사일" className={inputCls} />
           </Field>
 
           <Field label="권한">
@@ -100,7 +133,7 @@ export default function NurseForm() {
             </div>
           </Field>
           <Field label="소속 시작일" hint="이 날짜 전 칸은 편집할 수 없어요">
-            <input type="date" name="periodStart" aria-label="소속 시작일" className={inputCls} />
+            <input type="date" name="periodStart" required aria-label="소속 시작일" className={inputCls} />
           </Field>
         </div>
 
@@ -120,10 +153,15 @@ export default function NurseForm() {
       </div>
 
       <div className="flex items-center justify-end gap-3">
+        {error ? (
+          <p role="alert" className="mr-auto text-[16px] font-medium text-danger">
+            {error}
+          </p>
+        ) : null}
         <RnButton variant="secondary" size="lg" href="/nurses">
           취소
         </RnButton>
-        <RnButton variant="primary" size="lg" type="submit" className="px-10">
+        <RnButton variant="primary" size="lg" type="submit" disabled={busy} className="px-10">
           등록하기
         </RnButton>
       </div>

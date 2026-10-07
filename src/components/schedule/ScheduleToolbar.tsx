@@ -1,10 +1,10 @@
 import ScheduleToggle from "@/components/ui/ScheduleToggle";
-import type { DutyCode } from "@/types/schedule.type";
+import type { EditableDutyCode } from "@/types/schedule.type";
 import { BRUSH_BG, BRUSH_RING, DUTY_ORDER, DUTY_STYLE } from "./dutyStyle";
 
 type Props = {
-  brush: DutyCode | null;
-  onBrushChange: (code: DutyCode | null) => void;
+  brush: EditableDutyCode | null;
+  onBrushChange: (code: EditableDutyCode | null) => void;
   canUndo: boolean;
   onUndo: () => void;
   checkOnly: boolean;

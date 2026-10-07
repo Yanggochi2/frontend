@@ -2,6 +2,7 @@ import AdminButton from "@/components/ui/AdminButton";
 import AdminChip from "@/components/ui/AdminChip";
 import AdminNotice from "@/components/ui/AdminNotice";
 import type { ReactNode } from "react";
+import JoinCodeSection from "./JoinCodeSection";
 import type { WardSettingsData } from "@/types/ward.type";
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
@@ -31,15 +32,11 @@ export default function WardSettingsView({ ward }: { ward: WardSettingsData }) {
         <InfoRow label="병동" value={ward.wardName} />
         <InfoRow label="함께 일하는 간호사" value={`${ward.nurseCount}명`} />
         <InfoRow label="하루 필요 인원" value={`D ${D}  ·  E ${E}  ·  N ${N}`} />
-        <InfoRow label="규칙 시작 방식" value={ward.ruleStartLabel} />
+        {ward.ruleStartLabel ? <InfoRow label="규칙 시작 방식" value={ward.ruleStartLabel} /> : null}
         <AdminButton>정보 고치기</AdminButton>
       </Card>
       <Card title="병동 코드">
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="text-[36px] leading-normal font-bold text-ink">{ward.wardCode}</p>
-          <AdminButton>복사</AdminButton>
-          <AdminButton>코드 다시 만들기</AdminButton>
-        </div>
+        <JoinCodeSection initialCode={ward.wardCode} />
         <p className="text-[16px] leading-normal font-medium text-ink-sub">
           코드를 다시 만들면 이전 코드로는 가입할 수 없어요. 이미 들어온 사람에게는 영향이 없어요.
         </p>

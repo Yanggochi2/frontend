@@ -1,5 +1,8 @@
 // 근무표 화면 타입. 응답 필드는 백엔드 확정 후 결정 (TODO)
-export type DutyCode = "D" | "E" | "N" | "O" | "AL";
+// AL은 표시 전용(직접 입력 불가). TODO(🔶 ED 교육): 미확정, 입력 UI 없음.
+export type DutyCode = "D" | "E" | "N" | "O" | "AL" | "ED";
+// 브러시·팝오버로 직접 입력할 수 있는 코드
+export type EditableDutyCode = "D" | "E" | "N" | "O";
 export type ScheduleView = "week" | "month";
 export type DayTone = "default" | "sat" | "sun";
 export type CoverageStatus = "ok" | "short";
@@ -7,6 +10,7 @@ export type CoverageStatus = "ok" | "short";
 export type ScheduleCell = {
   duty: DutyCode | null; // null = 미배정 (O와 다름)
   flag?: "violation";
+  editable?: boolean; // 없으면 편집 가능 (mock)
 };
 
 export type ScheduleDay = {
@@ -17,7 +21,7 @@ export type ScheduleDay = {
 };
 
 export type ScheduleRow = {
-  nurseKey: string; // mock 전용 키. 실제 식별자는 백엔드 확정 후 (TODO)
+  nurseKey: string; // API 연동 시 nurseId, mock에서는 임시 키
   name: string;
   cells: ScheduleCell[];
   needsCheck?: boolean;
@@ -34,9 +38,18 @@ export type ScheduleSheetData = {
   weekCount: number;
   lastSavedLabel: string;
   unassigned: boolean;
+  // API 연동 시에만 있다. 없으면 화면 상태만 바꾼다 (mock).
+  api?: ScheduleSheetApiState;
 };
 
-export type ScheduleBrush = { code: DutyCode; label: string };
+export type ScheduleSheetApiState = {
+  scheduleId: string;
+  version: number;
+  dates: string[]; // 열 순서대로의 YYYY-MM-DD
+  editable: boolean; // DRAFT일 때만 true
+};
+
+export type ScheduleBrush = { code: EditableDutyCode; label: string };
 
 export type SchedulePageData =
   | { kind: "sheet"; sheet: ScheduleSheetData }

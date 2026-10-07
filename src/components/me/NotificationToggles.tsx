@@ -1,12 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { toErrorMessage } from "@/lib/apiErrorMessage";
+import { updateNotificationSetting } from "@/services/meApi";
 import type { NotificationSetting } from "@/types/me.type";
 import MyCard from "./MyCard";
 
-// TODO: 저장은 백엔드 연동 후 (지금은 화면 안에서만 켜고 끈다)
 export default function NotificationToggles({ items }: { items: NotificationSetting[] }) {
   const [state, setState] = useState(() => Object.fromEntries(items.map((i) => [i.id, i.enabled])));
+
+  const [error, setError] = useState<string | null>(null);
+
+  async function toggle(id: string) {
+    const next = !state[id];
+    setState((s) => ({ ...s, [id]: next }));
+    setError(null);
+    try {
+      await updateNotificationSetting(id, next);
+    } catch (e) {
+      setState((s) => ({ ...s, [id]: !next }));
+      setError(toErrorMessage(e));
+    }
+  }
 
   return (
     <MyCard title="알림 설정">
@@ -23,7 +38,7 @@ export default function NotificationToggles({ items }: { items: NotificationSett
               role="switch"
               aria-checked={on}
               aria-label={item.title}
-              onClick={() => setState((s) => ({ ...s, [item.id]: !s[item.id] }))}
+              onClick={() => toggle(item.id)}
               className={`flex h-8 w-14 shrink-0 items-center rounded-full px-1 ${
                 on ? "justify-end bg-brand" : "justify-start bg-[#d1d6db]"
               }`}
@@ -33,6 +48,7 @@ export default function NotificationToggles({ items }: { items: NotificationSett
           </div>
         );
       })}
+      {error ? <p role="alert" className="text-[16px] font-medium text-danger">{error}</p> : null}
     </MyCard>
   );
 }

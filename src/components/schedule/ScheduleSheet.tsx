@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ScheduleButton from "@/components/ui/ScheduleButton";
 import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
-import type { DutyCode, ScheduleRow, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
+import { ApiError } from "@/lib/apiClient";
+import { applyViolationFlags, patchScheduleCells, toCoverageStatuses } from "@/services/scheduleApi";
+import type { CoverageStatus, DutyCode, EditableDutyCode, ScheduleRow, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
 import ScheduleBottomBar from "./ScheduleBottomBar";
 import ScheduleCellPopover from "./ScheduleCellPopover";
 import ScheduleGrid from "./ScheduleGrid";
@@ -11,6 +13,13 @@ import ScheduleToolbar from "./ScheduleToolbar";
 
 type Popover = { row: number; col: number; top: number; left: number; above: boolean };
 type HistoryItem = { row: number; col: number; prev: DutyCode | null };
+
+const SAVE_ERROR_MESSAGE: Record<string, string> = {
+  VERSION_CONFLICT: "다른 곳에서 수정됐어요. 새로고침해 주세요",
+  SCHEDULE_LOCKED: "다른 사람이 편집 중이에요",
+  PROTECTED_CELL: "이 칸은 바꿀 수 없어요",
+};
+const SAVE_ERROR_DEFAULT = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";
 
 const POPOVER_WIDTH = 386;
 const POPOVER_HEIGHT = 170;
@@ -24,11 +33,17 @@ const VIEW_OPTIONS: { value: ScheduleView; label: string; href: string }[] = [
 export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   const [rows, setRows] = useState<ScheduleRow[]>(sheet.rows);
   const [week, setWeek] = useState(String(sheet.activeWeek));
-  const [brush, setBrush] = useState<DutyCode | null>(null);
+  const [brush, setBrush] = useState<EditableDutyCode | null>(null);
   const [checkOnly, setCheckOnly] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [popover, setPopover] = useState<Popover | null>(null);
   const [showEmptyGuide, setShowEmptyGuide] = useState(sheet.unassigned);
+  const [coverage, setCoverage] = useState<CoverageStatus[] | null>(sheet.coverage);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const api = sheet.api;
+  const versionRef = useRef(api?.version ?? 0);
+  // 빠르게 연속으로 고쳐도 baseVersion이 어긋나지 않게 저장을 한 줄로 세운다.
+  const queueRef = useRef<Promise<unknown>>(Promise.resolve());
 
   const closePopover = useCallback(() => setPopover(null), []);
 
@@ -48,16 +63,53 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
     };
   }, [popover, closePopover]);
 
-  // TODO: 저장·검증은 서버가 한다. 지금은 화면 상태만 바꾼다 (AGENTS.md 9). Undo는 클라이언트 메모리 스택 (6.2).
-  function setDuty(row: number, col: number, duty: DutyCode) {
-    const old = rows[row].cells[col].duty;
-    if (old === duty) return;
-    setHistory((h) => [...h, { row, col, prev: old }]);
+  function writeCell(row: number, col: number, duty: DutyCode | null) {
     setRows((prev) =>
       prev.map((r, i) =>
         i !== row ? r : { ...r, cells: r.cells.map((c, j) => (j === col ? { ...c, duty } : c)) },
       ),
     );
+  }
+
+  // API 연동 시 서버에 저장한다. 서버가 검증·저장을 하고, 화면은 먼저 바꿔 두었다가 실패하면 되돌린다.
+  // API가 없으면(mock) 화면 상태만 바꾼다 (AGENTS.md 9).
+  function save(row: number, col: number, duty: DutyCode | null): Promise<boolean> {
+    if (!api) return Promise.resolve(true);
+    const nurseId = rows[row].nurseKey;
+    const date = api.dates[col];
+    const job = queueRef.current.then(async () => {
+      try {
+        const res = await patchScheduleCells(api.scheduleId, {
+          baseVersion: versionRef.current,
+          changes: [{ nurseId, date, dutyCode: duty }],
+        });
+        versionRef.current = res.version;
+        setCoverage((prev) => (prev ? toCoverageStatuses(res.coverage, api.dates) : prev));
+        setRows((prev) => applyViolationFlags(prev, api.dates, res.violations));
+        setSaveError(null);
+        return true;
+      } catch (e) {
+        setSaveError((e instanceof ApiError && SAVE_ERROR_MESSAGE[e.code]) || SAVE_ERROR_DEFAULT);
+        return false;
+      }
+    });
+    queueRef.current = job;
+    return job;
+  }
+
+  // Undo는 클라이언트 메모리 스택 (6.2). 서버에는 되돌린 값을 일반 변경으로 보낸다.
+  function setDuty(row: number, col: number, duty: EditableDutyCode) {
+    if (api && !api.editable) return;
+    const old = rows[row].cells[col].duty;
+    if (old === duty) return;
+    const item: HistoryItem = { row, col, prev: old };
+    setHistory((h) => [...h, item]);
+    writeCell(row, col, duty);
+    void save(row, col, duty).then((ok) => {
+      if (ok) return;
+      writeCell(row, col, old);
+      setHistory((h) => h.filter((x) => x !== item));
+    });
   }
 
   function handleCellClick(row: number, col: number, el: HTMLElement) {
@@ -77,12 +129,14 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   function handleUndo() {
     const last = history[history.length - 1];
     if (!last) return;
+    const current = rows[last.row].cells[last.col].duty;
     setHistory(history.slice(0, -1));
-    setRows((prev) =>
-      prev.map((r, i) =>
-        i !== last.row ? r : { ...r, cells: r.cells.map((c, j) => (j === last.col ? { ...c, duty: last.prev } : c)) },
-      ),
-    );
+    writeCell(last.row, last.col, last.prev);
+    void save(last.row, last.col, last.prev).then((ok) => {
+      if (ok) return;
+      writeCell(last.row, last.col, current);
+      setHistory((h) => [...h, last]);
+    });
   }
 
   const gridRows = useMemo(() => {
@@ -128,12 +182,17 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
             checkOnly={checkOnly}
             onCheckOnlyChange={setCheckOnly}
           />
+          {saveError ? (
+            <p role="alert" className="text-[16px] font-bold text-danger">
+              {saveError}
+            </p>
+          ) : null}
           <div className="relative min-h-0 flex-1">
             <ScheduleGrid
               view={sheet.view}
               days={sheet.days}
               rows={gridRows}
-              coverage={sheet.coverage}
+              coverage={coverage}
               selected={sheet.selectedCell}
               onCellClick={handleCellClick}
               onScroll={closePopover}

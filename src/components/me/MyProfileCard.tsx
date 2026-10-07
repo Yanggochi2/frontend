@@ -33,9 +33,11 @@ export default function MyProfileCard({ profile }: { profile: MyProfile }) {
       <Row label="권한">
         <AdminChip tone={profile.roleTone}>{profile.roleLabel}</AdminChip>
       </Row>
-      <Row label="듀티 역할">
-        <AdminChip tone={profile.dutyRoleTone}>{profile.dutyRoleLabel}</AdminChip>
-      </Row>
+      {profile.dutyRoleLabel ? (
+        <Row label="듀티 역할">
+          <AdminChip tone={profile.dutyRoleTone}>{profile.dutyRoleLabel}</AdminChip>
+        </Row>
+      ) : null}
       {profile.careerText ? <Row label="총 경력">{profile.careerText}</Row> : null}
       {profile.skillLevel !== undefined ? <Row label="숙련도">{String(profile.skillLevel)}</Row> : null}
       <Row label="소속 시작일">{profile.joinedAt}</Row>

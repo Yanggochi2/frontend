@@ -8,6 +8,10 @@ export type RuleItem = {
   strength: "REQUIRED" | "RECOMMENDED";
   valueText: string;
   targetText: string;
+  // API 연동 시에만 채워진다 (RULE-01)
+  code?: string;
+  enabled?: boolean;
+  version?: number;
 };
 
 export type RuleFilter = { key: RuleCategory; label: string };

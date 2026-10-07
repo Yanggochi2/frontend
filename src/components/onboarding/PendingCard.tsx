@@ -1,5 +1,6 @@
 import OnboardingButton from "@/components/ui/OnboardingButton";
 import OnboardingCard from "@/components/ui/OnboardingCard";
+import PendingLogoutButton from "./PendingLogoutButton";
 import type { PendingInfo } from "@/types/onboarding.type";
 
 type Props = { info: PendingInfo };
@@ -35,8 +36,7 @@ export default function PendingCard({ info }: Props) {
         <OnboardingButton variant="secondary" href="/onboarding/select-ward">
           코드 다시 입력
         </OnboardingButton>
-        {/* TODO: 백엔드 확정 후 연동 (로그아웃) */}
-        <OnboardingButton variant="secondary">로그아웃</OnboardingButton>
+        <PendingLogoutButton />
       </div>
     </OnboardingCard>
   );

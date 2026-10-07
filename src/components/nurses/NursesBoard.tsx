@@ -13,10 +13,10 @@ const ROLE_FILTERS: { value: RoleFilter; label: string }[] = [
   { value: "ALL", label: "전체 역할" },
   { value: "CHARGE", label: DUTY_ROLE_LABEL.CHARGE },
   { value: "PRECEPTOR", label: DUTY_ROLE_LABEL.PRECEPTOR },
-  { value: "NEWBIE", label: DUTY_ROLE_LABEL.NEWBIE },
+  { value: "NEW", label: DUTY_ROLE_LABEL.NEW },
 ];
 
-const careerMonths = (n: Nurse) => n.careerYears * 12 + n.careerMonths;
+const careerMonths = (n: Nurse) => (n.careerYears ?? 0) * 12 + (n.careerMonths ?? 0);
 
 export default function NursesBoard({ items }: { items: Nurse[] }) {
   const [sort, setSort] = useState<Sort>("name");

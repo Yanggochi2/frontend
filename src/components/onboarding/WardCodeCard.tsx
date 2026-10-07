@@ -1,6 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useSubmit } from "@/hooks/useSubmit";
+import { requestWardJoin } from "@/services/onboardingApi";
 import OnboardingButton from "@/components/ui/OnboardingButton";
 import OnboardingCard from "@/components/ui/OnboardingCard";
 import OnboardingInput from "@/components/ui/OnboardingInput";
@@ -9,9 +12,17 @@ import { WARD_CODE_MAX_LENGTH } from "./onboarding.constants";
 type Props = { placeholder: string };
 
 export default function WardCodeCard({ placeholder }: Props) {
+  const router = useRouter();
   const [code, setCode] = useState("");
+  const { submit, loading, error } = useSubmit();
+  const canSubmit = code.trim() !== "" && !loading;
 
-  // TODO: 백엔드 확정 후 연동 (가입 신청 요청, 코드 검증, 시도 횟수 제한)
+  async function handleSubmit() {
+    if (!canSubmit) return;
+    if (await submit(() => requestWardJoin(code.trim()))) router.push("/onboarding/pending");
+  }
+
+  // TODO(🔶 AUTH-00): 코드 입력 시도 횟수 제한 표시는 확정 후 (서버는 429 RATE_LIMITED로 응답)
   return (
     <OnboardingCard className="flex flex-col items-start gap-3.5 p-9">
       <h2 className="text-2xl font-bold text-ink">병동 코드가 있어요</h2>
@@ -25,7 +36,10 @@ export default function WardCodeCard({ placeholder }: Props) {
         maxLength={WARD_CODE_MAX_LENGTH}
         aria-label="병동 코드"
       />
-      <OnboardingButton href="/onboarding/pending">가입 신청하기</OnboardingButton>
+      {error ? <p role="alert" className="text-base font-medium text-danger">{error}</p> : null}
+      <OnboardingButton onClick={handleSubmit} disabled={!canSubmit}>
+        {loading ? "신청하는 중…" : "가입 신청하기"}
+      </OnboardingButton>
     </OnboardingCard>
   );
 }

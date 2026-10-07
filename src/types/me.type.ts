@@ -8,8 +8,9 @@ export type MyProfile = {
   wardLabel: string;
   roleLabel: string;
   roleTone: AdminChipTone;
-  dutyRoleLabel: string;
-  dutyRoleTone: AdminChipTone;
+  // 응답에 없으면 행을 숨긴다 (/me에는 듀티 역할이 없다)
+  dutyRoleLabel?: string;
+  dutyRoleTone?: AdminChipTone;
   // 일반 간호사 응답에는 없는 필드: 있을 때만 표시 (AGENTS 6.1)
   careerText?: string;
   skillLevel?: number;
@@ -46,7 +47,8 @@ export type NotificationSetting = {
 export type MyPageData = {
   role: MyPageRole;
   profile: MyProfile;
-  stats: MyDutyStats;
+  // 응답에 없으면 카드를 숨긴다 (내 통계 API는 명세에 없음)
+  stats?: MyDutyStats;
   requests: MyRequest[];
   notifications: NotificationSetting[];
 };

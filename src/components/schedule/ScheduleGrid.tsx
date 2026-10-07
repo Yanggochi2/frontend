@@ -69,11 +69,12 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                 const isSelected = selected?.row === index && selected.col === col;
                 const style = cell.duty ? DUTY_STYLE[cell.duty] : null;
                 const label = style ? (isMonth ? style.monthLabel : style.weekLabel) : "";
-                const labelSize = isMonth ? (cell.duty === "AL" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" ? "text-[18px]" : "text-[22px]";
+                const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
                 return (
                   <td key={col} className={`relative border-r border-b border-grid p-0 ${rowH} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
                     <button
                       type="button"
+                      disabled={cell.editable === false}
                       onClick={(e) => onCellClick(index, col, e.currentTarget)}
                       aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}`}
                       className={`flex size-full items-center justify-center ${style ? style.cell : "text-ink"} ${labelSize}`}

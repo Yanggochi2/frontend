@@ -20,3 +20,10 @@ export type CreateWardDefaults = {
   presets: RulePreset[];
   defaultPresetId: string;
 };
+
+export type CreateWardInput = {
+  hospitalName: string;
+  wardName: string;
+  requiredStaff: Record<ShiftKind, number>;
+  rulePreset: string;
+};

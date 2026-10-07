@@ -1,6 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useSubmit } from "@/hooks/useSubmit";
+import { createWard } from "@/services/onboardingApi";
 import OnboardingButton from "@/components/ui/OnboardingButton";
 import OnboardingCard from "@/components/ui/OnboardingCard";
 import OnboardingInput from "@/components/ui/OnboardingInput";
@@ -18,7 +21,24 @@ export default function CreateWardForm({ defaults }: Props) {
   const [staff, setStaff] = useState(defaults.requiredStaff);
   const [presetId, setPresetId] = useState(defaults.defaultPresetId);
 
-  // TODO: 백엔드 확정 후 연동 (병동 개설 요청, 입력 검증)
+  const router = useRouter();
+  const { submit, loading, error } = useSubmit();
+  const canSubmit = hospital.trim() !== "" && ward.trim() !== "" && !loading;
+
+  async function handleSubmit() {
+    if (!canSubmit) return;
+    const ok = await submit(() =>
+      createWard({
+        hospitalName: hospital.trim(),
+        wardName: ward.trim(),
+        requiredStaff: staff,
+        rulePreset: presetId,
+      }),
+    );
+    // TODO: 개설 후 이동 경로는 백엔드 확정 후 결정 (프로토타입: 근무표 빈 상태)
+    if (ok) router.push("/schedule");
+  }
+
   return (
     <OnboardingCard className="flex w-full max-w-180 flex-col gap-[22px] px-10 py-9">
       <label htmlFor="hospital" className={labelClass}>병원 이름</label>
@@ -68,9 +88,11 @@ export default function CreateWardForm({ defaults }: Props) {
           );
         })}
       </div>
+      {error ? <p role="alert" className="text-base font-medium text-danger">{error}</p> : null}
       <div className="flex justify-end">
-        {/* TODO: 개설 후 이동 경로는 백엔드 확정 후 결정 (프로토타입: 근무표 빈 상태) */}
-        <OnboardingButton href="/schedule">병동 만들기</OnboardingButton>
+        <OnboardingButton onClick={handleSubmit} disabled={!canSubmit}>
+          {loading ? "만드는 중…" : "병동 만들기"}
+        </OnboardingButton>
       </div>
     </OnboardingCard>
   );

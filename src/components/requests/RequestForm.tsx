@@ -1,20 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import RnButton from "@/components/ui/RnButton";
-import { REQUEST_KIND_OPTIONS } from "@/constants/requests.constants";
+import { REQUEST_KIND_OPTIONS, REQUEST_REASON_ETC } from "@/constants/requests.constants";
+import { formatApiError } from "@/lib/formatApiError";
+import { createRequest } from "@/services/requestsApi";
 import type { RequestFormOptions, RequestKind } from "@/types/requests.type";
 import RequestCalendar, { formatRange, type DayRange } from "./RequestCalendar";
 
 export default function RequestForm({ options }: { options: RequestFormOptions }) {
   const { year, month, today, initialSelectedDay, reasons } = options;
-  const [kind, setKind] = useState<RequestKind>("ANNUAL");
-  const [reason, setReason] = useState(reasons[0] ?? "");
+  const router = useRouter();
+  const [kind, setKind] = useState<RequestKind>("ANNUAL_LEAVE");
+  const [reason, setReason] = useState(reasons[0]?.value ?? "");
+  const [reasonDetail, setReasonDetail] = useState("");
   const [range, setRange] = useState<DayRange>({ start: initialSelectedDay, end: initialSelectedDay });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    const detail = reasonDetail.trim();
+    if (reason === REQUEST_REASON_ETC && detail === "") {
+      setError("사유를 직접 입력해 주세요. (기타 선택 시 필수)");
+      return;
+    }
+    // 선택한 연속 구간을 YYYY-MM-DD 목록으로 만든다 (같은 달, 중복 없음).
+    const targetDates = Array.from({ length: range.end - range.start + 1 }, (_, i) => {
+      const day = range.start + i;
+      return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    });
+    setBusy(true);
+    setError(null);
+    try {
+      // TODO: PREFERRED_SHIFT 선택 UI가 없어 preferredDuty는 보내지 않는다.
+      const created = await createRequest({
+        type: kind,
+        targetDates,
+        reasonCode: reason,
+        ...(reason === REQUEST_REASON_ETC ? { reasonDetail: detail } : {}),
+      });
+      // null이면 API 미설정(화면만 동작)이라 이동하지 않는다.
+      if (created !== null) router.push("/requests");
+    } catch (err) {
+      setError(formatApiError(err));
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    // TODO: 신청 제출은 백엔드 확정 후 연결 (지금은 화면만)
-    <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-8">
+    <form onSubmit={onSubmit} className="flex flex-col gap-8">
       <div className="flex items-start gap-6">
         <section className="flex w-full max-w-[640px] flex-1 flex-col gap-4 rounded-[20px] border border-line bg-white px-7 py-[26px]">
           <h2 className="text-[20px] font-bold text-ink">어떤 신청인가요?</h2>
@@ -51,8 +88,8 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
               className="h-14 w-full appearance-none rounded-[14px] bg-surface px-5 text-[18px] font-medium text-ink"
             >
               {reasons.map((r) => (
-                <option key={r} value={r}>
-                  {r}
+                <option key={r.value} value={r.value}>
+                  {r.label}
                 </option>
               ))}
             </select>
@@ -60,6 +97,16 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
               ▾
             </span>
           </div>
+          {reason === REQUEST_REASON_ETC ? (
+            <input
+              type="text"
+              value={reasonDetail}
+              onChange={(e) => setReasonDetail(e.target.value)}
+              placeholder="사유를 직접 입력해요"
+              aria-label="사유 상세"
+              className="h-14 w-full rounded-[14px] bg-surface px-5 text-[18px] font-medium text-ink placeholder:text-ink-faint"
+            />
+          ) : null}
           <p className="text-[16px] font-medium text-ink-mute">
             관리자에게만 보여요. 다른 간호사에게는 보이지 않아요.
           </p>
@@ -80,10 +127,15 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
       </div>
 
       <div className="flex items-center justify-end gap-3">
+        {error ? (
+          <p role="alert" className="mr-auto text-[16px] font-medium text-danger">
+            {error}
+          </p>
+        ) : null}
         <RnButton variant="secondary" size="lg" href="/requests">
           취소
         </RnButton>
-        <RnButton variant="primary" size="lg" type="submit" className="px-10">
+        <RnButton variant="primary" size="lg" type="submit" disabled={busy} className="px-10">
           신청하기
         </RnButton>
       </div>
