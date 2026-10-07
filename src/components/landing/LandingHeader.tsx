@@ -15,9 +15,14 @@ export default function LandingHeader() {
             </a>
           ))}
         </nav>
-        <LandingButton href="#cta" size="sm">
-          도입 문의
-        </LandingButton>
+        <div className="flex items-center gap-2.5">
+          <LandingButton href="/login" variant="ghost" size="sm">
+            로그인
+          </LandingButton>
+          <LandingButton href="#cta" size="sm">
+            도입 문의
+          </LandingButton>
+        </div>
       </div>
     </header>
   );

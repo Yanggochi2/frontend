@@ -36,9 +36,9 @@ export default function LandingPage() {
               </h1>
               <p className={LEAD}>수간호사의 한 달을 한 번에 짜고, 규칙은 먼저 지키고, 바꾼 건 전부 기록으로 남겨요.</p>
               <div className="mt-10 flex flex-wrap gap-3">
-                <LandingButton href="#auto">더 알아보기</LandingButton>
-                <LandingButton href="#cta" variant="ghost">
-                  도입 문의
+                <LandingButton href="/signup">시작하기</LandingButton>
+                <LandingButton href="#auto" variant="ghost">
+                  더 알아보기
                 </LandingButton>
               </div>
               <p className="mt-9 flex items-center gap-2.5 text-[15px] text-landing-mist">
