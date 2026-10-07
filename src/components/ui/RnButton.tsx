@@ -25,7 +25,7 @@ export default function RnButton({
 }: Props) {
   const cls = `inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-[12px] font-bold ${
     size === "lg" ? "h-14 px-7 text-[18px]" : "h-12 px-4 text-[16px]"
-  } ${variant === "primary" ? "bg-brand text-white" : "bg-surface text-ink-sub"} ${className}`;
+  } ${variant === "primary" ? "bg-primary text-white" : "bg-surface text-ink-sub"} ${className}`;
 
   if (href) {
     return (

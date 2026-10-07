@@ -5,7 +5,7 @@ type Variant = "primary" | "secondary";
 type Size = "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-brand text-white",
+  primary: "bg-primary text-white",
   secondary: "bg-surface text-ink-sub",
 };
 const sizes: Record<Size, string> = {

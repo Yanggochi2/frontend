@@ -5,7 +5,7 @@ type Variant = "brand" | "neutral" | "primary" | "primary-soft";
 type Size = "sm" | "md" | "xs" | "bar";
 
 const VARIANT: Record<Variant, string> = {
-  brand: "bg-brand text-white",
+  brand: "bg-primary text-white",
   neutral: "bg-surface text-ink-sub",
   primary: "bg-primary text-white",
   "primary-soft": "bg-primary-soft text-primary",

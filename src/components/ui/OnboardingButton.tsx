@@ -6,7 +6,7 @@ type Variant = "primary" | "secondary";
 const base =
   "inline-flex h-14 items-center justify-center rounded-xl px-7 text-lg font-bold whitespace-nowrap cursor-pointer";
 const variants: Record<Variant, string> = {
-  primary: "bg-brand text-white",
+  primary: "bg-primary text-white",
   secondary: "bg-surface text-ink-sub",
 };
 
