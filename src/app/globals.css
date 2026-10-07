@@ -97,7 +97,7 @@ html:has(.landing-root) {
 
 /* 랜딩 큰 제목 */
 @utility landing-heading {
-  font-family: var(--font-display);
+  font-family: var(--font-black-han-sans), var(--font-noto-sans-kr), system-ui, sans-serif;
   font-weight: 400;
   margin: 0;
   letter-spacing: -0.035em;
