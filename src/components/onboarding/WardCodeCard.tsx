@@ -9,11 +9,11 @@ import OnboardingCard from "@/components/ui/OnboardingCard";
 import OnboardingInput from "@/components/ui/OnboardingInput";
 import { WARD_CODE_MAX_LENGTH } from "./onboarding.constants";
 
-type Props = { placeholder: string };
+type Props = { placeholder: string; initialCode?: string };
 
-export default function WardCodeCard({ placeholder }: Props) {
+export default function WardCodeCard({ placeholder, initialCode = "" }: Props) {
   const router = useRouter();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode.toUpperCase().slice(0, WARD_CODE_MAX_LENGTH));
   const { submit, loading, error } = useSubmit();
   const canSubmit = code.trim() !== "" && !loading;
 
