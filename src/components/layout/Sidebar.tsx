@@ -19,7 +19,7 @@ function NavList({ items }: { items: NavItem[] }) {
             aria-current={active ? "page" : undefined}
             className={`flex h-[52px] w-full shrink-0 items-center gap-2 rounded-[12px] pr-[14px] pl-4 text-[18px] ${
               active
-                ? "bg-brand-soft font-bold text-brand"
+                ? "bg-primary-soft font-bold text-primary"
                 : "font-medium text-ink-sub"
             }`}
           >
