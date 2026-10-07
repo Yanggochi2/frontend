@@ -40,14 +40,108 @@
   --color-duty-al: #ddf3e6;
   --color-duty-al-ink: #1e7a4c;
   --color-duty-al-edge: #2fb36e;
+
+  /* 랜딩(/) 전용. 값은 랜딩 시안(아티팩트) 기준 */
+  --font-display: var(--font-black-han-sans), var(--font-noto-sans-kr), system-ui, sans-serif;
+  --color-landing-ink: #12060b;
+  --color-landing-brand: #7a1f3d;
+  --color-landing-brand-hi: #b8325f;
+  --color-landing-blush: #f0a9bd;
+  --color-landing-frost: #fff1f5;
+  --color-landing-mist: #d6bcc6;
+  --color-landing-line: rgb(255 190 210 / 0.2);
+  --color-landing-panel: rgb(34 12 22 / 0.72);
+  --color-landing-d: #ffc94d;
+  --color-landing-e: #ff8a5b;
+  --color-landing-n: #9a8cff;
+  --color-landing-o: #b7a3ab;
+  --animate-landing-rise: landing-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
-/* 화면 비율 80%: 모든 화면을 80% 크기로 보여준다. 높이를 화면에 맞추는 곳은 .h-screen-ui / .min-h-screen-ui를 쓴다. */
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 랜딩에서만 메뉴 이동을 부드럽게 스크롤한다 */
+html:has(.landing-root) {
+  scroll-behavior: smooth;
+  background: var(--color-landing-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.landing-root) {
+    scroll-behavior: auto;
+  }
+}
+
+/* 랜딩 배경 그라데이션 */
+@utility landing-backdrop {
+  background:
+    radial-gradient(60vw 50vh at 78% 18%, rgb(150 35 75 / 0.42), transparent 70%),
+    radial-gradient(50vw 60vh at 8% 92%, rgb(184 50 95 / 0.2), transparent 70%),
+    linear-gradient(180deg, #12060b 0%, #1d0a13 55%, #12060b 100%);
+}
+
+/* 랜딩 상단 헤더의 아래로 흐려지는 배경 */
+@utility landing-header-fade {
+  background: linear-gradient(180deg, rgb(18 6 11 / 0.86), rgb(18 6 11 / 0));
+  backdrop-filter: blur(14px);
+}
+
+/* 랜딩 큰 제목 */
+@utility landing-heading {
+  font-family: var(--font-display);
+  font-weight: 400;
+  margin: 0;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  text-wrap: balance;
+  color: #fff;
+  text-shadow: 0 2px 32px rgb(18 6 11 / 0.95);
+}
+
+/* 랜딩 본문 단락 */
+@utility landing-lead {
+  max-width: 30em;
+  font-size: clamp(17px, 1.5vw, 20px);
+  line-height: 1.75;
+  color: var(--color-landing-mist);
+  text-shadow: 0 1px 18px rgb(18 6 11 / 0.95);
+}
+
+/* 3D 배경 위에서 글이 읽히도록 글 뒤에 깔리는 어두운 번짐 */
+@utility landing-shade {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -70px -90px;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      closest-side at 50% 50%,
+      rgb(18 6 11 / 0.74) 0%,
+      rgb(18 6 11 / 0.5) 55%,
+      rgb(18 6 11 / 0) 100%
+    );
+  }
+}
+
+/* 화면 비율 80%: 앱 화면(사이드바·온보딩)만 80% 크기로 보여준다. 랜딩(/)에는 적용하지 않는다.
+   .ui-zoom 안에서 높이를 화면에 맞추는 곳은 .h-screen-ui / .min-h-screen-ui를 쓴다. */
 :root {
   --ui-zoom: 0.8;
 }
 
-html {
+.ui-zoom {
   zoom: var(--ui-zoom);
 }
 
