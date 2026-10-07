@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/* 색상 값은 Figma "이석찬" 파일의 라이트 화면에서 가져왔다. */
+@theme inline {
+  --font-sans: var(--font-noto-sans-kr), system-ui, sans-serif;
+
+  --color-ink: #191f28;
+  --color-ink-sub: #4e5968;
+  --color-ink-mute: #6b7684;
+  --color-ink-faint: #8b95a1;
+
+  --color-line: #e5e8eb;
+  --color-grid: #c9ced6;
+  --color-surface: #f2f4f6;
+  --color-sidebar: #f9fafb;
+
+  --color-brand: #3182f6;
+  --color-brand-soft: #e8f3ff;
+  --color-danger: #f04452;
+  --color-danger-soft: #ffebee;
+
+  --color-primary: #a65468;
+  --color-primary-soft: #f7e9ed;
+
+  --color-ok: #1e7a4c;
+  --color-ok-soft: #e8f7ef;
+
+  --color-duty-d: #fff0bf;
+  --color-duty-d-ink: #8a6100;
+  --color-duty-d-edge: #f5b700;
+  --color-duty-e: #ffe1d2;
+  --color-duty-e-ink: #a34a1f;
+  --color-duty-e-edge: #f26b3a;
+  --color-duty-n: #e3e4fa;
+  --color-duty-n-ink: #4548a8;
+  --color-duty-n-edge: #5a5fd6;
+  --color-duty-off: #eef0f3;
+  --color-duty-off-ink: #5b6470;
+  --color-duty-off-edge: #aab2bd;
+  --color-duty-al: #ddf3e6;
+  --color-duty-al-ink: #1e7a4c;
+  --color-duty-al-edge: #2fb36e;
+}
+
+/* 화면 비율 80%: 모든 화면을 80% 크기로 보여준다. 높이를 화면에 맞추는 곳은 .h-screen-ui / .min-h-screen-ui를 쓴다. */
+:root {
+  --ui-zoom: 0.8;
+}
+
+html {
+  zoom: var(--ui-zoom);
+}
+
+.h-screen-ui {
+  height: calc(100vh / var(--ui-zoom));
+}
+
+.min-h-screen-ui {
+  min-height: calc(100vh / var(--ui-zoom));
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
