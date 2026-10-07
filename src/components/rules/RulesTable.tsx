@@ -15,7 +15,7 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<{ id: string; message: string } | null>(null);
 
-  // RULE-02. API 연결 전(patchRule이 null)에는 로컬 상태만 바꾼다.
+  // RULE-02.
   async function update(rule: RuleItem, patch: { enabled?: boolean; strength?: RuleItem["strength"] }) {
     setPendingId(rule.id);
     setError(null);
@@ -26,7 +26,7 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
         // TODO: 백엔드 확정 후 결정 (reason 입력 UI/필수 여부)
       });
       setRules((prev) =>
-        prev.map((r) => (r.id === rule.id ? (saved ?? { ...r, ...patch }) : r)),
+        prev.map((r) => (r.id === rule.id ? saved : r)),
       );
     } catch (e) {
       setError({ id: rule.id, message: e instanceof ApiError ? e.message : "저장하지 못했어요. 다시 시도해 주세요." });

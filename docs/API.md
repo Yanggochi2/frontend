@@ -105,7 +105,7 @@ HN = HEAD_NURSE, 구성원 = 병동 구성원. P2 = 2순위. (결정) = 명세�
 | NOTI-04 | PATCH /me/notification-settings | 인증 | scheduleConfirmed, scheduleCancelled, requestResult, dutyReminder, webPush | 200 NotificationSettings (P2, 422 PUSH_NOT_SUPPORTED) (결정) |
 | SEC-01 | GET /wards/me/audit-logs | HN | from, to, actorId, actionType, page, size | 200 AuditLog[]+meta |
 
-명세에 **없는** 것: 통계·공정성 조회(statsApi는 mock 유지), 월별 보기 전용 API, 자동 생성 예상 시간 등. (Figma 화면은 있으나 API 없음 → 백엔드에 확인 필요)
+명세에 **없는** 것: 통계·공정성 조회(statsApi는 항상 빈 결과를 돌려주고 화면은 빈 상태를 보여 준다), 월별 보기 전용 API, 자동 생성 예상 시간 등. (Figma 화면은 있으나 API 없음 → 백엔드에 확인 필요)
 
 ## 데이터 모델
 - UserSummary: id, name, email, accountStatus

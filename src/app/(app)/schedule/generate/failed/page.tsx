@@ -5,14 +5,12 @@ import type { GenerationFailure } from "@/types/schedule.type";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-// TODO: state 쿼리는 화면 미리보기용 임시 값 (Architecture.md)
 export default async function ScheduleGenerateFailedPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  const state = Array.isArray(sp.state) ? sp.state[0] : sp.state;
   const jobId = Array.isArray(sp.jobId) ? sp.jobId[0] : sp.jobId;
   let data: GenerationFailure | null = null;
   try {
-    data = await getGenerationFailure(state, jobId);
+    data = await getGenerationFailure(jobId);
   } catch {
     data = null;
   }

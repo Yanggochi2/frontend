@@ -10,7 +10,7 @@ export type CoverageStatus = "ok" | "short";
 export type ScheduleCell = {
   duty: DutyCode | null; // null = 미배정 (O와 다름)
   flag?: "violation";
-  editable?: boolean; // 없으면 편집 가능 (mock)
+  editable?: boolean; // 없으면 편집 가능
 };
 
 export type ScheduleDay = {
@@ -21,7 +21,7 @@ export type ScheduleDay = {
 };
 
 export type ScheduleRow = {
-  nurseKey: string; // API 연동 시 nurseId, mock에서는 임시 키
+  nurseKey: string; // nurseId
   name: string;
   cells: ScheduleCell[];
   needsCheck?: boolean;
@@ -38,8 +38,7 @@ export type ScheduleSheetData = {
   weekCount: number;
   lastSavedLabel: string;
   unassigned: boolean;
-  // API 연동 시에만 있다. 없으면 화면 상태만 바꾼다 (mock).
-  api?: ScheduleSheetApiState;
+  api: ScheduleSheetApiState;
 };
 
 export type ScheduleSheetApiState = {
@@ -57,8 +56,6 @@ export type SchedulePageData =
   | { kind: "nurse-unpublished"; periodLabel: string };
 
 export type SchedulePageParams = {
-  state?: string;
-  role?: string;
   view?: string;
 };
 

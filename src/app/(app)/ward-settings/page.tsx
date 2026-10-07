@@ -2,18 +2,12 @@ import AdminPageHeader from "@/components/ui/AdminPageHeader";
 import { AdminErrorState } from "@/components/ui/AdminStatus";
 import WardSettingsView from "@/components/ward/WardSettingsView";
 import { getWardSettings } from "@/services/wardApi";
-import { toPreviewState } from "@/types/adminCommon.type";
 import type { WardSettingsData } from "@/types/ward.type";
 
-export default async function WardSettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ state?: string }>;
-}) {
-  const state = toPreviewState((await searchParams).state);
+export default async function WardSettingsPage() {
   let ward: WardSettingsData | null = null;
   try {
-    ward = await getWardSettings(state);
+    ward = await getWardSettings();
   } catch {
     ward = null;
   }

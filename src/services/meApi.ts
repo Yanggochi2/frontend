@@ -1,9 +1,7 @@
-import { apiRequest, apiRequestList, isApiConfigured } from "@/lib/apiClient";
+import { apiRequest, apiRequestList } from "@/lib/apiClient";
 import { NOTIFICATION_SETTING_COPY } from "@/constants/notifications.constants";
-import { headNurseMyPageMock, nurseMyPageMock } from "@/mocks/me.mock";
 import type { ApiListResult } from "@/types/api.type";
-import type { PreviewState } from "@/types/adminCommon.type";
-import type { MyPageData, MyPageRole } from "@/types/me.type";
+import type { MyPageData } from "@/types/me.type";
 import type { ApiNotification, MeResponse, NotificationSettings } from "@/types/wardApi.type";
 
 function formatDate(iso: string): string {
@@ -13,13 +11,11 @@ function formatDate(iso: string): string {
   return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
 }
 
-// GET /me + GET /me/notification-settings. 역할은 서버가 세션에서 판정하므로 previewRole은 mock 전용이다.
+// GET /me + GET /me/notification-settings. 역할은 서버가 세션에서 판정한다.
 // 받은 필드만 채운다: 경력·숙련도·듀티 역할은 /me에 없으므로 비운다.
 // TODO: 내 근무 통계(stats)와 내 신청 내역(requests)은 이 서비스가 주지 않는다.
 //   통계는 명세에 API가 없고, 신청 내역은 REQ-02(requestsApi 소관)에 연결한다. 백엔드 확정 후 결정.
-export async function getMyPage(previewRole?: MyPageRole, state?: PreviewState): Promise<MyPageData> {
-  if (state === "error") throw new Error("my page load failed");
-  if (!isApiConfigured) return previewRole === "NURSE" ? nurseMyPageMock : headNurseMyPageMock;
+export async function getMyPage(): Promise<MyPageData> {
 
   const [me, settings] = await Promise.all([
     apiRequest<MeResponse>("/me"),
@@ -52,7 +48,6 @@ export async function getMyPage(previewRole?: MyPageRole, state?: PreviewState):
 
 // NOTI-04. 바꾼 항목만 보낸다.
 export async function updateNotificationSetting(key: string, enabled: boolean): Promise<void> {
-  if (!isApiConfigured) return;
   await apiRequest<NotificationSettings>("/me/notification-settings", {
     method: "PATCH",
     body: { [key]: enabled },

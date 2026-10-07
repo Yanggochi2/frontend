@@ -6,20 +6,12 @@ import NotificationToggles from "@/components/me/NotificationToggles";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
 import { AdminErrorState } from "@/components/ui/AdminStatus";
 import { getMyPage } from "@/services/meApi";
-import { toPreviewState } from "@/types/adminCommon.type";
 import type { MyPageData } from "@/types/me.type";
 
-export default async function MyPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ state?: string; role?: string }>;
-}) {
-  const params = await searchParams;
-  // TODO: 역할은 서버가 세션에서 판정한다. ?role=nurse는 미리보기용 임시 스위치 (백엔드 연결 시 제거)
-  const previewRole = params.role === "nurse" ? "NURSE" : "HEAD_NURSE";
+export default async function MyPage() {
   let data: MyPageData | null = null;
   try {
-    data = await getMyPage(previewRole, toPreviewState(params.state));
+    data = await getMyPage();
   } catch {
     data = null;
   }

@@ -5,18 +5,13 @@ import AdminFilterChip from "@/components/ui/AdminFilterChip";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
 import { AdminErrorState } from "@/components/ui/AdminStatus";
 import { getStats } from "@/services/statsApi";
-import { toPreviewState } from "@/types/adminCommon.type";
 import type { StatsData } from "@/types/stats.type";
 
-export default async function StatsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ state?: string }>;
-}) {
-  const state = toPreviewState((await searchParams).state);
+export default async function StatsPage() {
+  // TODO: 통계 API 명세 없음 — 지금은 항상 빈 결과라 빈 상태 화면이 나온다.
   let data: StatsData | null = null;
   try {
-    data = await getStats(state);
+    data = await getStats();
   } catch {
     data = null;
   }
@@ -29,7 +24,7 @@ export default async function StatsPage({
         title="통계·공정성"
         subtitle={
           isEmpty || !data
-            ? "2026년 10월"
+            ? "간호사별 근무 횟수와 OFF 개수를 봐요"
             : `팀 평균과 많이 다른 사람은 색으로 알려줘요 · ${data.periodLabel}`
         }
       />

@@ -1,6 +1,3 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
 import type { Role, ShellInfo } from "@/types/shell.type";
 
 export type NavItem = {
@@ -19,9 +16,9 @@ export type NavModel = {
 };
 
 // 사이드바와 상단 메뉴(사이드바 닫힘)가 같은 메뉴를 쓴다.
-// TODO: 역할은 서버가 세션에서 판정한다. `?role=nurse`는 일반 간호사 화면 미리보기용 임시 스위치.
+// 역할은 서버가 세션에서 판정한 shell.role만 쓴다.
 export function useNavModel(shell: ShellInfo): NavModel {
-  const role: Role = useSearchParams().get("role") === "nurse" ? "NURSE" : shell.role;
+  const role: Role = shell.role;
 
   const mainItems: NavItem[] =
     role === "NURSE"
@@ -49,8 +46,8 @@ export function useNavModel(shell: ShellInfo): NavModel {
 
   return {
     role,
-    userName: role === "NURSE" ? "박지우" : shell.userName,
-    profileHref: role === "NURSE" ? "/me?role=nurse" : "/me",
+    userName: shell.userName,
+    profileHref: "/me",
     mainItems,
     adminItems,
   };

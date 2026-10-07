@@ -1,7 +1,5 @@
-import { rulesMock } from "@/mocks/rules.mock";
-import { OFF_TARGET_FORMULA_LABEL } from "@/constants/rules.constants";
-import { apiRequest, isApiConfigured } from "@/lib/apiClient";
-import type { PreviewState } from "@/types/adminCommon.type";
+import { OFF_TARGET_FORMULA_LABEL, RULE_FILTER_CHIPS } from "@/constants/rules.constants";
+import { apiRequest } from "@/lib/apiClient";
 import type { RuleItem, RulesData } from "@/types/rules.type";
 import type {
   ApiHoliday,
@@ -36,20 +34,14 @@ export function toRuleItem(rule: ApiRule): RuleItem {
   };
 }
 
-export async function getRules(state?: PreviewState): Promise<RulesData> {
-  if (!isApiConfigured) {
-    if (state === "error") throw new Error("rules load failed");
-    if (state === "empty") return { ...rulesMock, rules: [] };
-    return rulesMock;
-  }
+export async function getRules(): Promise<RulesData> {
   // RULE-01
   const rules = await apiRequest<ApiRule[]>("/wards/me/rules");
-  return { filters: rulesMock.filters, rules: rules.map(toRuleItem) };
+  return { filters: RULE_FILTER_CHIPS, rules: rules.map(toRuleItem) };
 }
 
-// RULE-02. 연결 전에는 호출자가 로컬 상태만 바꾸도록 null을 돌려준다.
-export async function patchRule(ruleId: string, body: ApiRulePatchBody): Promise<RuleItem | null> {
-  if (!isApiConfigured) return null;
+// RULE-02.
+export async function patchRule(ruleId: string, body: ApiRulePatchBody): Promise<RuleItem> {
   const result = await apiRequest<ApiRulePatchResult>(`/wards/me/rules/${encodeURIComponent(ruleId)}`, {
     method: "PATCH",
     body,
@@ -58,8 +50,7 @@ export async function patchRule(ruleId: string, body: ApiRulePatchBody): Promise
 }
 
 // RULE-03
-export async function applyRulePreset(presetId: string): Promise<RuleItem[] | null> {
-  if (!isApiConfigured) return null;
+export async function applyRulePreset(presetId: string): Promise<RuleItem[]> {
   const rules = await apiRequest<ApiRule[]>(`/wards/me/rule-presets/${encodeURIComponent(presetId)}/apply`, {
     method: "POST",
   });
@@ -68,26 +59,22 @@ export async function applyRulePreset(presetId: string): Promise<RuleItem[] | nu
 
 // RULE-04
 export async function getHolidays(yearMonth: string): Promise<ApiHoliday[]> {
-  // TODO: 공휴일 화면이 아직 없다. mock도 없으므로 연결 전에는 빈 목록
-  if (!isApiConfigured) return [];
+  // TODO: 공휴일 화면이 아직 없다.
   return apiRequest<ApiHoliday[]>("/wards/me/holidays", { query: { yearMonth } });
 }
 
 // RULE-05
-export async function putHoliday(date: string, body: ApiHolidayPutBody): Promise<ApiHoliday | null> {
-  if (!isApiConfigured) return null;
+export async function putHoliday(date: string, body: ApiHolidayPutBody): Promise<ApiHoliday> {
   return apiRequest<ApiHoliday>(`/wards/me/holidays/${date}`, { method: "PUT", body });
 }
 
 // RULE-06/07 (🔶 결정 필요). 계산식은 constants에 둔다: OFF_TARGET_FORMULA_LABEL
 export const OFF_TARGET_FORMULA = OFF_TARGET_FORMULA_LABEL;
 
-export async function getOffTarget(yearMonth: string): Promise<ApiOffTarget | null> {
-  if (!isApiConfigured) return null;
+export async function getOffTarget(yearMonth: string): Promise<ApiOffTarget> {
   return apiRequest<ApiOffTarget>(`/wards/me/off-targets/${yearMonth}`);
 }
 
-export async function patchOffTarget(yearMonth: string, body: ApiOffTargetPatchBody): Promise<ApiOffTarget | null> {
-  if (!isApiConfigured) return null;
+export async function patchOffTarget(yearMonth: string, body: ApiOffTargetPatchBody): Promise<ApiOffTarget> {
   return apiRequest<ApiOffTarget>(`/wards/me/off-targets/${yearMonth}`, { method: "PATCH", body });
 }

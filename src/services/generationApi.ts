@@ -1,5 +1,4 @@
-import { apiRequest, isApiConfigured } from "@/lib/apiClient";
-import { generationFailureMock, generationProgressMock } from "@/mocks/schedule.mock";
+import { apiRequest } from "@/lib/apiClient";
 import type { GenerationFailure, GenerationProgress } from "@/types/schedule.type";
 import type {
   ApiGenerationJob,
@@ -56,13 +55,9 @@ function mmss(seconds: number) {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }
 
-// state는 mock 미리보기 전용. jobId는 진행 화면이 어느 작업인지 알려 준다.
+// jobId는 진행 화면이 어느 작업인지 알려 준다.
 // TODO: jobId를 화면 간에 어떻게 넘길지(쿼리/상태)는 라우팅 확정 후 결정. 지금은 ?jobId= 쿼리.
-export async function getGenerationProgress(state?: string, jobId?: string): Promise<GenerationProgress> {
-  if (!isApiConfigured) {
-    if (state === "error") throw new Error("generation mock error");
-    return generationProgressMock;
-  }
+export async function getGenerationProgress(jobId?: string): Promise<GenerationProgress> {
   if (!jobId) throw new Error("jobId가 필요해요.");
   const job = await getGenerationJob(jobId);
   const schedule = await getScheduleById(job.scheduleId);
@@ -79,11 +74,7 @@ export async function getGenerationProgress(state?: string, jobId?: string): Pro
   };
 }
 
-export async function getGenerationFailure(state?: string, jobId?: string): Promise<GenerationFailure> {
-  if (!isApiConfigured) {
-    if (state === "error") throw new Error("generation failure mock error");
-    return generationFailureMock;
-  }
+export async function getGenerationFailure(jobId?: string): Promise<GenerationFailure> {
   if (!jobId) throw new Error("jobId가 필요해요.");
   const job = await getGenerationJob(jobId);
   // TODO: conflicts / relaxations 모양이 명세에 없다. 완화 선택지와 원인 문구는 확정 후 매핑한다.

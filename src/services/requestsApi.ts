@@ -1,9 +1,7 @@
-import { apiRequest, apiRequestList, isApiConfigured } from "@/lib/apiClient";
+import { apiRequest, apiRequestList } from "@/lib/apiClient";
 import { REQUEST_REASON_ETC, REQUEST_REASONS } from "@/constants/requests.constants";
-import { requestFormOptionsMock, requestItemsMock } from "@/mocks/requests.mock";
 import { getNurseNameMap } from "@/services/nursesApi";
 import type {
-  PreviewState,
   RequestFormOptions,
   RequestItem,
   RequestListResult,
@@ -62,21 +60,8 @@ function currentYearMonth() {
 }
 
 // REQ-03 수간호사 신청 목록. REQ-02(getMyRequests)와 같은 화면 타입으로 돌려준다.
-// state는 화면 상태 미리보기용(개발 확인용). 백엔드 연결 시 제거한다.
-export async function getRequests(
-  state?: PreviewState,
-  query: WorkRequestQuery = {},
-): Promise<RequestListResult> {
+export async function getRequests(query: WorkRequestQuery = {}): Promise<RequestListResult> {
   const { year, month } = currentYearMonth();
-  if (!isApiConfigured) {
-    if (state === "error") throw new Error("신청 목록을 불러오지 못했어요");
-    const items = state === "empty" ? [] : requestItemsMock;
-    return {
-      items,
-      pendingCount: items.filter((i) => i.status === "PENDING").length,
-      monthLabel: "2026년 10월",
-    };
-  }
   const yearMonth = query.yearMonth ?? `${year}-${pad(month)}`;
   const [list, names] = await Promise.all([
     apiRequestList<ApiWorkRequest>(REQUESTS_PATH, { query: { size: 100, ...query, yearMonth } }),
@@ -93,14 +78,12 @@ export async function getRequests(
 
 // REQ-02 내 신청 목록
 export async function getMyRequests(query: WorkRequestQuery = {}): Promise<RequestItem[]> {
-  if (!isApiConfigured) return [];
   const list = await apiRequestList<ApiWorkRequest>(`${REQUESTS_PATH}/me`, { query });
   return list.data.map((r) => mapWorkRequest(r));
 }
 
 // REQ-04
-export async function getRequest(id: string): Promise<RequestItem | null> {
-  if (!isApiConfigured) return requestItemsMock.find((r) => r.id === id) ?? null;
+export async function getRequest(id: string): Promise<RequestItem> {
   const [data, names] = await Promise.all([
     apiRequest<ApiWorkRequest>(`${REQUESTS_PATH}/${encodeURIComponent(id)}`),
     getNurseNameMap(),
@@ -109,7 +92,6 @@ export async function getRequest(id: string): Promise<RequestItem | null> {
 }
 
 export async function getRequestFormOptions(): Promise<RequestFormOptions> {
-  if (!isApiConfigured) return requestFormOptionsMock;
   const now = new Date();
   return {
     year: now.getFullYear(),
@@ -120,11 +102,8 @@ export async function getRequestFormOptions(): Promise<RequestFormOptions> {
   };
 }
 
-// 아래 변경 요청은 API 미설정이면 null을 돌려준다(화면만 동작, 호출하지 않음).
-
 // REQ-01 (Idempotency-Key)
-export async function createRequest(body: WorkRequestCreate): Promise<RequestItem | null> {
-  if (!isApiConfigured) return null;
+export async function createRequest(body: WorkRequestCreate): Promise<RequestItem> {
   const data = await apiRequest<ApiWorkRequest>(REQUESTS_PATH, {
     method: "POST",
     body,
@@ -134,8 +113,7 @@ export async function createRequest(body: WorkRequestCreate): Promise<RequestIte
 }
 
 // REQ-05 (Idempotency-Key). TODO: 백엔드 확정 후 결정 — 응답의 scheduleImpact 구조
-export async function approveRequest(id: string): Promise<RequestItem | null> {
-  if (!isApiConfigured) return null;
+export async function approveRequest(id: string): Promise<RequestItem> {
   const data = await apiRequest<ApiWorkRequest>(`${REQUESTS_PATH}/${encodeURIComponent(id)}/approve`, {
     method: "POST",
     idempotencyKey: idempotencyKey(),
@@ -144,8 +122,7 @@ export async function approveRequest(id: string): Promise<RequestItem | null> {
 }
 
 // REQ-06 반려 사유 필수
-export async function rejectRequest(id: string, reason: string): Promise<RequestItem | null> {
-  if (!isApiConfigured) return null;
+export async function rejectRequest(id: string, reason: string): Promise<RequestItem> {
   const data = await apiRequest<ApiWorkRequest>(`${REQUESTS_PATH}/${encodeURIComponent(id)}/reject`, {
     method: "POST",
     body: { reason },
@@ -154,8 +131,7 @@ export async function rejectRequest(id: string, reason: string): Promise<Request
 }
 
 // REQ-07 신청자 본인만
-export async function cancelRequest(id: string): Promise<RequestItem | null> {
-  if (!isApiConfigured) return null;
+export async function cancelRequest(id: string): Promise<RequestItem> {
   const data = await apiRequest<ApiWorkRequest>(`${REQUESTS_PATH}/${encodeURIComponent(id)}/cancel`, {
     method: "POST",
   });

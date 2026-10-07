@@ -1,7 +1,5 @@
-import { apiRequest, apiRequestList, isApiConfigured } from "@/lib/apiClient";
-import { approvalsMock } from "@/mocks/approvals.mock";
+import { apiRequest, apiRequestList } from "@/lib/apiClient";
 import type { ApprovalsData, JoinRequest } from "@/types/approvals.type";
-import type { PreviewState } from "@/types/adminCommon.type";
 import type { Membership, MembershipRequest } from "@/types/wardApi.type";
 
 const BASE = "/wards/me/membership-requests";
@@ -27,10 +25,7 @@ function toJoinRequest(r: MembershipRequest): JoinRequest {
 }
 
 // WARD-04 (수간호사만). 승인 대기 건만 가져온다.
-export async function getApprovals(state?: PreviewState): Promise<ApprovalsData> {
-  if (state === "error") throw new Error("approvals load failed");
-  if (state === "empty") return { requests: [] };
-  if (!isApiConfigured) return approvalsMock;
+export async function getApprovals(): Promise<ApprovalsData> {
   const { data } = await apiRequestList<MembershipRequest>(BASE, {
     query: { status: "PENDING", size: 100 },
   });
@@ -39,7 +34,6 @@ export async function getApprovals(state?: PreviewState): Promise<ApprovalsData>
 
 // WARD-05
 export async function approveJoinRequest(id: string): Promise<void> {
-  if (!isApiConfigured) return;
   await apiRequest<Membership>(`${BASE}/${encodeURIComponent(id)}/approve`, {
     method: "POST",
     idempotencyKey: crypto.randomUUID(),
@@ -48,7 +42,6 @@ export async function approveJoinRequest(id: string): Promise<void> {
 
 // WARD-06 (reason 필수)
 export async function rejectJoinRequest(id: string, reason: string): Promise<void> {
-  if (!isApiConfigured) return;
   await apiRequest<MembershipRequest>(`${BASE}/${encodeURIComponent(id)}/reject`, {
     method: "POST",
     body: { reason },

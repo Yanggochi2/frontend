@@ -5,19 +5,11 @@ import RnErrorState from "@/components/ui/RnErrorState";
 import RnPageHeader from "@/components/ui/RnPageHeader";
 import { getNurses } from "@/services/nursesApi";
 import type { NurseListResult } from "@/types/nurses.type";
-import type { PreviewState } from "@/types/requests.type";
 
-export default async function NursesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ state?: string }>;
-}) {
-  const { state } = await searchParams;
-  const preview = state === "empty" || state === "error" ? (state as PreviewState) : undefined;
-
+export default async function NursesPage() {
   let result: NurseListResult | null = null;
   try {
-    result = await getNurses(preview);
+    result = await getNurses();
   } catch {
     result = null;
   }

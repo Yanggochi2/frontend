@@ -41,7 +41,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   const [coverage, setCoverage] = useState<CoverageStatus[] | null>(sheet.coverage);
   const [saveError, setSaveError] = useState<string | null>(null);
   const api = sheet.api;
-  const versionRef = useRef(api?.version ?? 0);
+  const versionRef = useRef(api.version);
   // 빠르게 연속으로 고쳐도 baseVersion이 어긋나지 않게 저장을 한 줄로 세운다.
   const queueRef = useRef<Promise<unknown>>(Promise.resolve());
 
@@ -72,9 +72,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   }
 
   // API 연동 시 서버에 저장한다. 서버가 검증·저장을 하고, 화면은 먼저 바꿔 두었다가 실패하면 되돌린다.
-  // API가 없으면(mock) 화면 상태만 바꾼다 (AGENTS.md 9).
   function save(row: number, col: number, duty: DutyCode | null): Promise<boolean> {
-    if (!api) return Promise.resolve(true);
     const nurseId = rows[row].nurseKey;
     const date = api.dates[col];
     const job = queueRef.current.then(async () => {
@@ -99,7 +97,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
 
   // Undo는 클라이언트 메모리 스택 (6.2). 서버에는 되돌린 값을 일반 변경으로 보낸다.
   function setDuty(row: number, col: number, duty: EditableDutyCode) {
-    if (api && !api.editable) return;
+    if (!api.editable) return;
     const old = rows[row].cells[col].duty;
     if (old === duty) return;
     const item: HistoryItem = { row, col, prev: old };

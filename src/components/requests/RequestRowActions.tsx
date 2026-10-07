@@ -18,9 +18,8 @@ export default function RequestRowActions({ id }: { id: string }) {
     setBusy(true);
     setError(null);
     try {
-      const result = await action();
-      // 서비스가 null을 주면 API 미설정(화면만 동작)이라 새로고침하지 않는다.
-      if (result !== null) router.refresh();
+      await action();
+      router.refresh();
     } catch (e) {
       setError(formatApiError(e));
     } finally {

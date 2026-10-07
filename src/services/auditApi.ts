@@ -1,6 +1,5 @@
-import { auditMock } from "@/mocks/audit.mock";
-import { apiRequestList, isApiConfigured } from "@/lib/apiClient";
-import type { PreviewState } from "@/types/adminCommon.type";
+import { AUDIT_FILTER_CHIPS } from "@/constants/audit.constants";
+import { apiRequestList } from "@/lib/apiClient";
 import type { ApiAuditLog, AuditLogQuery } from "@/types/auditApi.type";
 import type { AuditEntry, AuditLogData } from "@/types/audit.type";
 
@@ -33,13 +32,8 @@ function toEntry(log: ApiAuditLog): AuditEntry {
 }
 
 // 감사 로그는 보기 전용 (SEC-02). SEC-01만 쓴다.
-export async function getAuditLog(state?: PreviewState, query: AuditLogQuery = {}): Promise<AuditLogData> {
-  if (!isApiConfigured) {
-    if (state === "error") throw new Error("audit log load failed");
-    if (state === "empty") return { ...auditMock, entries: [] };
-    return auditMock;
-  }
+export async function getAuditLog(query: AuditLogQuery = {}): Promise<AuditLogData> {
   const result = await apiRequestList<ApiAuditLog>("/wards/me/audit-logs", { query });
   // TODO: 필터 칩 동작과 페이지네이션(meta) UI는 백엔드 확정 후 연결
-  return { filters: auditMock.filters, entries: result.data.map(toEntry) };
+  return { filters: AUDIT_FILTER_CHIPS, entries: result.data.map(toEntry) };
 }

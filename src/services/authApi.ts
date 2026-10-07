@@ -1,4 +1,4 @@
-import { apiRequest, isApiConfigured } from "@/lib/apiClient";
+import { apiRequest } from "@/lib/apiClient";
 import type { LoginRequest, SignupRequest, UserSummary } from "@/types/authApi.type";
 
 // TODO: Figma에 로그인/가입 화면이 없어 화면은 만들지 않았다. 디자인 확정 후 이 함수들을 연결한다.
@@ -18,7 +18,5 @@ export async function refreshSession(): Promise<void> {
 }
 
 export async function logout(): Promise<void> {
-  // 백엔드가 없으면 mock 모드: 아무 일도 하지 않는다.
-  if (!isApiConfigured) return;
   await apiRequest<void>("/auth/logout", { method: "POST" });
 }

@@ -5,18 +5,12 @@ import AdminNotice from "@/components/ui/AdminNotice";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
 import { AdminErrorState } from "@/components/ui/AdminStatus";
 import { getApprovals } from "@/services/approvalsApi";
-import { toPreviewState } from "@/types/adminCommon.type";
 import type { ApprovalsData } from "@/types/approvals.type";
 
-export default async function ApprovalsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ state?: string }>;
-}) {
-  const state = toPreviewState((await searchParams).state);
+export default async function ApprovalsPage() {
   let data: ApprovalsData | null = null;
   try {
-    data = await getApprovals(state);
+    data = await getApprovals();
   } catch {
     data = null;
   }

@@ -1,10 +1,8 @@
 import type { ApiErrorBody, ApiListResult, ApiResult } from "@/types/api.type";
 
 // 호출 주소는 환경 변수로 분리한다. 예: https://example.com/api/v1
-// 비어 있으면 백엔드 없이 mock으로 동작한다 (isApiConfigured).
+// 비어 있으면 모든 요청이 API_NOT_CONFIGURED ApiError로 실패한다.
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
-
-export const isApiConfigured = BASE_URL !== "";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -69,8 +67,13 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
   }
   if (options.idempotencyKey) headers["Idempotency-Key"] = options.idempotencyKey;
   if (options.scheduleLockToken) headers["X-Schedule-Lock-Token"] = options.scheduleLockToken;
+  // 쿠키를 먼저 읽어 서버 렌더링 시 항상 요청마다 렌더링되게 한다 (빌드 시점에 결과가 고정되지 않도록).
   const cookie = await serverCookieHeader();
   if (cookie) headers.Cookie = cookie;
+
+  if (BASE_URL === "") {
+    throw new ApiError(0, { code: "API_NOT_CONFIGURED", message: "서버 주소가 설정되지 않았어요." });
+  }
 
   const response = await fetch(buildUrl(path, options.query), {
     method,

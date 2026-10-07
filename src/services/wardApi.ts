@@ -1,6 +1,4 @@
-import { apiRequest, apiRequestList, isApiConfigured } from "@/lib/apiClient";
-import { wardSettingsMock } from "@/mocks/ward.mock";
-import type { PreviewState } from "@/types/adminCommon.type";
+import { apiRequest, apiRequestList } from "@/lib/apiClient";
 import type { WardSettingsData } from "@/types/ward.type";
 import type { ApiWard, JoinCode, Membership, TransferResult } from "@/types/wardApi.type";
 
@@ -8,9 +6,7 @@ import type { ApiWard, JoinCode, Membership, TransferResult } from "@/types/ward
 type HeadNurseItem = { id: string; name: string };
 
 // WARD-02 + WARD-07 (+ NUR-02로 인원/수간호사 목록). 병동 설정은 수간호사 화면이다.
-export async function getWardSettings(state?: PreviewState): Promise<WardSettingsData> {
-  if (state === "error") throw new Error("ward settings load failed");
-  if (!isApiConfigured) return wardSettingsMock;
+export async function getWardSettings(): Promise<WardSettingsData> {
 
   const [ward, joinCode, all, heads] = await Promise.all([
     apiRequest<ApiWard>("/wards/me"),
@@ -34,7 +30,6 @@ export async function getWardSettings(state?: PreviewState): Promise<WardSetting
 
 // WARD-08. 새 코드를 돌려준다.
 export async function rotateJoinCode(): Promise<string> {
-  if (!isApiConfigured) return wardSettingsMock.wardCode;
   const res = await apiRequest<JoinCode>("/wards/me/join-code/rotate", {
     method: "POST",
     idempotencyKey: crypto.randomUUID(),

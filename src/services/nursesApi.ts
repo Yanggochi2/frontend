@@ -1,6 +1,4 @@
-import { apiRequest, apiRequestList, isApiConfigured } from "@/lib/apiClient";
-import { nurseActiveCountMock, nurseItemsMock } from "@/mocks/nurses.mock";
-import type { PreviewState } from "@/types/requests.type";
+import { apiRequest, apiRequestList } from "@/lib/apiClient";
 import type { DutyRole, Nurse, NurseListResult, NurseStatus } from "@/types/nurses.type";
 import type {
   ApiNurse,
@@ -35,17 +33,9 @@ export function mapNurse(n: ApiNurse): Nurse {
   };
 }
 
-// NUR-02. state는 화면 상태 미리보기용(개발 확인용). 백엔드 연결 시 제거한다.
+// NUR-02.
 // 화면의 정렬·역할 필터·퇴사자 토글은 클라이언트에서 처리하므로 기본값으로 퇴사자까지 받는다.
-export async function getNurses(
-  state?: PreviewState,
-  query: NurseListQuery = {},
-): Promise<NurseListResult> {
-  if (!isApiConfigured) {
-    if (state === "error") throw new Error("간호사 명단을 불러오지 못했어요");
-    if (state === "empty") return { items: [], activeCount: 0 };
-    return { items: nurseItemsMock, activeCount: nurseActiveCountMock };
-  }
+export async function getNurses(query: NurseListQuery = {}): Promise<NurseListResult> {
   // TODO: 100명을 넘으면 페이지 이동 UI가 필요하다 (meta.totalPages)
   const list = await apiRequestList<ApiNurse>(NURSES_PATH, {
     query: { includeRetired: true, size: 100, ...query },
@@ -67,16 +57,12 @@ export async function getNurseNameMap(): Promise<Map<string, string>> {
 }
 
 // NUR-03
-export async function getNurse(id: string): Promise<Nurse | null> {
-  if (!isApiConfigured) return nurseItemsMock.find((n) => n.id === id) ?? null;
+export async function getNurse(id: string): Promise<Nurse> {
   return mapNurse(await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}`));
 }
 
-// 아래 변경 요청은 API 미설정이면 null을 돌려준다(화면만 동작, 호출하지 않음).
-
 // NUR-01 (Idempotency-Key). role은 보내지 않는다.
-export async function createNurse(body: NurseCreate): Promise<Nurse | null> {
-  if (!isApiConfigured) return null;
+export async function createNurse(body: NurseCreate): Promise<Nurse> {
   const data = await apiRequest<ApiNurse>(NURSES_PATH, {
     method: "POST",
     body,
@@ -86,8 +72,7 @@ export async function createNurse(body: NurseCreate): Promise<Nurse | null> {
 }
 
 // NUR-04. role은 보내지 않는다. TODO: 응답의 Violation[] 처리는 백엔드 확정 후 결정
-export async function updateNurse(id: string, patch: NursePatch): Promise<Nurse | null> {
-  if (!isApiConfigured) return null;
+export async function updateNurse(id: string, patch: NursePatch): Promise<Nurse> {
   const data = await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}`, {
     method: "PATCH",
     body: patch,
@@ -96,8 +81,7 @@ export async function updateNurse(id: string, patch: NursePatch): Promise<Nurse 
 }
 
 // NUR-05. affiliationEnd는 YYYY-MM-DD. TODO: 응답의 Violation[] 처리는 백엔드 확정 후 결정
-export async function retireNurse(id: string, affiliationEnd: string): Promise<Nurse | null> {
-  if (!isApiConfigured) return null;
+export async function retireNurse(id: string, affiliationEnd: string): Promise<Nurse> {
   const data = await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}/retire`, {
     method: "POST",
     body: { affiliationEnd },

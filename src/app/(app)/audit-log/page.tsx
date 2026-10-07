@@ -3,18 +3,12 @@ import AdminEmptyState from "@/components/ui/AdminEmptyState";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
 import { AdminErrorState } from "@/components/ui/AdminStatus";
 import { getAuditLog } from "@/services/auditApi";
-import { toPreviewState } from "@/types/adminCommon.type";
 import type { AuditLogData } from "@/types/audit.type";
 
-export default async function AuditLogPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ state?: string }>;
-}) {
-  const state = toPreviewState((await searchParams).state);
+export default async function AuditLogPage() {
   let data: AuditLogData | null = null;
   try {
-    data = await getAuditLog(state);
+    data = await getAuditLog();
   } catch {
     data = null;
   }

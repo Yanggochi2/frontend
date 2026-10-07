@@ -11,12 +11,11 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 // 월별 보기는 /schedule?view=month 로 둔다 (router.md 참고).
-// TODO: role/state 쿼리는 화면 미리보기용 임시 값. 역할은 서버가 판정하고, 백엔드 연결 시 제거한다.
 export default async function SchedulePage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   let data: SchedulePageData | null = null;
   try {
-    data = await getSchedulePage({ state: first(sp.state), role: first(sp.role), view: first(sp.view) });
+    data = await getSchedulePage({ view: first(sp.view) });
   } catch {
     data = null;
   }

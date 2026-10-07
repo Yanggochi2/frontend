@@ -33,5 +33,3 @@ export type RequestFormOptions = {
   initialSelectedDay: number;
   reasons: { value: string; label: string }[];
 };
-
-export type PreviewState = "empty" | "error";

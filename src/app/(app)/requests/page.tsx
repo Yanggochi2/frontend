@@ -4,19 +4,12 @@ import RnEmptyState from "@/components/ui/RnEmptyState";
 import RnErrorState from "@/components/ui/RnErrorState";
 import RnPageHeader from "@/components/ui/RnPageHeader";
 import { getRequests } from "@/services/requestsApi";
-import type { PreviewState, RequestListResult } from "@/types/requests.type";
+import type { RequestListResult } from "@/types/requests.type";
 
-export default async function RequestsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ state?: string }>;
-}) {
-  const { state } = await searchParams;
-  const preview = state === "empty" || state === "error" ? (state as PreviewState) : undefined;
-
+export default async function RequestsPage() {
   let result: RequestListResult | null = null;
   try {
-    result = await getRequests(preview);
+    result = await getRequests();
   } catch {
     result = null;
   }

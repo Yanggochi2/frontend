@@ -35,14 +35,13 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
     setError(null);
     try {
       // TODO: PREFERRED_SHIFT 선택 UI가 없어 preferredDuty는 보내지 않는다.
-      const created = await createRequest({
+      await createRequest({
         type: kind,
         targetDates,
         reasonCode: reason,
         ...(reason === REQUEST_REASON_ETC ? { reasonDetail: detail } : {}),
       });
-      // null이면 API 미설정(화면만 동작)이라 이동하지 않는다.
-      if (created !== null) router.push("/requests");
+      router.push("/requests");
     } catch (err) {
       setError(formatApiError(err));
     } finally {

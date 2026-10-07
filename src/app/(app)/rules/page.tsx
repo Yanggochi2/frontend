@@ -3,14 +3,12 @@ import AdminButton from "@/components/ui/AdminButton";
 import AdminPageHeader from "@/components/ui/AdminPageHeader";
 import { AdminErrorState } from "@/components/ui/AdminStatus";
 import { getRules } from "@/services/rulesApi";
-import { toPreviewState } from "@/types/adminCommon.type";
 import type { RulesData } from "@/types/rules.type";
 
-export default async function RulesPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
-  const state = toPreviewState((await searchParams).state);
+export default async function RulesPage() {
   let data: RulesData | null = null;
   try {
-    data = await getRules(state);
+    data = await getRules();
   } catch {
     data = null;
   }

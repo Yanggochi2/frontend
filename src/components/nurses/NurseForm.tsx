@@ -52,7 +52,7 @@ export default function NurseForm() {
     try {
       // TODO: 권한(role) 선택은 NUR-01 본문에 없어 보내지 않는다. 수간호사 지정은 WARD-09.
       // TODO: preceptorOf 선택 UI는 시안에 없다.
-      const created = await createNurse({
+      await createNurse({
         name: str("name"),
         dutyRole,
         status,
@@ -61,8 +61,7 @@ export default function NurseForm() {
         skillLevel: skill,
         affiliationStart: str("periodStart"),
       });
-      // null이면 API 미설정(화면만 동작)이라 이동하지 않는다.
-      if (created !== null) router.push("/nurses");
+      router.push("/nurses");
     } catch (err) {
       setError(formatApiError(err));
     } finally {

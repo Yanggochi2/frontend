@@ -1,9 +1,4 @@
-import { ApiError, apiRequest, apiRequestBlob, apiRequestList, isApiConfigured } from "@/lib/apiClient";
-import {
-  monthSheetMock,
-  unassignedSheetMock,
-  weekSheetMock,
-} from "@/mocks/schedule.mock";
+import { ApiError, apiRequest, apiRequestBlob, apiRequestList } from "@/lib/apiClient";
 import type {
   ApiCellBulkPatch,
   ApiCellBulkPatchResult,
@@ -100,7 +95,7 @@ function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week"
     selectedCell: null,
     activeWeek,
     weekCount,
-    lastSavedLabel: "", // TODO: 마지막 수정 시각 필드가 명세에 없다
+    lastSavedLabel: "-", // TODO: 마지막 수정 시각 필드가 명세에 없다
     unassigned: schedule.cells.length > 0 && schedule.cells.every((c) => c.dutyCode === null || c.dutyCode === "AL"),
     api: { scheduleId: schedule.id, version: schedule.version, dates, editable: schedule.status === "DRAFT" },
   };
@@ -108,10 +103,8 @@ function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week"
 
 // ---- 조회 ----
 
-// params(state / role / view)는 화면 미리보기용 임시 값이다 (mock일 때만). 역할은 서버가 세션에서 판정한다 (AGENTS.md 6.1).
+// view는 주/월 보기 전환 값이다. 역할은 서버가 세션에서 판정한다 (AGENTS.md 6.1).
 export async function getSchedulePage(params: SchedulePageParams = {}): Promise<SchedulePageData> {
-  if (!isApiConfigured) return getSchedulePageMock(params);
-
   const { yearMonth } = currentYearMonthAndDay();
   const periodLabel = `${yearMonth.slice(0, 4)}년 ${Number(yearMonth.slice(5))}월`;
   let schedule: ApiSchedule;
@@ -133,19 +126,6 @@ export async function getSchedulePage(params: SchedulePageParams = {}): Promise<
   }
   return { kind: "sheet", sheet: toSheet(schedule, violations, params.view === "month" ? "month" : "week") };
 }
-
-async function getSchedulePageMock(params: SchedulePageParams): Promise<SchedulePageData> {
-  const periodLabel = "2026년 10월";
-
-  if (params.state === "error") throw new Error("schedule mock error");
-  // TODO: mock 미리보기 전용. 일반 간호사 분기는 서버 판정으로 교체
-  if (params.role === "nurse") return { kind: "nurse-unpublished", periodLabel };
-  if (params.state === "empty") return { kind: "no-nurses", periodLabel };
-  if (params.state === "unassigned") return { kind: "sheet", sheet: unassignedSheetMock() };
-  if (params.view === "month") return { kind: "sheet", sheet: monthSheetMock() };
-  return { kind: "sheet", sheet: weekSheetMock() };
-}
-
 
 // SCH-02 (구성원)
 export function getScheduleByYearMonth(yearMonth: string): Promise<ApiSchedule> {

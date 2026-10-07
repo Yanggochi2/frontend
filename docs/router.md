@@ -20,8 +20,7 @@
 | `/me` | 마이페이지 (수간호사 / 일반 간호사) | 마이페이지 두 가지 |
 
 월별 보기(`월별 보기 · 사이드바 열림`)는 별도 경로 없이 `/schedule?view=month`(주간/월간 보기 전환)로 둔다.
-일반 간호사 근무표(확정 전)는 `/schedule`에서 역할에 따라 분기 (추측, 역할 판정은 서버). 지금은 미리보기용으로 `?role=nurse`를 쓴다 (TODO, 서버 판정으로 교체).
-`/schedule` 미리보기 쿼리(임시): `state=empty`(간호사 없음), `state=unassigned`(빈 표), `state=error`, `view=month`.
+일반 간호사 근무표(확정 전)는 `/schedule`에서 서버 응답(역할, 확정본 유무)에 따라 분기한다 (추측, 역할 판정은 서버). 쿼리는 `view=month`만 쓴다.
 
 ## 사이드바 없음 — `src/app/(onboarding)/`
 | 경로 | 화면 |
