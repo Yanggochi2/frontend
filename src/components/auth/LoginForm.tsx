@@ -7,6 +7,7 @@ import OnboardingButton from "@/components/ui/OnboardingButton";
 import { useSubmit } from "@/hooks/useSubmit";
 import { getEntryPath, login } from "@/services/authApi";
 import AuthField from "./AuthField";
+import SocialLoginButtons from "./SocialLoginButtons";
 
 type Props = { joinCode?: string };
 
@@ -69,7 +70,8 @@ export default function LoginForm({ joinCode }: Props) {
           회원가입
         </Link>
       </p>
-      {/* TODO: 비밀번호 찾기·소셜 로그인(D-03)은 API·정책 확정 후 */}
+      <SocialLoginButtons />
+      {/* TODO: 비밀번호 찾기는 API 확정 후 */}
     </form>
   );
 }
