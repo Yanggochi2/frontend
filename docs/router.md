@@ -29,5 +29,11 @@
 | `/onboarding/pending` | 첫 화면 · 승인 대기 |
 | `/onboarding/create-ward` | 첫 화면 · 병동 개설 |
 
+## 랜딩 — `src/app/(marketing)/`
+| 경로 | 화면 |
+|---|---|
+| `/` | 서비스 소개 랜딩 (3D 배경, 섹션 앵커 #hero ~ #cta) |
+
 ## 진입
-- `/` → `/schedule` 임시 redirect. 접근 상태별 분기(로그인, 소속 없음, 미승인)는 백엔드 확정 후 (TODO).
+- 앱의 시작 화면은 `/schedule`이다. 사이드바를 닫았을 때의 로고도 `/schedule`로 간다.
+- 접근 상태별 분기(로그인, 소속 없음, 미승인)는 백엔드 확정 후 (TODO).

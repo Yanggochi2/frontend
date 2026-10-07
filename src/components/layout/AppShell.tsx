@@ -35,12 +35,12 @@ export default function AppShell({ shell, children }: { shell: ShellInfo; childr
   }
 
   return open ? (
-    <div className="flex h-screen-ui">
+    <div className="ui-zoom flex h-screen-ui">
       <Sidebar shell={shell} onClose={() => change(false)} />
       <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
     </div>
   ) : (
-    <div className="flex h-screen-ui flex-col">
+    <div className="ui-zoom flex h-screen-ui flex-col">
       <TopNav shell={shell} onOpen={() => change(true)} />
       <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
     </div>
