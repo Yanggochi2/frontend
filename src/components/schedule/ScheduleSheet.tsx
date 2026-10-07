@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { movePeriod, scheduleHref } from "@/lib/schedulePeriod";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ScheduleButton from "@/components/ui/ScheduleButton";
 import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
@@ -24,15 +26,9 @@ const SAVE_ERROR_DEFAULT = "저장하지 못했어요. 잠시 후 다시 시도�
 const POPOVER_WIDTH = 386;
 const POPOVER_HEIGHT = 170;
 
-const WEEK_OPTIONS = [1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: `${n}주` }));
-const VIEW_OPTIONS: { value: ScheduleView; label: string; href: string }[] = [
-  { value: "week", label: "주간", href: "/schedule" },
-  { value: "month", label: "월간", href: "/schedule?view=month" },
-];
 
 export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   const [rows, setRows] = useState<ScheduleRow[]>(sheet.rows);
-  const [week, setWeek] = useState(String(sheet.activeWeek));
   const [brush, setBrush] = useState<EditableDutyCode | null>(null);
   const [checkOnly, setCheckOnly] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -143,6 +139,18 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   }, [rows, checkOnly]);
 
   const isMonth = sheet.view === "month";
+  const period = { yearMonth: sheet.yearMonth, week: sheet.activeWeek };
+  const prevHref = scheduleHref(sheet.view, movePeriod(period, sheet.view, -1));
+  const nextHref = scheduleHref(sheet.view, movePeriod(period, sheet.view, 1));
+  const viewOptions: { value: ScheduleView; label: string; href: string }[] = [
+    { value: "week", label: "주간", href: scheduleHref("week", period) },
+    { value: "month", label: "월간", href: scheduleHref("month", period) },
+  ];
+  const weekOptions = Array.from({ length: sheet.weekCount }, (_, i) => ({
+    value: String(i + 1),
+    label: `${i + 1}주`,
+    href: scheduleHref("week", { yearMonth: sheet.yearMonth, week: i + 1 }),
+  }));
 
   return (
     <>
@@ -152,23 +160,22 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
           <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <h2 className="text-[28px] leading-normal font-bold text-ink">{sheet.title}</h2>
-              {/* TODO: 이전/다음 기간 이동은 백엔드 연결 시 */}
-              <button type="button" aria-label="이전" className="size-11 rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
+              <Link href={prevHref} aria-label="이전" className="flex size-11 items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
                 ‹
-              </button>
-              <button type="button" aria-label="다음" className="size-11 rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
+              </Link>
+              <Link href={nextHref} aria-label="다음" className="flex size-11 items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
                 ›
-              </button>
+              </Link>
             </div>
             <div className="flex items-center gap-3">
               <ScheduleSegmented
-                options={VIEW_OPTIONS}
+                options={viewOptions}
                 value={isMonth ? "month" : "week"}
                 ariaLabel="보기 전환"
                 itemClassName="w-24"
               />
               {isMonth ? null : (
-                <ScheduleSegmented options={WEEK_OPTIONS} value={week} onChange={setWeek} ariaLabel="주 선택" />
+                <ScheduleSegmented options={weekOptions} value={String(sheet.activeWeek)} ariaLabel="주 선택" />
               )}
             </div>
           </div>

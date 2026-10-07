@@ -34,6 +34,7 @@ export type ScheduleSheetData = {
   rows: ScheduleRow[];
   coverage: CoverageStatus[] | null; // 월별 보기에는 커버리지 행이 없다
   selectedCell: { row: number; col: number } | null;
+  yearMonth: string;
   activeWeek: number;
   weekCount: number;
   lastSavedLabel: string;
@@ -57,6 +58,8 @@ export type SchedulePageData =
 
 export type SchedulePageParams = {
   view?: string;
+  ym?: string;
+  week?: string;
 };
 
 export type GenerationStep = {

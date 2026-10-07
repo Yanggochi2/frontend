@@ -15,7 +15,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   const sp = await searchParams;
   let data: SchedulePageData | null = null;
   try {
-    data = await getSchedulePage({ view: first(sp.view) });
+    data = await getSchedulePage({ view: first(sp.view), ym: first(sp.ym), week: first(sp.week) });
   } catch {
     data = null;
   }
@@ -25,7 +25,10 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
     return (
       <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col gap-3 px-6 py-4">
         <ApiOfflineBanner retryHref="/schedule" />
-        <ScheduleSheet key={`offline-${sp.view ?? ""}`} sheet={getOfflineSheet(first(sp.view))} />
+        <ScheduleSheet
+          key={`offline-${sp.view ?? ""}-${sp.ym ?? ""}-${sp.week ?? ""}`}
+          sheet={getOfflineSheet({ view: first(sp.view), ym: first(sp.ym), week: first(sp.week) })}
+        />
       </div>
     );
   }
@@ -33,7 +36,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   if (data.kind === "sheet") {
     return (
       <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col px-6 py-4">
-        <ScheduleSheet key={`${data.sheet.view}-${data.sheet.unassigned}`} sheet={data.sheet} />
+        <ScheduleSheet key={`${data.sheet.view}-${data.sheet.yearMonth}-${data.sheet.activeWeek}-${data.sheet.unassigned}`} sheet={data.sheet} />
       </div>
     );
   }

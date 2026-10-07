@@ -1,4 +1,5 @@
 import { ApiError, apiRequest, apiRequestBlob, apiRequestList } from "@/lib/apiClient";
+import { monthDates, resolvePeriod, todayKst, weekCountOf } from "@/lib/schedulePeriod";
 import type {
   ApiCellBulkPatch,
   ApiCellBulkPatchResult,
@@ -23,19 +24,6 @@ const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const SCHEDULES = "/wards/me/schedules";
 
 // ---- 매핑 (API -> UI 타입) ----
-
-function currentYearMonthAndDay() {
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" })
-    .format(new Date())
-    .split("-");
-  return { yearMonth: `${parts[0]}-${parts[1]}`, day: Number(parts[2]) };
-}
-
-function monthDates(yearMonth: string): string[] {
-  const [y, m] = yearMonth.split("-").map(Number);
-  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
-  return Array.from({ length: last }, (_, i) => `${yearMonth}-${String(i + 1).padStart(2, "0")}`);
-}
 
 function toDay(date: string, today: string): ScheduleDay {
   const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
@@ -65,12 +53,10 @@ export function applyViolationFlags(rows: ScheduleRow[], dates: string[], violat
   }));
 }
 
-function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week" | "month"): ScheduleSheetData {
-  const { yearMonth: nowYm, day } = currentYearMonthAndDay();
+function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week" | "month", activeWeek: number): ScheduleSheetData {
+  const { yearMonth: nowYm, day } = todayKst();
   const all = monthDates(schedule.yearMonth);
-  const weekCount = Math.ceil(all.length / 7);
-  // TODO: 주 구분 기준(월요일 시작 등)은 명세에 없다. 지금은 1일부터 7일씩 끊고, 오늘이 속한 주를 연다.
-  const activeWeek = schedule.yearMonth === nowYm ? Math.min(weekCount, Math.ceil(day / 7)) : 1;
+  const weekCount = weekCountOf(schedule.yearMonth);
   const dates = view === "month" ? all : all.slice((activeWeek - 1) * 7, activeWeek * 7);
   const today = `${nowYm}-${String(day).padStart(2, "0")}`;
 
@@ -85,14 +71,14 @@ function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week"
     }),
   }));
 
-  const month = Number(schedule.yearMonth.slice(5));
   return {
     view,
-    title: view === "month" ? `${month}월 근무` : "이번 주 근무",
+    title: sheetTitle(view, schedule.yearMonth, activeWeek, nowYm, day),
     days: dates.map((d) => toDay(d, today)),
     rows: applyViolationFlags(rows, dates, violations),
     coverage: view === "month" ? null : toCoverageStatuses(schedule.coverage, dates),
     selectedCell: null,
+    yearMonth: schedule.yearMonth,
     activeWeek,
     weekCount,
     lastSavedLabel: "-", // TODO: 마지막 수정 시각 필드가 명세에 없다
@@ -101,11 +87,18 @@ function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week"
   };
 }
 
+function sheetTitle(view: "week" | "month", yearMonth: string, week: number, nowYm: string, day: number) {
+  const month = Number(yearMonth.slice(5));
+  if (view === "month") return `${month}월 근무`;
+  if (yearMonth === nowYm && week === Math.min(weekCountOf(yearMonth), Math.ceil(day / 7))) return "이번 주 근무";
+  return `${month}월 ${week}주 근무`;
+}
+
 // ---- 조회 ----
 
 // view는 주/월 보기 전환 값이다. 역할은 서버가 세션에서 판정한다 (AGENTS.md 6.1).
 export async function getSchedulePage(params: SchedulePageParams = {}): Promise<SchedulePageData> {
-  const { yearMonth } = currentYearMonthAndDay();
+  const { yearMonth, week } = resolvePeriod(params.ym, params.week);
   const periodLabel = `${yearMonth.slice(0, 4)}년 ${Number(yearMonth.slice(5))}월`;
   let schedule: ApiSchedule;
   try {
@@ -124,25 +117,26 @@ export async function getSchedulePage(params: SchedulePageParams = {}): Promise<
       violations = (await getScheduleViolations(schedule.id, { severity: "HARD", size: 100 })).data;
     } catch {}
   }
-  return { kind: "sheet", sheet: toSheet(schedule, violations, params.view === "month" ? "month" : "week") };
+  return { kind: "sheet", sheet: toSheet(schedule, violations, params.view === "month" ? "month" : "week", week) };
 }
 
 // 서버에 연결하지 못했을 때 보여 줄 빈 근무표 틀. 날짜 열은 실제 오늘 날짜로 만들고 간호사 행은 없다.
-export function getOfflineSheet(view?: string): ScheduleSheetData {
-  const v = view === "month" ? "month" : "week";
-  const { yearMonth, day } = currentYearMonthAndDay();
+export function getOfflineSheet(params: SchedulePageParams = {}): ScheduleSheetData {
+  const v = params.view === "month" ? "month" : "week";
+  const { yearMonth, week: activeWeek } = resolvePeriod(params.ym, params.week);
+  const { yearMonth: nowYm, day } = todayKst();
   const all = monthDates(yearMonth);
-  const weekCount = Math.ceil(all.length / 7);
-  const activeWeek = Math.min(weekCount, Math.ceil(day / 7));
+  const weekCount = weekCountOf(yearMonth);
   const dates = v === "month" ? all : all.slice((activeWeek - 1) * 7, activeWeek * 7);
-  const today = `${yearMonth}-${String(day).padStart(2, "0")}`;
+  const today = `${nowYm}-${String(day).padStart(2, "0")}`;
   return {
     view: v,
-    title: v === "month" ? `${Number(yearMonth.slice(5))}월 근무` : "이번 주 근무",
+    title: sheetTitle(v, yearMonth, activeWeek, nowYm, day),
     days: dates.map((d) => toDay(d, today)),
     rows: [],
     coverage: null,
     selectedCell: null,
+    yearMonth,
     activeWeek,
     weekCount,
     lastSavedLabel: "-",
