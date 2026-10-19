@@ -93,6 +93,7 @@ export type ApiGenerationJob = {
   metrics: unknown; // TODO: 백엔드 확정 후 결정
   conflicts: unknown; // TODO: 백엔드 확정 후 결정
   relaxations: unknown; // TODO: 백엔드 확정 후 결정 (relaxationIds로 쓰이는 항목의 모양)
+  error?: string | null; // 실패(FAILED) 사유. 명세에는 없고 백엔드 응답에 있다
 };
 
 export type ApiGenerationStart = {

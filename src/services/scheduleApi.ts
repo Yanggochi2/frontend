@@ -212,6 +212,11 @@ export function getOfflineSheet(params: SchedulePageParams = {}): ScheduleSheetD
   };
 }
 
+// SCH-01. 그 달 근무표가 이미 있으면 409 SCHEDULE_ALREADY_EXISTS, 간호사가 없으면 422 NO_ACTIVE_NURSES
+export function createSchedule(yearMonth: string): Promise<ApiSchedule> {
+  return apiRequest<ApiSchedule>(SCHEDULES, { method: "POST", body: { yearMonth } });
+}
+
 // SCH-02 (구성원)
 export function getScheduleByYearMonth(yearMonth: string): Promise<ApiSchedule> {
   return apiRequest<ApiSchedule>(SCHEDULES, { query: { yearMonth } });
