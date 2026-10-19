@@ -48,5 +48,6 @@ src/
 ## 근무표·자동 생성 서비스
 - `services/scheduleApi.ts`(조회·셀 변경·확정·내보내기), `services/generationApi.ts`(자동 생성 GEN-01~05). 항상 실제 API를 호출한다.
 - 타입: `types/scheduleApi.type.ts`(API 모델), `types/schedule.type.ts`(화면용). 매핑은 scheduleApi.ts에서 한다.
-- `ScheduleSheet`는 셀 변경 시 화면을 먼저 바꾸고 `patchScheduleCells`로 저장한다(실패 시 되돌림, Undo 스택은 클라이언트 메모리). 연차(AL)는 표시만 하고 직접 입력하지 않는다.
+- 셀 편집 상태는 `hooks/useScheduleEditor.ts`가 맡는다. 셀 변경 시 화면을 먼저 바꾸고 `patchScheduleCells`로 저장한다(실패 시 되돌림). 되돌리기/다시 실행 스택은 클라이언트 메모리이고 단축키는 Ctrl/⌘+Z, Ctrl+Y(⌘+Shift+Z). 연차(AL)는 표시만 하고 직접 입력하지 않는다.
+- 확정·확정 취소는 `ScheduleBottomBar`에서 한다. 하드 위반이 1건이라도 있으면 확정 버튼을 막는다. 성공하면 `router.refresh()`로 다시 불러오고, 시트는 상태가 바뀌면 새로 그려진다(page의 key).
 - 자동 생성 화면은 `?jobId=`로 작업을 지정한다 (TODO: 라우팅 확정 후 결정).

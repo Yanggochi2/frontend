@@ -75,20 +75,31 @@ async function getHolidayNames(yearMonth: string): Promise<Map<string, string>> 
   }
 }
 
-// HARD 위반이 걸린 칸에 표시를 달고, 위반이 있는 행에 '확인 필요'를 단다.
+// HARD 위반이 걸린 칸에 표시와 메시지를 달고, 위반이 있는 행에 '확인 필요'를 단다.
 export function applyViolationFlags(rows: ScheduleRow[], dates: string[], violations: ApiViolation[]): ScheduleRow[] {
-  const hard = violations.filter((v) => v.severity === "HARD" && v.nurseId);
   const anyByNurse = new Set(violations.map((v) => v.nurseId));
-  const hardKey = new Set(hard.map((v) => `${v.nurseId}|${v.date}`));
+  const hardByCell = new Map<string, string[]>();
+  violations
+    .filter((v) => v.severity === "HARD" && v.nurseId)
+    .forEach((v) => {
+      const key = `${v.nurseId}|${v.date}`;
+      hardByCell.set(key, [...(hardByCell.get(key) ?? []), v.message]);
+    });
   return rows.map((r) => ({
     ...r,
     needsCheck: anyByNurse.has(r.nurseKey),
     cells: r.cells.map((c, i) => {
-      const { flag: _flag, ...rest } = c;
+      const { flag: _flag, violations: _violations, ...rest } = c;
       void _flag;
-      return hardKey.has(`${r.nurseKey}|${dates[i]}`) ? { ...rest, flag: "violation" as const } : rest;
+      void _violations;
+      const messages = hardByCell.get(`${r.nurseKey}|${dates[i]}`);
+      return messages ? { ...rest, flag: "violation" as const, violations: messages } : rest;
     }),
   }));
+}
+
+export function countHardViolations(violations: ApiViolation[]): number {
+  return violations.filter((v) => v.severity === "HARD").length;
 }
 
 function toSheet(
@@ -130,7 +141,14 @@ function toSheet(
     weekCount,
     lastSavedLabel: "-", // TODO: 마지막 수정 시각 필드가 명세에 없다
     unassigned: schedule.cells.length > 0 && schedule.cells.every((c) => c.dutyCode === null || c.dutyCode === "AL"),
-    api: { scheduleId: schedule.id, version: schedule.version, dates, editable: schedule.status === "DRAFT" },
+    api: {
+      scheduleId: schedule.id,
+      version: schedule.version,
+      dates,
+      editable: schedule.status === "DRAFT",
+      status: schedule.status,
+      hardViolationCount: countHardViolations(violations),
+    },
   };
 }
 
@@ -190,7 +208,7 @@ export function getOfflineSheet(params: SchedulePageParams = {}): ScheduleSheetD
     weekCount,
     lastSavedLabel: "-",
     unassigned: false,
-    api: { scheduleId: "", version: 0, dates, editable: false },
+    api: { scheduleId: "", version: 0, dates, editable: false, status: "DRAFT", hardViolationCount: 0 },
   };
 }
 

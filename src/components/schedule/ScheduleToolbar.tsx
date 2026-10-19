@@ -7,11 +7,22 @@ type Props = {
   onBrushChange: (code: EditableDutyCode | null) => void;
   canUndo: boolean;
   onUndo: () => void;
+  canRedo: boolean;
+  onRedo: () => void;
   checkOnly: boolean;
   onCheckOnlyChange: (value: boolean) => void;
 };
 
-export default function ScheduleToolbar({ brush, onBrushChange, canUndo, onUndo, checkOnly, onCheckOnlyChange }: Props) {
+export default function ScheduleToolbar({
+  brush,
+  onBrushChange,
+  canUndo,
+  onUndo,
+  canRedo,
+  onRedo,
+  checkOnly,
+  onCheckOnlyChange,
+}: Props) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <div className="flex flex-wrap items-center gap-2">
@@ -36,9 +47,19 @@ export default function ScheduleToolbar({ brush, onBrushChange, canUndo, onUndo,
           type="button"
           onClick={onUndo}
           disabled={!canUndo}
+          title="Ctrl+Z"
           className="py-2 text-[16px] font-medium text-ink-sub disabled:opacity-60"
         >
           ↶ 되돌리기
+        </button>
+        <button
+          type="button"
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="Ctrl+Y"
+          className="py-2 text-[16px] font-medium text-ink-sub disabled:opacity-60"
+        >
+          ↷ 다시 실행
         </button>
         <ScheduleToggle checked={checkOnly} onChange={onCheckOnlyChange} label="확인 필요한 칸만 보기" />
       </div>

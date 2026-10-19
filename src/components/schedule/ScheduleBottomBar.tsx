@@ -1,18 +1,100 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import ScheduleButton from "@/components/ui/ScheduleButton";
+import { useSubmit } from "@/hooks/useSubmit";
+import { cancelScheduleConfirmation, confirmSchedule } from "@/services/scheduleApi";
+import type { ScheduleStatus } from "@/types/scheduleApi.type";
+import ScheduleConfirmDialog from "./ScheduleConfirmDialog";
+
+type Props = {
+  scheduleId: string; // 비어 있으면 서버에 연결하지 못한 상태
+  status: ScheduleStatus;
+  hardViolationCount: number;
+};
 
 // 시트 아래 CTA. 화면 높이 안에 시트가 다 들어오도록 고정 배치 대신 흐름 안에 둔다.
-export default function ScheduleBottomBar() {
+export default function ScheduleBottomBar({ scheduleId, status, hardViolationCount }: Props) {
+  const router = useRouter();
+  const { submit, loading, error, setError } = useSubmit();
+  // 같은 확정 시도는 같은 Idempotency-Key를 쓴다. 창을 열 때 만든다.
+  const [dialog, setDialog] = useState<{ kind: "confirm" | "cancel"; key: string } | null>(null);
+  const offline = scheduleId === "";
+  const blocked = hardViolationCount > 0;
+
+  function open(kind: "confirm" | "cancel") {
+    setError(null);
+    setDialog({ kind, key: crypto.randomUUID() });
+  }
+
+  async function run(reason: string) {
+    if (!dialog) return;
+    const ok = await submit(() =>
+      dialog.kind === "confirm"
+        ? // TODO: 소프트 위반 확인 목록 UI는 아직 없다. 백엔드는 지금 이 값을 검사하지 않는다.
+          confirmSchedule(scheduleId, { acknowledgedSoftViolationIds: [] }, dialog.key)
+        : cancelScheduleConfirmation(scheduleId, { reason }),
+    );
+    if (!ok) return;
+    setDialog(null);
+    router.refresh();
+  }
+
   return (
     <div className="flex shrink-0 items-center justify-end gap-3 pt-3">
+      {status === "DRAFT" && blocked ? (
+        <p className="mr-auto text-[17px] font-bold text-danger">규칙 위반 {hardViolationCount}건을 고쳐야 확정할 수 있어요</p>
+      ) : null}
+      {status === "CONFIRMED" ? (
+        <p className="mr-auto text-[17px] font-bold text-ok">확정된 근무표예요. 간호사들에게 공개됐어요</p>
+      ) : null}
       <div className="flex items-center gap-3">
-        <ScheduleButton variant="primary-soft" size="bar" href="/schedule/generate">
-          자동으로 다시 짜기
-        </ScheduleButton>
-        {/* TODO: 필수 칸 확인 동작은 화면 연결 시 결정 */}
-        <ScheduleButton variant="primary" size="bar">
-          필수 칸 확인하기
-        </ScheduleButton>
+        {status === "DRAFT" ? (
+          <>
+            <ScheduleButton variant="primary-soft" size="bar" href="/schedule/generate">
+              자동으로 다시 짜기
+            </ScheduleButton>
+            <ScheduleButton
+              variant="primary"
+              size="bar"
+              onClick={() => open("confirm")}
+              disabled={offline || blocked}
+              className="disabled:opacity-50"
+            >
+              확정하기
+            </ScheduleButton>
+          </>
+        ) : null}
+        {status === "CONFIRMED" ? (
+          <ScheduleButton variant="primary-soft" size="bar" onClick={() => open("cancel")}>
+            확정 취소
+          </ScheduleButton>
+        ) : null}
       </div>
+      {dialog?.kind === "confirm" ? (
+        <ScheduleConfirmDialog
+          title="근무표를 확정할까요?"
+          description="확정하면 간호사들에게 공개되고 알림이 가요. 확정한 뒤에는 고칠 수 없고, 고치려면 확정을 취소해야 해요."
+          confirmLabel="확정하기"
+          busy={loading}
+          error={error}
+          onConfirm={run}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
+      {dialog?.kind === "cancel" ? (
+        <ScheduleConfirmDialog
+          title="확정을 취소할까요?"
+          description="취소하면 다시 고칠 수 있는 상태가 되고, 간호사들에게 취소 알림과 사유가 가요."
+          confirmLabel="확정 취소"
+          reasonLabel="취소 사유"
+          busy={loading}
+          error={error}
+          onConfirm={run}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
     </div>
   );
 }
