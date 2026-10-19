@@ -1,5 +1,5 @@
 import ScheduleChip from "@/components/ui/ScheduleChip";
-import type { CoverageStatus, ScheduleDay, ScheduleRow, ScheduleView } from "@/types/schedule.type";
+import type { CoverageDuty, CoverageStatus, ScheduleDay, ScheduleRow, ScheduleView } from "@/types/schedule.type";
 import { DUTY_STYLE } from "./dutyStyle";
 
 export type GridRow = { row: ScheduleRow; index: number };
@@ -14,14 +14,42 @@ type Props = {
   onScroll: () => void;
 };
 
-const DAY_TEXT = { default: "text-ink", sat: "text-ink", sun: "text-danger" } as const;
-const WEEKDAY_TEXT = { default: "text-ink-sub", sat: "text-brand", sun: "text-danger" } as const;
+const DAY_TEXT = { default: "text-ink", sat: "text-ink", sun: "text-danger", holiday: "text-danger" } as const;
+const WEEKDAY_TEXT = { default: "text-ink-sub", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
+
+// 하단 인원 행. 세로 스크롤에도 보이도록 아래에서부터 쌓아 고정한다 (행 높이 h-11).
+const COVERAGE_ROWS: { duty: CoverageDuty; bottom: string }[] = [
+  { duty: "D", bottom: "bottom-22" },
+  { duty: "E", bottom: "bottom-11" },
+  { duty: "N", bottom: "bottom-0" },
+];
+
+// 숙련 그룹이 시작되는 행에 그룹 이름과 굵은 윗선을 단다.
+// 표가 영역 높이에 맞춰 행을 늘리므로 구분용 행을 따로 넣지 않는다.
+function groupStarts(rows: GridRow[]): Map<number, { name: string; count: number }> {
+  const starts = new Map<number, { name: string; count: number }>();
+  let current: { name: string; count: number } | null = null;
+  rows.forEach(({ row }, i) => {
+    if (!row.group) {
+      current = null;
+      return;
+    }
+    if (current && i > 0 && rows[i - 1].row.group === row.group) {
+      current.count += 1;
+      return;
+    }
+    current = { name: row.group, count: 1 };
+    starts.set(i, current);
+  });
+  return starts;
+}
 
 export default function ScheduleGrid({ view, days, rows, coverage, selected, onCellClick, onScroll }: Props) {
   const isMonth = view === "month";
   const nameW = isMonth ? "w-[96px]" : "w-[151px]";
   const rowH = "h-10";
   const headH = "h-12";
+  const starts = groupStarts(rows);
 
   return (
     <div onScroll={onScroll} className="absolute inset-0 overflow-auto">
@@ -39,10 +67,14 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
               <th
                 key={d.date}
                 scope="col"
+                title={d.holidayName}
                 className={`sticky top-0 z-20 border-t border-r border-b border-grid p-0 font-normal ${headH} ${d.isToday ? "bg-line" : "bg-surface"}`}
               >
                 <div className="flex flex-col items-center justify-center gap-0.5 leading-none">
-                  <span className={`${isMonth ? "text-[12px]" : "text-[15px]"} font-medium ${WEEKDAY_TEXT[d.tone]}`}>{d.weekday}</span>
+                  {/* 주간 보기는 칸이 넓어 요일 자리에 공휴일 이름을 쓴다. 월간은 색으로만 구분하고 이름은 title로 */}
+                  <span className={`max-w-full truncate px-1 ${isMonth ? "text-[12px]" : "text-[15px]"} font-medium ${WEEKDAY_TEXT[d.tone]}`}>
+                    {d.holidayName && !isMonth ? `${d.weekday} · ${d.holidayName}` : d.weekday}
+                  </span>
                   <span className={`${isMonth ? "text-[16px]" : "text-[22px]"} font-bold ${DAY_TEXT[d.tone]}`}>{d.date}</span>
                 </div>
               </th>
@@ -57,66 +89,95 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
           </tr>
         </thead>
         <tbody>
-          {rows.map(({ row, index }) => (
-            <tr key={row.nurseKey}>
-              <th
-                scope="row"
-                className={`sticky left-0 z-10 border-r border-b border-l border-grid bg-white text-left ${isMonth ? "text-[17px]" : "text-[20px]"} font-bold text-ink ${nameW} ${rowH} pl-4`}
-              >
-                {row.name}
-              </th>
-              {row.cells.map((cell, col) => {
-                const isSelected = selected?.row === index && selected.col === col;
-                const style = cell.duty ? DUTY_STYLE[cell.duty] : null;
-                const label = style ? (isMonth ? style.monthLabel : style.weekLabel) : "";
-                const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
-                return (
-                  <td key={col} className={`relative border-r border-b border-grid p-0 ${rowH} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
-                    <button
-                      type="button"
-                      disabled={cell.editable === false}
-                      onClick={(e) => onCellClick(index, col, e.currentTarget)}
-                      aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}`}
-                      className={`flex size-full items-center justify-center ${style ? style.cell : "text-ink"} ${labelSize}`}
-                    >
-                      {label}
-                    </button>
-                    {cell.flag === "violation" ? (
-                      <span aria-hidden className="pointer-events-none absolute inset-0 border-4 border-danger" />
-                    ) : null}
-                    {isSelected ? (
-                      <span aria-hidden className="pointer-events-none absolute inset-0 border-4 border-primary" />
-                    ) : null}
+          {rows.map(({ row, index }, i) => {
+            const start = starts.get(i);
+            const groupTop = start ? "border-t-2 border-t-primary" : "";
+            return (
+              <tr key={row.nurseKey}>
+                <th
+                  scope="row"
+                  className={`sticky left-0 z-10 border-r border-b border-l border-grid bg-white text-left ${isMonth ? "text-[17px]" : "text-[20px]"} font-bold text-ink ${nameW} ${rowH} ${groupTop} pl-4`}
+                >
+                  {start ? (
+                    <span className={`block leading-tight font-bold text-primary ${isMonth ? "text-[11px]" : "text-[13px]"}`}>
+                      {start.name} · {start.count}명
+                    </span>
+                  ) : null}
+                  {row.name}
+                </th>
+                {row.cells.map((cell, col) => {
+                  const isSelected = selected?.row === index && selected.col === col;
+                  const style = cell.duty ? DUTY_STYLE[cell.duty] : null;
+                  const label = style ? (isMonth ? style.monthLabel : style.weekLabel) : "";
+                  const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
+                  return (
+                    <td key={col} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
+                      <button
+                        type="button"
+                        disabled={cell.editable === false}
+                        onClick={(e) => onCellClick(index, col, e.currentTarget)}
+                        aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}${cell.charge ? " 차지" : ""}`}
+                        className={`flex size-full items-center justify-center ${style ? style.cell : "text-ink"} ${labelSize}`}
+                      >
+                        {label}
+                      </button>
+                      {cell.charge ? (
+                        <span
+                          aria-hidden
+                          className={`pointer-events-none absolute top-0.5 right-0.5 rounded-[6px] bg-primary px-1 leading-tight font-bold text-white ${isMonth ? "text-[10px]" : "text-[12px]"}`}
+                        >
+                          {isMonth ? "C" : "차지"}
+                        </span>
+                      ) : null}
+                      {cell.flag === "violation" ? (
+                        <span aria-hidden className="pointer-events-none absolute inset-0 border-4 border-danger" />
+                      ) : null}
+                      {isSelected ? (
+                        <span aria-hidden className="pointer-events-none absolute inset-0 border-4 border-primary" />
+                      ) : null}
+                    </td>
+                  );
+                })}
+                {isMonth ? (
+                  <td className={`sticky right-0 z-10 border-r border-b border-grid bg-white text-center text-[17px] font-medium text-ink ${rowH} ${groupTop}`}>
+                    {row.cells.filter((c) => c.duty === "O").length}
                   </td>
-                );
-              })}
-              {isMonth ? (
-                <td className={`sticky right-0 z-10 border-r border-b border-grid bg-white text-center text-[17px] font-medium text-ink ${rowH}`}>
-                  {row.cells.filter((c) => c.duty === "O").length}
-                </td>
-              ) : (
-                <td className={`pl-4 ${rowH}`}>
-                  {row.needsCheck ? <ScheduleChip tone="danger" shape="square">확인 필요</ScheduleChip> : null}
-                </td>
-              )}
-            </tr>
-          ))}
+                ) : (
+                  <td className={`pl-4 ${rowH}`}>
+                    {row.needsCheck ? <ScheduleChip tone="danger" shape="square">확인 필요</ScheduleChip> : null}
+                  </td>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
         {coverage ? (
           <tfoot>
-            <tr>
-              <th scope="row" className={`sticky bottom-0 left-0 z-20 h-11 border-r border-b border-l border-grid bg-surface text-left font-bold text-ink-sub ${isMonth ? "pl-2 text-[13px]" : "pl-4 text-[16px]"}`}>
-                필요 인원
-              </th>
-              {coverage.map((c, i) => (
-                <td key={days[i].date} className="sticky bottom-0 z-10 h-11 border-r border-b border-grid bg-white text-center">
-                  <ScheduleChip tone={c === "ok" ? "ok" : "danger"} shape="square">
-                    {isMonth ? (c === "ok" ? "✓" : "!") : c === "ok" ? "충족" : "미달"}
-                  </ScheduleChip>
-                </td>
-              ))}
-              <td className="sticky bottom-0 bg-white" />
-            </tr>
+            {COVERAGE_ROWS.map(({ duty, bottom }) => (
+              <tr key={duty}>
+                <th
+                  scope="row"
+                  className={`sticky left-0 z-20 h-11 border-r border-b border-l border-grid bg-surface pl-4 text-left text-[16px] font-bold text-ink-sub ${bottom}`}
+                >
+                  {duty} 인원
+                </th>
+                {coverage.map((c, i) => {
+                  const count = c.counts[duty];
+                  return (
+                    <td key={days[i].date} className={`sticky z-10 h-11 border-r border-b border-grid bg-white text-center ${bottom}`}>
+                      {count ? (
+                        <ScheduleChip tone={count.actual < count.required ? "danger" : "ok"} shape="square">
+                          {count.actual}/{count.required}
+                        </ScheduleChip>
+                      ) : (
+                        <span className="text-[15px] text-ink-faint">-</span>
+                      )}
+                    </td>
+                  );
+                })}
+                <td className={`sticky bg-white ${bottom}`} />
+              </tr>
+            ))}
           </tfoot>
         ) : null}
       </table>

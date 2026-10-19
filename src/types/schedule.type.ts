@@ -4,13 +4,19 @@ export type DutyCode = "D" | "E" | "N" | "O" | "AL" | "ED";
 // 브러시·팝오버로 직접 입력할 수 있는 코드
 export type EditableDutyCode = "D" | "E" | "N" | "O";
 export type ScheduleView = "week" | "month";
-export type DayTone = "default" | "sat" | "sun";
-export type CoverageStatus = "ok" | "short";
+export type DayTone = "default" | "sat" | "sun" | "holiday";
+export type CoverageDuty = "D" | "E" | "N";
+// 날짜 하나의 근무별 인원. 근무별 값이 없으면 그 근무는 표시하지 않는다.
+export type CoverageStatus = {
+  short: boolean; // 하나라도 미달이면 true
+  counts: Partial<Record<CoverageDuty, { actual: number; required: number }>>;
+};
 
 export type ScheduleCell = {
   duty: DutyCode | null; // null = 미배정 (O와 다름)
   flag?: "violation";
   editable?: boolean; // 없으면 편집 가능
+  charge?: boolean; // 그날 그 근무의 차지 간호사
 };
 
 export type ScheduleDay = {
@@ -18,11 +24,13 @@ export type ScheduleDay = {
   weekday: string;
   tone: DayTone;
   isToday?: boolean;
+  holidayName?: string; // 공휴일이면 이름 (이름이 없으면 "공휴일")
 };
 
 export type ScheduleRow = {
   nurseKey: string; // nurseId
   name: string;
+  group?: string; // 숙련 그룹. 없으면 묶지 않는다
   cells: ScheduleCell[];
   needsCheck?: boolean;
 };

@@ -10,7 +10,9 @@ import type {
   ApiViolation,
   ApiViolationQuery,
 } from "@/types/scheduleApi.type";
+import { getHolidays } from "./rulesApi";
 import type {
+  CoverageDuty,
   CoverageStatus,
   DayTone,
   ScheduleDay,
@@ -25,16 +27,52 @@ const SCHEDULES = "/wards/me/schedules";
 
 // ---- 매핑 (API -> UI 타입) ----
 
-function toDay(date: string, today: string): ScheduleDay {
+// holidays: 날짜 → 공휴일 이름
+function toDay(date: string, today: string, holidays: Map<string, string>): ScheduleDay {
   const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
-  const tone: DayTone = weekday === 0 ? "sun" : weekday === 6 ? "sat" : "default";
-  return { date: Number(date.slice(8)), weekday: WEEKDAYS[weekday], tone, isToday: date === today };
+  const holidayName = holidays.get(date);
+  const tone: DayTone =
+    holidayName !== undefined ? "holiday" : weekday === 0 ? "sun" : weekday === 6 ? "sat" : "default";
+  return { date: Number(date.slice(8)), weekday: WEEKDAYS[weekday], tone, isToday: date === today, holidayName };
 }
 
-// 날짜별 필요 인원 상태. 하나라도 UNDER면 미달.
+const COVERAGE_DUTIES: CoverageDuty[] = ["D", "E", "N"];
+
+// 날짜별 근무(D/E/N) 인원. 하나라도 UNDER면 그날은 미달.
 export function toCoverageStatuses(coverage: ApiCoverage[], dates: string[]): CoverageStatus[] {
-  const short = new Set(coverage.filter((c) => c.status === "UNDER").map((c) => c.date));
-  return dates.map((d) => (short.has(d) ? "short" : "ok"));
+  const byDate = new Map<string, ApiCoverage[]>();
+  coverage.forEach((c) => byDate.set(c.date, [...(byDate.get(c.date) ?? []), c]));
+  return dates.map((d) => {
+    const items = byDate.get(d) ?? [];
+    const counts: CoverageStatus["counts"] = {};
+    items.forEach((c) => {
+      if ((COVERAGE_DUTIES as string[]).includes(c.dutyCode)) {
+        counts[c.dutyCode as CoverageDuty] = { actual: c.actualCount, required: c.requiredCount };
+      }
+    });
+    return { short: items.some((c) => c.status === "UNDER"), counts };
+  });
+}
+
+// 숙련 그룹이 있으면 같은 그룹끼리 붙인다. 그룹 순서는 처음 나온 순서를 따른다.
+function groupRows(rows: ScheduleRow[]): ScheduleRow[] {
+  if (rows.every((r) => !r.group)) return rows;
+  const order: string[] = [];
+  rows.forEach((r) => {
+    const key = r.group ?? "";
+    if (!order.includes(key)) order.push(key);
+  });
+  return order.flatMap((key) => rows.filter((r) => (r.group ?? "") === key));
+}
+
+// 공휴일 조회는 수간호사만 된다. 실패하거나 권한이 없으면 공휴일 없이 시트를 보여 준다.
+async function getHolidayNames(yearMonth: string): Promise<Map<string, string>> {
+  try {
+    const list = await getHolidays(yearMonth);
+    return new Map(list.filter((h) => h.isHoliday).map((h) => [h.date, h.name || "공휴일"]));
+  } catch {
+    return new Map();
+  }
 }
 
 // HARD 위반이 걸린 칸에 표시를 달고, 위반이 있는 행에 '확인 필요'를 단다.
@@ -53,7 +91,13 @@ export function applyViolationFlags(rows: ScheduleRow[], dates: string[], violat
   }));
 }
 
-function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week" | "month", activeWeek: number): ScheduleSheetData {
+function toSheet(
+  schedule: ApiSchedule,
+  violations: ApiViolation[],
+  holidays: Map<string, string>,
+  view: "week" | "month",
+  activeWeek: number,
+): ScheduleSheetData {
   const { yearMonth: nowYm, day } = todayKst();
   const all = monthDates(schedule.yearMonth);
   const weekCount = weekCountOf(schedule.yearMonth);
@@ -61,20 +105,23 @@ function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week"
   const today = `${nowYm}-${String(day).padStart(2, "0")}`;
 
   const cellMap = new Map(schedule.cells.map((c) => [`${c.nurseId}|${c.date}`, c]));
-  const rows: ScheduleRow[] = schedule.nurses.map((n) => ({
-    nurseKey: n.id,
-    name: n.name,
-    cells: dates.map((d) => {
-      const c = cellMap.get(`${n.id}|${d}`);
-      // 칸이 없으면 소속 기간 밖으로 보고 편집 불가로 둔다 (추측).
-      return { duty: c?.dutyCode ?? null, editable: c ? c.editable : false };
-    }),
-  }));
+  const rows: ScheduleRow[] = groupRows(
+    schedule.nurses.map((n) => ({
+      nurseKey: n.id,
+      name: n.name,
+      group: n.skillGroup ?? undefined,
+      cells: dates.map((d) => {
+        const c = cellMap.get(`${n.id}|${d}`);
+        // 칸이 없으면 소속 기간 밖으로 보고 편집 불가로 둔다 (추측).
+        return { duty: c?.dutyCode ?? null, editable: c ? c.editable : false, charge: c?.isCharge || undefined };
+      }),
+    })),
+  );
 
   return {
     view,
     title: sheetTitle(view, schedule.yearMonth, activeWeek, nowYm, day),
-    days: dates.map((d) => toDay(d, today)),
+    days: dates.map((d) => toDay(d, today, holidays)),
     rows: applyViolationFlags(rows, dates, violations),
     coverage: view === "month" ? null : toCoverageStatuses(schedule.coverage, dates),
     selectedCell: null,
@@ -111,13 +158,15 @@ export async function getSchedulePage(params: SchedulePageParams = {}): Promise<
   if (schedule.nurses.length === 0) return { kind: "no-nurses", periodLabel };
 
   let violations: ApiViolation[] = [];
+  const holidaysJob = getHolidayNames(schedule.yearMonth);
   if (schedule.status === "DRAFT") {
     // 위반 목록은 수간호사만 받는다. 실패해도 시트는 보여 준다.
     try {
       violations = (await getScheduleViolations(schedule.id, { severity: "HARD", size: 100 })).data;
     } catch {}
   }
-  return { kind: "sheet", sheet: toSheet(schedule, violations, params.view === "month" ? "month" : "week", week) };
+  const holidays = await holidaysJob;
+  return { kind: "sheet", sheet: toSheet(schedule, violations, holidays, params.view === "month" ? "month" : "week", week) };
 }
 
 // 서버에 연결하지 못했을 때 보여 줄 빈 근무표 틀. 날짜 열은 실제 오늘 날짜로 만들고 간호사 행은 없다.
@@ -132,7 +181,7 @@ export function getOfflineSheet(params: SchedulePageParams = {}): ScheduleSheetD
   return {
     view: v,
     title: sheetTitle(v, yearMonth, activeWeek, nowYm, day),
-    days: dates.map((d) => toDay(d, today)),
+    days: dates.map((d) => toDay(d, today, new Map())),
     rows: [],
     coverage: null,
     selectedCell: null,

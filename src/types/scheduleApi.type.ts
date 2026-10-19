@@ -8,6 +8,8 @@ export type ScheduleStatus = "DRAFT" | "GENERATING" | "CONFIRMED" | "ARCHIVED";
 export type ApiScheduleNurse = {
   id: string;
   name: string;
+  // TODO: 백엔드 확정 후 결정 (숙련 그룹 필드 이름. 비즈니스 로직 10-19 기준 추가 예정)
+  skillGroup?: string | null;
   // 그 밖의 Nurse 필드(숙련도·경력 등)는 역할별로 다르다. 받은 것만 표시한다.
   [key: string]: unknown;
 };
@@ -17,6 +19,8 @@ export type ApiScheduleCell = {
   date: string; // YYYY-MM-DD
   dutyCode: ApiDutyCode | null;
   editable: boolean;
+  // TODO: 백엔드 확정 후 결정 (날짜별 차지 지정 필드 이름. 비즈니스 로직 10-19 6장)
+  isCharge?: boolean;
 };
 
 export type ApiCoverageStatus = "UNDER" | "MET" | "OVER";
