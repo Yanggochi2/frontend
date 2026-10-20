@@ -17,6 +17,10 @@ export type ApiNurse = {
   affiliationEnd?: string | null;
   preceptorOf?: string | null;
   version?: number;
+  /** 수간호사 응답에만. 이 간호사 행에 로그인 계정이 연결돼 있는지 */
+  hasAccount?: boolean;
+  /** 수간호사 응답에만. 유효한 개인 초대 코드가 나가 있으면 만료 시각 */
+  inviteExpiresAt?: string | null;
 };
 
 // NUR-01 본문. role은 보내지 않는다(권한 부여는 WARD-09).
