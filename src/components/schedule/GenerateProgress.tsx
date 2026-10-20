@@ -1,8 +1,8 @@
-import ScheduleButton from "@/components/ui/ScheduleButton";
 import ScheduleChip from "@/components/ui/ScheduleChip";
 import SchedulePageHeader from "@/components/ui/SchedulePageHeader";
 import { GENERATE_ESTIMATED_MINUTES } from "@/constants/schedule.constants";
 import type { GenerationProgress } from "@/types/schedule.type";
+import GenerateStopButton from "./GenerateStopButton";
 
 const STATUS = {
   done: { label: "완료", tone: "gray", card: "border-line bg-white" },
@@ -16,12 +16,7 @@ export default function GenerateProgress({ data }: { data: GenerationProgress })
       <SchedulePageHeader
         title="근무표를 만들고 있어요"
         subtitle={`${data.periodLabel} · 보통 ${GENERATE_ESTIMATED_MINUTES}분 안에 끝나요, 창을 닫지 마세요`}
-        action={
-          // TODO: 중단 동작은 백엔드 확정 후
-          <ScheduleButton variant="neutral" size="sm">
-            중단하고 현재 결과 쓰기
-          </ScheduleButton>
-        }
+        action={<GenerateStopButton jobId={data.jobId} yearMonth={data.yearMonth} />}
       />
       <ol className="grid w-full grid-cols-3 gap-6">
         {data.steps.map((s) => {

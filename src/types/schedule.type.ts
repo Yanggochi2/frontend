@@ -88,6 +88,8 @@ export type GenerationMetric = {
 };
 
 export type GenerationProgress = {
+  jobId: string;
+  yearMonth: string;
   periodLabel: string;
   steps: GenerationStep[];
   metrics: GenerationMetric[];
@@ -102,8 +104,11 @@ export type GenerationFailureOption = {
 };
 
 export type GenerationFailure = {
+  jobId: string;
+  yearMonth: string;
   title: string;
   subtitle: string;
   cause: { tag: string; headline: string; detail: string };
+  problems: string[]; // 남은 하드 위반 메시지
   options: GenerationFailureOption[];
 };

@@ -6,7 +6,7 @@
 | 경로 | 화면 | Figma 프레임 |
 |---|---|---|
 | `/schedule` | 근무표 시트 | v3.1-A, 근무표 시트 · 빈 표, 빈 상태 · 근무표 |
-| `/schedule/generate` | 자동 생성 진행 | 자동 생성 진행 |
+| `/schedule/generate` | 자동 생성 시작(`?ym=`) · 진행(`?jobId=`) | 자동 생성 진행 (시작 화면은 시안 없음) |
 | `/schedule/generate/failed` | 생성 실패 · 해 없음 | 생성 실패 · 해 없음 |
 | `/requests` | 신청 관리 | 신청 관리, 빈 상태 · 신청 관리 |
 | `/requests/new` | 새 신청 | 새 신청 |

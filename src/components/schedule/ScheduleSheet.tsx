@@ -5,6 +5,7 @@ import { movePeriod, scheduleHref } from "@/lib/schedulePeriod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ScheduleButton from "@/components/ui/ScheduleButton";
 import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
+import { useGenerationStart } from "@/hooks/useGenerationStart";
 import { useScheduleEditor } from "@/hooks/useScheduleEditor";
 import type { EditableDutyCode, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
 import ScheduleBottomBar from "./ScheduleBottomBar";
@@ -27,6 +28,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   const [checkOnly, setCheckOnly] = useState(false);
   const [popover, setPopover] = useState<Popover | null>(null);
   const [showEmptyGuide, setShowEmptyGuide] = useState(sheet.unassigned);
+  const generation = useGenerationStart();
   const api = sheet.api;
 
   const closePopover = useCallback(() => setPopover(null), []);
@@ -139,9 +141,20 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
                 <p className="text-[16px] font-medium text-ink-sub">
                   칸을 눌러 근무를 넣거나, 자동 생성으로 한 번에 채워요. 연차는 이미 들어가 있어요.
                 </p>
+                {generation.error ? (
+                  <p role="alert" className="text-[16px] font-bold text-danger">
+                    {generation.error}
+                  </p>
+                ) : null}
                 <div className="flex gap-2">
-                  <ScheduleButton variant="brand" size="sm" href="/schedule/generate">
-                    자동 생성
+                  <ScheduleButton
+                    variant="brand"
+                    size="sm"
+                    onClick={() => generation.start(sheet.yearMonth)}
+                    disabled={generation.loading}
+                    className="disabled:opacity-50"
+                  >
+                    {generation.loading ? "만드는 중…" : "자동 생성"}
                   </ScheduleButton>
                   <ScheduleButton variant="neutral" size="sm" onClick={() => setShowEmptyGuide(false)}>
                     직접 채우기
@@ -167,6 +180,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
       ) : null}
       <ScheduleBottomBar
         scheduleId={api.scheduleId}
+        yearMonth={sheet.yearMonth}
         status={api.status}
         hardViolationCount={editor.hardViolationCount}
       />

@@ -11,6 +11,7 @@ export default async function ScheduleGenerateFailedPage({ searchParams }: { sea
   let data: GenerationFailure;
   let offline = false;
   try {
+    if (!jobId) throw new Error("jobId가 필요해요.");
     data = await getGenerationFailure(jobId);
   } catch {
     data = getEmptyGenerationFailure();
@@ -18,7 +19,7 @@ export default async function ScheduleGenerateFailedPage({ searchParams }: { sea
   }
   return (
     <div className="flex flex-col gap-8 px-12 pt-12 pb-10">
-      {offline ? <ApiOfflineBanner retryHref="/schedule/generate/failed" /> : null}
+      {offline ? <ApiOfflineBanner retryHref={jobId ? `/schedule/generate/failed?jobId=${encodeURIComponent(jobId)}` : "/schedule/generate"} /> : null}
       <GenerateFailed data={data} />
     </div>
   );

@@ -34,11 +34,11 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   }
 
   if (data.kind === "sheet") {
-    // 확정·확정 취소 뒤 새로고침하면 상태와 버전이 바뀌므로 편집 상태를 새로 시작한다.
+    // 확정·확정 취소·자동 생성 뒤 다시 불러오면 버전이 바뀌므로 편집 상태를 새로 시작한다.
     const { view, yearMonth, activeWeek, unassigned, api } = data.sheet;
     return (
       <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col px-6 py-4">
-        <ScheduleSheet key={`${view}-${yearMonth}-${activeWeek}-${unassigned}-${api.status}`} sheet={data.sheet} />
+        <ScheduleSheet key={`${view}-${yearMonth}-${activeWeek}-${unassigned}-${api.version}`} sheet={data.sheet} />
       </div>
     );
   }
