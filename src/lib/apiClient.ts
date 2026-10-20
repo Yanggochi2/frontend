@@ -41,10 +41,11 @@ function buildUrl(path: string, query?: Query) {
   return `${BASE_URL}${path}${search}`;
 }
 
-// TODO: X-CSRF-Token을 어디서 받는지 API 명세에 없다. 백엔드 확정 후 이 함수만 바꾼다.
+// 백엔드가 로그인 때 내려주는 CSRF_TOKEN 쿠키(스크립트가 읽을 수 있는 유일한 인증 쿠키)를 X-CSRF-Token 헤더로 보낸다.
+// 쿠키 이름은 백엔드 app/presentation/deps.py 기준. 명세서 v1.0에는 받는 곳이 없다.
 function getCsrfToken(): string | undefined {
   if (typeof document === "undefined") return undefined;
-  const match = document.cookie.match(/(?:^|; )csrfToken=([^;]*)/);
+  const match = document.cookie.match(/(?:^|; )CSRF_TOKEN=([^;]*)/);
   return match ? decodeURIComponent(match[1]) : undefined;
 }
 
