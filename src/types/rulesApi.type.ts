@@ -25,11 +25,11 @@ export type ApiRulePatchBody = {
 export type ApiRulePatchResult = ApiRule & { violationSummary?: unknown[] };
 
 // RULE-04
+// 백엔드 응답 기준. 병동이 등록한 날만 오고, isHoliday=false는 공휴일 해제다.
 export type ApiHoliday = {
   date: string; // YYYY-MM-DD
-  // TODO: 백엔드 확정 후 결정 (Holiday 필드는 RULE-05 요청 기준으로만 추정: isHoliday, name)
-  isHoliday?: boolean;
-  name?: string;
+  isHoliday: boolean;
+  name: string | null;
 };
 
 // RULE-05 요청

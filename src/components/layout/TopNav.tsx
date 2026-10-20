@@ -18,7 +18,7 @@ export default function TopNav({ shell, onOpen }: { shell: ShellInfo; onOpen: ()
       >
         »
       </button>
-      <Link href="/" aria-label="홈으로" className="flex items-center gap-2">
+      <Link href="/schedule" aria-label="홈으로" className="flex items-center gap-2">
         <span aria-hidden className="size-6 rounded-[7px] bg-primary" />
         <span className="text-[22px] font-bold text-ink">Ottugi</span>
       </Link>
