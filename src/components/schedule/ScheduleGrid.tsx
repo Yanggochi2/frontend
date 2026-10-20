@@ -111,7 +111,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                   const label = style ? (isMonth ? style.monthLabel : style.weekLabel) : "";
                   const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
                   return (
-                    <td key={col} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
+                    <td key={col} title={cell.violations?.join("\n")} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
                       <button
                         type="button"
                         disabled={cell.editable === false}

@@ -2,44 +2,32 @@
 
 import Link from "next/link";
 import { movePeriod, scheduleHref } from "@/lib/schedulePeriod";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ScheduleButton from "@/components/ui/ScheduleButton";
 import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
-import { ApiError } from "@/lib/apiClient";
-import { applyViolationFlags, patchScheduleCells, toCoverageStatuses } from "@/services/scheduleApi";
-import type { CoverageStatus, DutyCode, EditableDutyCode, ScheduleRow, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
+import { useScheduleEditor } from "@/hooks/useScheduleEditor";
+import type { EditableDutyCode, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
 import ScheduleBottomBar from "./ScheduleBottomBar";
 import ScheduleCellPopover from "./ScheduleCellPopover";
 import ScheduleGrid from "./ScheduleGrid";
 import ScheduleToolbar from "./ScheduleToolbar";
 
 type Popover = { row: number; col: number; top: number; left: number; above: boolean };
-type HistoryItem = { row: number; col: number; prev: DutyCode | null };
-
-const SAVE_ERROR_MESSAGE: Record<string, string> = {
-  VERSION_CONFLICT: "다른 곳에서 수정됐어요. 새로고침해 주세요",
-  SCHEDULE_LOCKED: "다른 사람이 편집 중이에요",
-  PROTECTED_CELL: "이 칸은 바꿀 수 없어요",
-};
-const SAVE_ERROR_DEFAULT = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";
 
 const POPOVER_WIDTH = 386;
 const POPOVER_HEIGHT = 170;
+// 위반 메시지 한 줄당 늘어나는 팝오버 높이 (위/아래 배치 계산용)
+const POPOVER_PROBLEM_LINE = 26;
 
 
 export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
-  const [rows, setRows] = useState<ScheduleRow[]>(sheet.rows);
+  const editor = useScheduleEditor(sheet);
+  const { rows, setDuty } = editor;
   const [brush, setBrush] = useState<EditableDutyCode | null>(null);
   const [checkOnly, setCheckOnly] = useState(false);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [popover, setPopover] = useState<Popover | null>(null);
   const [showEmptyGuide, setShowEmptyGuide] = useState(sheet.unassigned);
-  const [coverage, setCoverage] = useState<CoverageStatus[] | null>(sheet.coverage);
-  const [saveError, setSaveError] = useState<string | null>(null);
   const api = sheet.api;
-  const versionRef = useRef(api.version);
-  // 빠르게 연속으로 고쳐도 baseVersion이 어긋나지 않게 저장을 한 줄로 세운다.
-  const queueRef = useRef<Promise<unknown>>(Promise.resolve());
 
   const closePopover = useCallback(() => setPopover(null), []);
 
@@ -59,53 +47,6 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
     };
   }, [popover, closePopover]);
 
-  function writeCell(row: number, col: number, duty: DutyCode | null) {
-    setRows((prev) =>
-      prev.map((r, i) =>
-        i !== row ? r : { ...r, cells: r.cells.map((c, j) => (j === col ? { ...c, duty } : c)) },
-      ),
-    );
-  }
-
-  // API 연동 시 서버에 저장한다. 서버가 검증·저장을 하고, 화면은 먼저 바꿔 두었다가 실패하면 되돌린다.
-  function save(row: number, col: number, duty: DutyCode | null): Promise<boolean> {
-    const nurseId = rows[row].nurseKey;
-    const date = api.dates[col];
-    const job = queueRef.current.then(async () => {
-      try {
-        const res = await patchScheduleCells(api.scheduleId, {
-          baseVersion: versionRef.current,
-          changes: [{ nurseId, date, dutyCode: duty }],
-        });
-        versionRef.current = res.version;
-        setCoverage((prev) => (prev ? toCoverageStatuses(res.coverage, api.dates) : prev));
-        setRows((prev) => applyViolationFlags(prev, api.dates, res.violations));
-        setSaveError(null);
-        return true;
-      } catch (e) {
-        setSaveError((e instanceof ApiError && SAVE_ERROR_MESSAGE[e.code]) || SAVE_ERROR_DEFAULT);
-        return false;
-      }
-    });
-    queueRef.current = job;
-    return job;
-  }
-
-  // Undo는 클라이언트 메모리 스택 (6.2). 서버에는 되돌린 값을 일반 변경으로 보낸다.
-  function setDuty(row: number, col: number, duty: EditableDutyCode) {
-    if (!api.editable) return;
-    const old = rows[row].cells[col].duty;
-    if (old === duty) return;
-    const item: HistoryItem = { row, col, prev: old };
-    setHistory((h) => [...h, item]);
-    writeCell(row, col, duty);
-    void save(row, col, duty).then((ok) => {
-      if (ok) return;
-      writeCell(row, col, old);
-      setHistory((h) => h.filter((x) => x !== item));
-    });
-  }
-
   function handleCellClick(row: number, col: number, el: HTMLElement) {
     if (brush) {
       setDuty(row, col, brush);
@@ -115,22 +56,10 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
     // 화면 비율(zoom)이 걸려 있어도 위치가 맞도록, 화면 기준 좌표를 비율로 나눠 쓴다.
     const rect = el.getBoundingClientRect();
     const f = el.offsetWidth ? rect.width / el.offsetWidth : 1;
-    const above = rect.bottom + (8 + POPOVER_HEIGHT) * f > window.innerHeight;
+    const height = POPOVER_HEIGHT + (rows[row].cells[col].violations?.length ?? 0) * POPOVER_PROBLEM_LINE;
+    const above = rect.bottom + (8 + height) * f > window.innerHeight;
     const left = Math.max(8, Math.min(rect.left + rect.width / 2 - (POPOVER_WIDTH * f) / 2, window.innerWidth - (POPOVER_WIDTH + 8) * f));
     setPopover({ row, col, left: left / f, above, top: (above ? rect.top - 8 * f : rect.bottom + 8 * f) / f });
-  }
-
-  function handleUndo() {
-    const last = history[history.length - 1];
-    if (!last) return;
-    const current = rows[last.row].cells[last.col].duty;
-    setHistory(history.slice(0, -1));
-    writeCell(last.row, last.col, last.prev);
-    void save(last.row, last.col, last.prev).then((ok) => {
-      if (ok) return;
-      writeCell(last.row, last.col, current);
-      setHistory((h) => [...h, last]);
-    });
   }
 
   const gridRows = useMemo(() => {
@@ -182,14 +111,16 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
           <ScheduleToolbar
             brush={brush}
             onBrushChange={setBrush}
-            canUndo={history.length > 0}
-            onUndo={handleUndo}
+            canUndo={editor.canUndo}
+            onUndo={editor.undo}
+            canRedo={editor.canRedo}
+            onRedo={editor.redo}
             checkOnly={checkOnly}
             onCheckOnlyChange={setCheckOnly}
           />
-          {saveError ? (
+          {editor.saveError ? (
             <p role="alert" className="text-[16px] font-bold text-danger">
-              {saveError}
+              {editor.saveError}
             </p>
           ) : null}
           <div className="relative min-h-0 flex-1">
@@ -197,7 +128,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
               view={sheet.view}
               days={sheet.days}
               rows={gridRows}
-              coverage={coverage}
+              coverage={editor.coverage}
               selected={sheet.selectedCell}
               onCellClick={handleCellClick}
               onScroll={closePopover}
@@ -227,13 +158,18 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
           top={popover.top}
           left={popover.left}
           above={popover.above}
+          problems={rows[popover.row].cells[popover.col].violations}
           onPick={(code) => {
             setDuty(popover.row, popover.col, code);
             closePopover();
           }}
         />
       ) : null}
-      <ScheduleBottomBar />
+      <ScheduleBottomBar
+        scheduleId={api.scheduleId}
+        status={api.status}
+        hardViolationCount={editor.hardViolationCount}
+      />
     </>
   );
 }

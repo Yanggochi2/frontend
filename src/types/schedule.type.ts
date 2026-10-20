@@ -1,3 +1,5 @@
+import type { ScheduleStatus } from "./scheduleApi.type";
+
 // 근무표 화면 타입. 응답 필드는 백엔드 확정 후 결정 (TODO)
 // AL은 표시 전용(직접 입력 불가). TODO(🔶 ED 교육): 미확정, 입력 UI 없음.
 export type DutyCode = "D" | "E" | "N" | "O" | "AL" | "ED";
@@ -15,6 +17,7 @@ export type CoverageStatus = {
 export type ScheduleCell = {
   duty: DutyCode | null; // null = 미배정 (O와 다름)
   flag?: "violation";
+  violations?: string[]; // 이 칸에 걸린 하드 위반 메시지
   editable?: boolean; // 없으면 편집 가능
   charge?: boolean; // 그날 그 근무의 차지 간호사
 };
@@ -55,6 +58,8 @@ export type ScheduleSheetApiState = {
   version: number;
   dates: string[]; // 열 순서대로의 YYYY-MM-DD
   editable: boolean; // DRAFT일 때만 true
+  status: ScheduleStatus;
+  hardViolationCount: number; // 병동 단위 위반(인원 미달 등)까지 센다. 0이어야 확정할 수 있다
 };
 
 export type ScheduleBrush = { code: EditableDutyCode; label: string };
