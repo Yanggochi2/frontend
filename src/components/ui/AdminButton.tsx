@@ -21,9 +21,10 @@ type Props = {
   children: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  type?: "button" | "submit";
 };
 
-export default function AdminButton({ variant = "secondary", size = "sm", href, children, onClick, disabled }: Props) {
+export default function AdminButton({ variant = "secondary", size = "sm", href, children, onClick, disabled, type = "button" }: Props) {
   const cls = `inline-flex shrink-0 items-center justify-center rounded-[12px] leading-normal font-bold whitespace-nowrap ${variants[variant]} ${sizes[size]}`;
   if (href) {
     return (
@@ -33,7 +34,7 @@ export default function AdminButton({ variant = "secondary", size = "sm", href, 
     );
   }
   return (
-    <button type="button" className={`${cls} ${disabled ? "opacity-60" : ""}`} onClick={onClick} disabled={disabled}>
+    <button type={type} className={`${cls} ${disabled ? "opacity-60" : ""}`} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   );

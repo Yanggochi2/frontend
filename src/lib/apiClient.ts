@@ -47,7 +47,8 @@ function buildUrl(path: string, query?: Query) {
   return `${BASE_URL}${path}${search}`;
 }
 
-// 백엔드가 로그인 때 내려주는 CSRF_TOKEN 쿠키(HttpOnly 아님)를 읽어 X-CSRF-Token 헤더로 보낸다.
+// 백엔드가 로그인 때 내려주는 CSRF_TOKEN 쿠키(스크립트가 읽을 수 있는 유일한 인증 쿠키)를 X-CSRF-Token 헤더로 보낸다.
+// 쿠키 이름은 백엔드 app/presentation/deps.py 기준. 명세서 v1.0에는 받는 곳이 없다.
 function getCsrfToken(): string | undefined {
   if (typeof document === "undefined") return undefined;
   const match = document.cookie.match(/(?:^|; )CSRF_TOKEN=([^;]*)/);

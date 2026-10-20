@@ -1,6 +1,7 @@
 import { apiRequest, apiRequestList } from "@/lib/apiClient";
+import { getUnlinkedNurses } from "@/services/nursesApi";
 import type { ApprovalsData, JoinRequest } from "@/types/approvals.type";
-import type { Membership, MembershipRequest } from "@/types/wardApi.type";
+import type { MembershipRequest } from "@/types/wardApi.type";
 
 const BASE = "/wards/me/membership-requests";
 
@@ -12,30 +13,33 @@ function formatRequestedAt(iso?: string): string {
   return `${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-// MembershipRequest 필드는 명세에 없다 (types/wardApi.type.ts TODO). 없는 값은 "-"로 둔다.
 function toJoinRequest(r: MembershipRequest): JoinRequest {
   return {
     id: r.id,
     name: r.name ?? "-",
+    email: r.email ?? "-",
     requestedAt: formatRequestedAt(r.createdAt),
-    // TODO: 백엔드 확정 후 결정 (신청에 쓰인 병동 코드를 응답이 주는지)
-    wardCode: "-",
+    candidateIds: r.candidates ?? [],
     grantedRoleLabel: "일반 간호사",
   };
 }
 
-// WARD-04 (수간호사만). 승인 대기 건만 가져온다.
+// WARD-04 (수간호사만). 승인 대기 건과, 승인 때 계정을 연결할 수 있는 등록 간호사를 함께 가져온다.
 export async function getApprovals(): Promise<ApprovalsData> {
   const { data } = await apiRequestList<MembershipRequest>(BASE, {
     query: { status: "PENDING", size: 100 },
   });
-  return { requests: data.map(toJoinRequest) };
+  // 간호사 목록을 못 받아도 신청 목록은 보여 준다 (새로 등록해서 승인할 수는 있다)
+  const unlinkedNurses = data.length > 0 ? await getUnlinkedNurses().catch(() => []) : [];
+  return { requests: data.map(toJoinRequest), unlinkedNurses };
 }
 
-// WARD-05
-export async function approveJoinRequest(id: string): Promise<void> {
-  await apiRequest<Membership>(`${BASE}/${encodeURIComponent(id)}/approve`, {
+// WARD-05. 승인하려면 이 계정이 어느 간호사 행인지(nurseId) 정해야 한다.
+// 근무표·신청·통계가 간호사 행에 붙기 때문에, 등록된 간호사에 연결하거나 새로 등록한 뒤 그 id를 넘긴다.
+export async function approveJoinRequest(id: string, nurseId: string): Promise<void> {
+  await apiRequest<unknown>(`${BASE}/${encodeURIComponent(id)}/approve`, {
     method: "POST",
+    body: { nurseId },
     idempotencyKey: crypto.randomUUID(),
   });
 }

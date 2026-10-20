@@ -60,6 +60,8 @@ export type MembershipRequest = {
   email: string;
   createdAt: string; // 신청 시각 (UTC ISO)
   rejectionReason: string | null;
+  /** 승인 대기일 때만. 이름이 같고 계정이 없는 재직 간호사 id (WARD-05 nurseId로 연결) */
+  candidates?: string[];
 };
 
 // WARD-07/08 JoinCode. 모델이 명세에 없다.

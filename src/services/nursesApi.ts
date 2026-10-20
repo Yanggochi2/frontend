@@ -30,6 +30,8 @@ export function mapNurse(n: ApiNurse): Nurse {
     careerMonths: n.careerMonths == null ? undefined : n.careerMonths % 12,
     skill: n.skillLevel ?? undefined,
     periodLabel: periodLabel(n),
+    hasAccount: n.hasAccount,
+    inviteActive: n.inviteExpiresAt ? true : undefined,
   };
 }
 
@@ -42,6 +44,12 @@ export async function getNurses(query: NurseListQuery = {}): Promise<NurseListRe
   });
   const items = list.data.map(mapNurse);
   return { items, activeCount: items.filter((n) => n.status !== "RETIRED").length };
+}
+
+// 가입 승인 때 계정을 연결할 수 있는, 계정이 없는 재직 간호사 (수간호사 응답의 hasAccount 기준)
+export async function getUnlinkedNurses(): Promise<Nurse[]> {
+  const { items } = await getNurses({ includeRetired: false });
+  return items.filter((n) => n.hasAccount === false && n.status !== "RETIRED");
 }
 
 // 신청 목록의 신청자 이름 표시용. 실패해도 신청 목록은 보여준다(applicantId로 대체).

@@ -39,6 +39,8 @@ HN = HEAD_NURSE, 구성원 = 병동 구성원. P2 = 2순위. (결정) = 명세�
 | WARD-09 | POST /wards/me/head-nurses/{nurseId}/grant | HN | 없음 | 200 Membership | 404, 409 ROLE_ALREADY_ASSIGNED |
 | WARD-10 | POST /wards/me/head-nurse-transfer | HN | targetNurseId | 200 TransferResult | 404, 409 LAST_HEAD_NURSE_CONFLICT |
 
+> 가입 승인(WARD-04/05)은 백엔드 `docs/membership.md` 계약을 따른다: 대기 신청 목록에 `name`, `email`, `createdAt`, `candidates`(이름이 같고 계정이 없는 간호사 id)가 있고, 승인은 본문 `nurseId`로 계정을 연결할 등록 간호사를 정한다. 수간호사용 간호사 목록에는 `hasAccount`, `inviteExpiresAt`이 있다. 원본 명세서 v1.0에는 없는 확장이라 백엔드 문서가 기준이다.
+
 ### 간호사
 | ID | 요청 | 권한 | 입력 | 성공 |
 |---|---|---|---|---|

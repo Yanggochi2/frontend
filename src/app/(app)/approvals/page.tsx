@@ -32,7 +32,7 @@ export default async function ApprovalsPage() {
           <AdminNotice>
             승인하면 ‘일반 간호사’로 들어와요. 수간호사 권한은 병동 설정에서만 줄 수 있어요.
           </AdminNotice>
-          <ApprovalsTable requests={[]} />
+          <ApprovalsTable requests={[]} unlinkedNurses={[]} />
         </>
       ) : isEmpty ? (
         <AdminEmptyState
@@ -50,7 +50,7 @@ export default async function ApprovalsPage() {
           <AdminNotice>
             승인하면 ‘일반 간호사’로 들어와요. 수간호사 권한은 병동 설정에서만 줄 수 있어요.
           </AdminNotice>
-          <ApprovalsTable requests={data.requests} />
+          <ApprovalsTable requests={data.requests} unlinkedNurses={data.unlinkedNurses} />
         </>
       )}
     </div>
