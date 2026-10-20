@@ -30,9 +30,13 @@ export function getGenerationJob(jobId: string) {
 }
 
 // GEN-03. applyBestResult에 따라 GenerationJob 또는 Schedule이 온다 (명세에 구분 필드 없음).
-export function stopGeneration(jobId: string, body: ApiGenerationStop) {
-  // TODO: 응답이 Job인지 Schedule인지 구분하는 방법은 백엔드 확정 후 결정
-  return apiRequest<ApiGenerationJob | ApiSchedule>(`${GENERATIONS}/${jobId}/stop`, { method: "POST", body });
+// 백엔드는 생성을 요청 안에서 끝내므로 대개 이미 끝난 작업이다(409 JOB_ALREADY_FINISHED). 그때는 결과가 이미 근무표에 있다.
+export async function stopGeneration(jobId: string, body: ApiGenerationStop): Promise<void> {
+  try {
+    await apiRequest<ApiGenerationJob>(`${GENERATIONS}/${jobId}/stop`, { method: "POST", body });
+  } catch (e) {
+    if (!(e instanceof ApiError && e.code === "JOB_ALREADY_FINISHED")) throw e;
+  }
 }
 
 // GEN-04. 완화 선택 후 새 작업이 시작된다.
@@ -80,7 +84,7 @@ export function generationHref(job: ApiGenerationJob, yearMonth: string): string
 export async function applyPartialResultForJob(jobId: string): Promise<ApiSchedule> {
   const job = await getGenerationJob(jobId);
   const schedule = await getScheduleById(job.scheduleId);
-  return applyPartialResult(jobId, { baseVersion: schedule.version });
+  return (await applyPartialResult(jobId, { baseVersion: schedule.version })).schedule;
 }
 
 // ---- 화면용 ----
@@ -131,7 +135,6 @@ export async function getGenerationFailure(jobId: string): Promise<GenerationFai
     problems = (await getScheduleViolations(job.scheduleId, { severity: "HARD", size: 100 })).data.map((v) => v.message);
   } catch {}
   const noSolution = job.status === "NO_SOLUTION";
-  // TODO: conflicts / relaxations 모양이 명세에 없다. 완화 선택지는 확정 후 매핑한다 (지금 백엔드는 빈 배열).
   return {
     jobId,
     yearMonth: schedule.yearMonth,
@@ -147,7 +150,13 @@ export async function getGenerationFailure(jobId: string): Promise<GenerationFai
           : "규칙이나 인원을 조정한 뒤 다시 만들어 주세요."),
     },
     problems,
-    options: [],
+    options: (job.relaxations ?? []).map((r, i) => ({
+      id: r.id,
+      badge: { label: "완화", tone: "brand" as const },
+      title: r.description,
+      description: "이 규칙을 권장(SOFT)으로 낮추고 다시 만들어요. 규칙 설정에도 반영돼요.",
+      primary: i === 0,
+    })),
   };
 }
 
