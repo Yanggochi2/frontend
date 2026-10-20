@@ -12,10 +12,10 @@ export const REQUIRED_STAFF_PER_DAY = { D: 4, E: 3, N: 2 } as const;
 // TODO(🔶 SCH-10) 통계에서 빨강으로 강조하는 OFF 부족 일수 기준 (Figma 샘플: 2일 부족은 강조, 1일 부족은 일반 표시)
 export const OFF_SHORTAGE_WARN_DAYS = 2;
 
-// 규칙 화면 필터 칩 (config). 
+// 규칙 화면 필터 칩 (config). 월 휴무 수는 규칙(MONTHLY_OFF)으로 옮겨 OFF 목표 탭은 두지 않는다.
 export const RULE_FILTER_CHIPS: RuleFilter[] = [
+  { key: "ALL", label: "전체" },
   { key: "REQUIRED", label: "필수 규칙" },
   { key: "RECOMMENDED", label: "권장 규칙" },
   { key: "HOLIDAY", label: "공휴일" },
-  { key: "OFF_TARGET", label: "OFF 목표" },
 ];

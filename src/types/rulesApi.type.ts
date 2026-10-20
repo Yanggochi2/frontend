@@ -10,6 +10,17 @@ export type ApiRule = {
   // TODO: 백엔드 확정 후 결정 (parameters 내부 모양이 명세에 없다)
   parameters: Record<string, unknown>;
   version: number;
+  // TODO: 백엔드 확정 후 결정 (지울 수 없는 기본 규칙 구분 필드. 없으면 code로 판단)
+  builtIn?: boolean;
+};
+
+// 규칙 추가. ⚠️ 명세에 없는 API (POST /wards/me/rules). TODO: 백엔드 확정 후 결정
+export type ApiRuleCreateBody = {
+  code: string;
+  name: string;
+  severity: ApiRuleSeverity;
+  enabled: boolean;
+  parameters: Record<string, unknown>;
 };
 
 // RULE-02 요청. role/병동 ID는 담지 않는다.
