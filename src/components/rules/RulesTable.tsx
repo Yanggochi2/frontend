@@ -49,10 +49,10 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
       <AdminTableShell minWidth="min-w-[1000px]">
         <thead>
           <tr>
-            <AdminTh first className="w-[520px]">규칙</AdminTh>
-            <AdminTh className="w-[140px]">강도</AdminTh>
-            <AdminTh className="w-[300px]">값</AdminTh>
-            <AdminTh className="w-[264px]">적용 대상</AdminTh>
+            <AdminTh first className="w-[520px]">근무표를 만들 때 지킬 기준</AdminTh>
+            <AdminTh className="w-[160px]">적용 방식</AdminTh>
+            <AdminTh className="w-[260px]">기준값</AdminTh>
+            <AdminTh className="w-[240px]">누구에게 적용하나요?</AdminTh>
             <AdminTh className="w-[120px]">
               <span className="sr-only">수정</span>
             </AdminTh>
@@ -62,10 +62,15 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
           {visible.length === 0 ? <AdminTableEmptyRow colSpan={5}>규칙이 없어요</AdminTableEmptyRow> : null}
           {visible.map((r) => (
             <AdminTr key={r.id}>
-              <AdminTd first>{r.name}</AdminTd>
+              <AdminTd first>
+                <div className="flex flex-col gap-1">
+                  <span className="font-bold text-ink">{r.name}</span>
+                  <span className="text-[14px] leading-relaxed text-ink-sub">{r.description}</span>
+                </div>
+              </AdminTd>
               <AdminTd>
                 <AdminChip tone={r.strength === "REQUIRED" ? "red" : "gray"}>
-                  {r.strength === "REQUIRED" ? "필수" : "권장"}
+                  {r.strength === "REQUIRED" ? "반드시 지킴" : "가능하면 반영"}
                 </AdminChip>
               </AdminTd>
               <AdminTd>{r.valueText}</AdminTd>
@@ -79,7 +84,7 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
                       onClick={() => update(r, { enabled: !(r.enabled ?? true) })}
                       className="text-primary disabled:opacity-50"
                     >
-                      {(r.enabled ?? true) ? "끄기" : "켜기"}
+                      {(r.enabled ?? true) ? "사용 중" : "사용하기"}
                     </button>
                     <button
                       type="button"
@@ -87,7 +92,7 @@ export default function RulesTable({ filters, rules: initialRules }: RulesData) 
                       onClick={() => update(r, { strength: r.strength === "REQUIRED" ? "RECOMMENDED" : "REQUIRED" })}
                       className="text-primary disabled:opacity-50"
                     >
-                      강도
+                      {r.strength === "REQUIRED" ? "권장으로" : "필수로"}
                     </button>
                   </div>
                   {error?.id === r.id ? (

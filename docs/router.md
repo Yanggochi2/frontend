@@ -6,7 +6,7 @@
 | 경로 | 화면 | Figma 프레임 |
 |---|---|---|
 | `/schedule` | 근무표 시트 | v3.1-A, 근무표 시트 · 빈 표, 빈 상태 · 근무표 |
-| `/schedule/generate` | 자동 생성 진행 | 자동 생성 진행 |
+| `/schedule/generate` | 자동 생성 시작·진행 | 자동 생성 진행 |
 | `/schedule/generate/failed` | 생성 실패 · 해 없음 | 생성 실패 · 해 없음 |
 | `/requests` | 신청 관리 | 신청 관리, 빈 상태 · 신청 관리 |
 | `/requests/new` | 새 신청 | 새 신청 |
@@ -21,6 +21,8 @@
 
 월별 보기(`월별 보기 · 사이드바 열림`)는 별도 경로 없이 `/schedule?view=month`(주간/월간 보기 전환)로 둔다.
 일반 간호사 근무표(확정 전)는 `/schedule`에서 서버 응답(역할, 확정본 유무)에 따라 분기한다 (추측, 역할 판정은 서버). 쿼리는 `view=month`만 쓴다.
+
+자동 생성은 `/schedule/generate?scheduleId={scheduleId}&ym={YYYY-MM}`로 진입하면 GEN-01을 호출한다. 시작 후에는 `jobId`를 쿼리에 추가해 GEN-02를 폴링하고, 완료되면 해당 월의 `/schedule?view=month&ym={YYYY-MM}`로 이동한다. 사이드바에서 바로 진입해 `scheduleId`가 없으면 현재 월의 근무표를 먼저 조회한다.
 
 ## 사이드바 없음 — `src/app/(onboarding)/`
 | 경로 | 화면 |

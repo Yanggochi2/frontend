@@ -99,3 +99,43 @@ export type ApiGenerationStop = { applyBestResult: boolean };
 export type ApiGenerationRelaxations = { relaxationIds: string[] };
 export type ApiGenerationPartialApply = { baseVersion: number };
 export type ApiScheduleWithViolations = ApiSchedule & { violations: ApiViolation[] }; // GEN-05 (추측: 병합 형태)
+
+// SCH-10~12 가져오기 미리보기
+export type ApiImportPreviewStatus = "NEEDS_MAPPING" | "READY" | "APPLIED";
+export type ApiImportPreviewRow = {
+  rowNumber: number;
+  nurseName: string;
+  date: string;
+  rawDuty: string;
+};
+export type ApiImportPreviewError = {
+  rowNumber: number;
+  field: string;
+  value: string;
+  reason: string;
+};
+export type ApiImportPreview = {
+  id: string;
+  scheduleId: string;
+  status: ApiImportPreviewStatus;
+  filename: string;
+  rowCount: number;
+  rows: ApiImportPreviewRow[];
+  nurseMappings: Record<string, string>;
+  dutyMappings: Record<string, ApiDutyCode>;
+  errors: ApiImportPreviewError[];
+  createdAt: string;
+};
+export type ApiImportPreviewPatch = {
+  nurseMappings: Record<string, string>;
+  dutyMappings: Record<string, ApiDutyCode>;
+};
+
+// SCH-13~15 편집 잠금
+export type ApiScheduleLock = {
+  scheduleId: string;
+  holderUserId: string;
+  token: string;
+  acquiredAt: string;
+  expiresAt: string;
+};

@@ -11,6 +11,7 @@ import type { CoverageStatus, DutyCode, EditableDutyCode, ScheduleRow, ScheduleS
 import ScheduleBottomBar from "./ScheduleBottomBar";
 import ScheduleCellPopover from "./ScheduleCellPopover";
 import ScheduleGrid from "./ScheduleGrid";
+import ScheduleMonthCalendar from "./ScheduleMonthCalendar";
 import ScheduleToolbar from "./ScheduleToolbar";
 
 type Popover = { row: number; col: number; top: number; left: number; above: boolean };
@@ -139,6 +140,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   }, [rows, checkOnly]);
 
   const isMonth = sheet.view === "month";
+  const generateHref = `/schedule/generate?scheduleId=${encodeURIComponent(api.scheduleId)}&ym=${encodeURIComponent(sheet.yearMonth)}`;
   const period = { yearMonth: sheet.yearMonth, week: sheet.activeWeek };
   const prevHref = scheduleHref(sheet.view, movePeriod(period, sheet.view, -1));
   const nextHref = scheduleHref(sheet.view, movePeriod(period, sheet.view, 1));
@@ -179,29 +181,37 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
               )}
             </div>
           </div>
-          <ScheduleToolbar
-            brush={brush}
-            onBrushChange={setBrush}
-            canUndo={history.length > 0}
-            onUndo={handleUndo}
-            checkOnly={checkOnly}
-            onCheckOnlyChange={setCheckOnly}
-          />
+          {isMonth ? (
+            <p className="text-[15px] font-medium text-ink-sub">날짜를 누르면 간호사별 근무와 필요 인원 충족 여부를 자세히 볼 수 있어요.</p>
+          ) : (
+            <ScheduleToolbar
+              brush={brush}
+              onBrushChange={setBrush}
+              canUndo={history.length > 0}
+              onUndo={handleUndo}
+              checkOnly={checkOnly}
+              onCheckOnlyChange={setCheckOnly}
+            />
+          )}
           {saveError ? (
             <p role="alert" className="text-[16px] font-bold text-danger">
               {saveError}
             </p>
           ) : null}
           <div className="relative min-h-0 flex-1">
-            <ScheduleGrid
-              view={sheet.view}
-              days={sheet.days}
-              rows={gridRows}
-              coverage={coverage}
-              selected={sheet.selectedCell}
-              onCellClick={handleCellClick}
-              onScroll={closePopover}
-            />
+            {isMonth ? (
+              <ScheduleMonthCalendar yearMonth={sheet.yearMonth} days={sheet.days} rows={rows} coverage={coverage} />
+            ) : (
+              <ScheduleGrid
+                view={sheet.view}
+                days={sheet.days}
+                rows={gridRows}
+                coverage={coverage}
+                selected={sheet.selectedCell}
+                onCellClick={handleCellClick}
+                onScroll={closePopover}
+              />
+            )}
             {showEmptyGuide ? (
               <div className="absolute top-1/3 left-1/2 flex w-[min(432px,calc(100%-2rem))] -translate-x-1/2 flex-col items-center gap-3 rounded-[20px] border border-line bg-white p-5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
                 <p className="text-[22px] font-bold text-ink">아직 비어 있어요</p>
@@ -209,7 +219,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
                   칸을 눌러 근무를 넣거나, 자동 생성으로 한 번에 채워요. 연차는 이미 들어가 있어요.
                 </p>
                 <div className="flex gap-2">
-                  <ScheduleButton variant="brand" size="sm" href="/schedule/generate">
+                  <ScheduleButton variant="brand" size="sm" href={generateHref}>
                     자동 생성
                   </ScheduleButton>
                   <ScheduleButton variant="neutral" size="sm" onClick={() => setShowEmptyGuide(false)}>
@@ -233,7 +243,7 @@ export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
           }}
         />
       ) : null}
-      <ScheduleBottomBar />
+      <ScheduleBottomBar scheduleId={api.scheduleId} yearMonth={sheet.yearMonth} />
     </>
   );
 }

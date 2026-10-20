@@ -59,8 +59,9 @@ async function serverCookieHeader(): Promise<string | undefined> {
 async function send(path: string, options: RequestOptions): Promise<Response> {
   const method = options.method ?? "GET";
   const headers: Record<string, string> = { Accept: "application/json" };
+  const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
 
-  if (options.body !== undefined) headers["Content-Type"] = "application/json";
+  if (options.body !== undefined && !isFormData) headers["Content-Type"] = "application/json";
   if (method !== "GET") {
     const csrf = getCsrfToken();
     if (csrf) headers["X-CSRF-Token"] = csrf;
@@ -75,12 +76,19 @@ async function send(path: string, options: RequestOptions): Promise<Response> {
     throw new ApiError(0, { code: "API_NOT_CONFIGURED", message: "서버 주소가 설정되지 않았어요." });
   }
 
+  const requestBody: BodyInit | undefined =
+    options.body === undefined
+      ? undefined
+      : isFormData
+        ? (options.body as FormData)
+        : JSON.stringify(options.body);
+
   const response = await fetch(buildUrl(path, options.query), {
     method,
     headers,
     credentials: "include",
     cache: "no-store",
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body: requestBody,
   });
 
   if (!response.ok) {

@@ -3,6 +3,7 @@ export type ApiAuditLog = {
   id: string;
   occurredAt: string; // UTC ISO 8601
   actorId: string; // 명세에 행위자 이름 필드가 없다
+  actorName?: string;
   actionType: string; // TODO: 백엔드 확정 후 결정 (actionType 값 목록 없음)
   targetType: string;
   targetId: string;

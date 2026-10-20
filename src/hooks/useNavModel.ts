@@ -32,7 +32,7 @@ export function useNavModel(shell: ShellInfo): NavModel {
           { label: "자동 생성", href: "/schedule/generate" },
           { label: "신청 관리", href: "/requests", badge: shell.pendingRequestCount },
           { label: "간호사 명단", href: "/nurses" },
-          { label: "규칙 설정", href: "/rules" },
+          { label: "자동 편성 기준", href: "/rules" },
           { label: "통계·공정성", href: "/stats" },
         ];
   const adminItems: NavItem[] =
@@ -40,7 +40,7 @@ export function useNavModel(shell: ShellInfo): NavModel {
       ? []
       : [
           { label: "가입 승인", href: "/approvals", badge: shell.pendingApprovalCount },
-          { label: "감사 로그", href: "/audit-log" },
+          { label: "변경 기록", href: "/audit-log" },
           { label: "병동 설정", href: "/ward-settings" },
         ];
 

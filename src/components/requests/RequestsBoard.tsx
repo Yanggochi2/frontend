@@ -14,7 +14,7 @@ const STATUS_FILTERS: { value: RequestStatus; label: string }[] = [
 const KIND_FILTERS: { value: RequestKind | "ALL"; label: string }[] = [
   { value: "ALL", label: "전체 종류" },
   { value: "ANNUAL_LEAVE", label: "연차" },
-  { value: "PREFERRED_OFF", label: "희망 오프" },
+  { value: "PREFERRED_OFF", label: "희망 휴무(OFF)" },
   // TODO: 희망 근무(PREFERRED_SHIFT) 필터 칩은 시안에 없음
 ];
 

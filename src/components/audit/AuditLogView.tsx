@@ -18,11 +18,11 @@ export default function AuditLogView({ filters, entries }: AuditLogData) {
       <AdminTableShell minWidth="min-w-[1000px]">
         <thead>
           <tr>
-            <AdminTh first className="w-[190px]">시각</AdminTh>
-            <AdminTh className="w-[130px]">행위자</AdminTh>
-            <AdminTh className="w-[200px]">행위</AdminTh>
-            <AdminTh className="w-[230px]">대상</AdminTh>
-            <AdminTh>변경 내용</AdminTh>
+            <AdminTh first className="w-[190px]">언제</AdminTh>
+            <AdminTh className="w-[150px]">누가</AdminTh>
+            <AdminTh className="w-[220px]">무슨 일을 했나요?</AdminTh>
+            <AdminTh className="w-[180px]">어디에</AdminTh>
+            <AdminTh>쉽게 보기</AdminTh>
           </tr>
         </thead>
         <tbody>

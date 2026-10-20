@@ -41,7 +41,7 @@ export default async function RequestsPage() {
           <RnEmptyState
             icon="✓"
             title="받은 신청이 없어요"
-            description="간호사가 연차나 희망 오프를 신청하면 여기에 모여요."
+            description="간호사가 연차나 희망 OFF를 신청하면 여기에 모여요. 승인된 신청만 자동 편성에 반영해요."
             action={
               <RnButton variant="secondary" size="lg" href="/requests/new">
                 새 신청

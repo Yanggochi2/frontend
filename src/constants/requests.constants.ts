@@ -19,11 +19,11 @@ export const MONTHLY_REQUEST_LIMIT: number | null = null;
 // TODO: PREFERRED_SHIFT(희망 근무)는 시안에 선택 UI가 없어 폼 옵션에서 제외. 추가 시 preferredDuty(D/E/N) 입력이 필요하다.
 export const REQUEST_KIND_OPTIONS = [
   { value: "ANNUAL_LEAVE", label: "연차", description: "승인되면 꼭 쉬게 돼요" },
-  { value: "PREFERRED_OFF", label: "희망 오프", description: "가능하면 맞춰 드려요" },
+  { value: "PREFERRED_OFF", label: "희망 휴무(OFF)", description: "필요 인원을 맞출 수 있으면 쉬는 날로 반영해요" },
 ] as const;
 
 export const REQUEST_KIND_LABEL: Record<RequestKind, string> = {
   ANNUAL_LEAVE: "연차",
-  PREFERRED_OFF: "희망 오프",
+  PREFERRED_OFF: "희망 휴무(OFF)",
   PREFERRED_SHIFT: "희망 근무",
 };

@@ -6,7 +6,11 @@ import type {
   ApiConfirmCancelRequest,
   ApiConfirmRequest,
   ApiCoverage,
+  ApiImportPreview,
+  ApiImportPreviewPatch,
   ApiSchedule,
+  ApiScheduleLock,
+  ApiScheduleWithViolations,
   ApiViolation,
   ApiViolationQuery,
 } from "@/types/scheduleApi.type";
@@ -76,7 +80,7 @@ function toSheet(schedule: ApiSchedule, violations: ApiViolation[], view: "week"
     title: sheetTitle(view, schedule.yearMonth, activeWeek, nowYm, day),
     days: dates.map((d) => toDay(d, today)),
     rows: applyViolationFlags(rows, dates, violations),
-    coverage: view === "month" ? null : toCoverageStatuses(schedule.coverage, dates),
+    coverage: toCoverageStatuses(schedule.coverage, dates),
     selectedCell: null,
     yearMonth: schedule.yearMonth,
     activeWeek,
@@ -193,5 +197,55 @@ export function exportScheduleXlsx(scheduleId: string): Promise<Blob> {
   return apiRequestBlob(`${SCHEDULES}/${scheduleId}/export.xlsx`);
 }
 
-// TODO: SCH-10~15 (가져오기, 편집 잠금)는 2순위라 아직 만들지 않는다.
+// SCH-10. FormData는 apiClient가 Content-Type boundary를 브라우저에 맡겨 전송한다.
+export function createImportPreview(scheduleId: string, file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiRequest<ApiImportPreview>(`${SCHEDULES}/${scheduleId}/import-previews`, {
+    method: "POST",
+    body: formData,
+  });
+}
 
+// SCH-11
+export function updateImportPreview(scheduleId: string, previewId: string, body: ApiImportPreviewPatch) {
+  return apiRequest<ApiImportPreview>(`${SCHEDULES}/${scheduleId}/import-previews/${previewId}`, {
+    method: "PATCH",
+    body,
+  });
+}
+
+// SCH-12
+export function applyImportPreview(
+  scheduleId: string,
+  previewId: string,
+  baseVersion: number,
+  scheduleLockToken?: string,
+) {
+  return apiRequest<ApiScheduleWithViolations>(`${SCHEDULES}/${scheduleId}/import-previews/${previewId}/apply`, {
+    method: "POST",
+    body: { baseVersion },
+    scheduleLockToken,
+  });
+}
+
+// SCH-13
+export function acquireScheduleLock(scheduleId: string) {
+  return apiRequest<ApiScheduleLock>(`${SCHEDULES}/${scheduleId}/lock`, { method: "POST" });
+}
+
+// SCH-14
+export function releaseScheduleLock(scheduleId: string, scheduleLockToken: string) {
+  return apiRequest<void>(`${SCHEDULES}/${scheduleId}/lock`, {
+    method: "DELETE",
+    scheduleLockToken,
+  });
+}
+
+// SCH-15
+export function takeoverScheduleLock(scheduleId: string, reason: string) {
+  return apiRequest<ApiScheduleLock>(`${SCHEDULES}/${scheduleId}/lock/takeover`, {
+    method: "POST",
+    body: { reason },
+  });
+}

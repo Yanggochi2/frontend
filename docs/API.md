@@ -69,12 +69,12 @@ HN = HEAD_NURSE, 구성원 = 병동 구성원. P2 = 2순위. (결정) = 명세�
 | SCH-07 | POST .../confirm | HN | acknowledgedSoftViolationIds[] | 200 Schedule (409 HARD_VIOLATIONS_EXIST, INVALID_SCHEDULE_STATE) |
 | SCH-08 | POST .../confirmation-cancellations | HN | reason | 200 Schedule (400 REASON_REQUIRED, 409 ARCHIVED_SCHEDULE) (결정) |
 | SCH-09 | GET .../export.xlsx | HN | - | 200 xlsx |
-| SCH-10 | POST .../import-previews | HN | multipart file | 202 ImportPreview (P2, 413, 422) (결정) |
-| SCH-11 | PATCH .../import-previews/{previewId} | HN | nurseMappings, dutyMappings | 200 ImportPreview (P2) |
-| SCH-12 | POST .../import-previews/{previewId}/apply | HN | baseVersion | 200 Schedule+Violation[] (P2) |
-| SCH-13 | POST .../lock | HN | 없음 | 201 ScheduleLock+토큰 (P2, 409 LOCK_ALREADY_HELD) (결정) |
-| SCH-14 | DELETE .../lock | 잠금 보유 HN | X-Schedule-Lock-Token | 204 (P2) |
-| SCH-15 | POST .../lock/takeover | HN | reason | 200 ScheduleLock+새 토큰 (P2) (결정) |
+| SCH-10 | POST .../import-previews | HN | multipart `file`(xlsx/csv, 최대 10MB) | 202 ImportPreview (413, 422) |
+| SCH-11 | PATCH .../import-previews/{previewId} | HN | nurseMappings, dutyMappings | 200 ImportPreview |
+| SCH-12 | POST .../import-previews/{previewId}/apply | HN | baseVersion (+잠금 사용 시 토큰) | 200 Schedule+Violation[] |
+| SCH-13 | POST .../lock | HN | 없음 | 201 ScheduleLock+token (409 LOCK_ALREADY_HELD) |
+| SCH-14 | DELETE .../lock | 잠금 보유 HN | X-Schedule-Lock-Token | 204 |
+| SCH-15 | POST .../lock/takeover | HN | reason | 200 ScheduleLock+새 token |
 
 ### 자동 생성
 | ID | 요청 | 권한 | 입력 | 성공 |
@@ -95,6 +95,8 @@ HN = HEAD_NURSE, 구성원 = 병동 구성원. P2 = 2순위. (결정) = 명세�
 | REQ-05 | POST .../{id}/approve | HN | 없음 | 200 WorkRequest+scheduleImpact (409 REQUEST_ALREADY_PROCESSED, SCHEDULE_CONFIRMED) |
 | REQ-06 | POST .../{id}/reject | HN | reason | 200 WorkRequest (400 REASON_REQUIRED) |
 | REQ-07 | POST .../{id}/cancel | 신청자 본인 | 없음 | 200 WorkRequest (409 SCHEDULE_CONFIRMED, REQUEST_NOT_CANCELLABLE) |
+
+자동 편성 반영 원칙: `APPROVED` 신청만 반영한다. `ANNUAL_LEAVE`는 근무표 생성 시점과 관계없이 `AL`로 고정하고, `PREFERRED_OFF`는 듀티별 필요 인원을 만족할 수 있는 범위에서 `O`를 우선 배정한다. 대기·반려·취소 신청은 반영하지 않는다.
 
 ### 알림·감사 (P2 / P1)
 | ID | 요청 | 권한 | 입력 | 성공 |
@@ -119,6 +121,8 @@ HN = HEAD_NURSE, 구성원 = 병동 구성원. P2 = 2순위. (결정) = 명세�
 - Violation: id, severity, ruleId, nurseId, date, currentValue, message
 - Coverage: date, dutyCode, actualCount, requiredCount, status UNDER|MET|OVER
 - GenerationJob: id, scheduleId, status, stage, elapsedSeconds, progress, hardViolationCount, metrics, conflicts, relaxations
+- ImportPreview: id, scheduleId, status(NEEDS_MAPPING|READY|APPLIED), filename, rowCount, rows, nurseMappings, dutyMappings, errors, createdAt
+- ScheduleLock: scheduleId, holderUserId, token, acquiredAt
 - WorkRequest: id, applicantId, type, targetDates, reasonCode, reasonDetail, preferredDuty, status, processorId, processedAt, rejectionReason
 - Notification: id, type, title, body, read, createdAt, resourceType, resourceId
 - AuditLog: id, occurredAt, actorId, actionType, targetType, targetId, before, after

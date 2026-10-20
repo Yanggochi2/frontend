@@ -17,8 +17,8 @@ export default async function RulesPage() {
   return (
     <div className="flex min-w-0 flex-col gap-8 px-12 pt-12 pb-10">
       <AdminPageHeader
-        title="규칙 설정"
-        subtitle="프리셋으로 시작한 뒤 하나씩 고칠 수 있어요"
+        title="자동 편성 기준"
+        subtitle="자동으로 근무표를 짤 때 반드시 지킬 기준과 가능하면 맞출 기준이에요"
         action={<AdminButton>프리셋 다시 적용</AdminButton>}
       />
       {data ? (

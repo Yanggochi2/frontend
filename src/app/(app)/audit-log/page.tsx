@@ -18,11 +18,11 @@ export default async function AuditLogPage() {
   return (
     <div className="flex min-w-0 flex-col gap-8 px-12 pt-12 pb-10">
       <AdminPageHeader
-        title="감사 로그"
+        title="변경 기록"
         subtitle={
           isEmpty || !data
-            ? "우리 병동의 활동 기록이에요"
-            : "우리 병동의 활동 기록이에요 · 보기만 가능하고 지우거나 고칠 수 없어요"
+            ? "근무표·신청·간호사 정보에서 일어난 일을 확인해요"
+            : "누가 언제 근무표나 신청을 바꿨는지 확인하는 기록이에요 · 기록은 지우거나 고칠 수 없어요"
         }
       />
       {!data ? (

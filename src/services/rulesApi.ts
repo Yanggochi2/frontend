@@ -11,10 +11,19 @@ import type {
   ApiRulePatchResult,
 } from "@/types/rulesApi.type";
 
+const RULE_COPY: Record<string, { description: string; target: string }> = {
+  MIN_COVERAGE: { description: "D·E·N 각 근무에 병동에서 정한 최소 인원을 배정해요.", target: "모든 근무일" },
+  CHARGE_DAY_ONLY: { description: "차지 간호사는 데이 근무에만 배정해요.", target: "차지 간호사" },
+  PREGNANT_NO_NIGHT: { description: "임신 상태인 간호사는 나이트 근무에서 제외해요.", target: "임신 간호사" },
+  NEW_NIGHT_SUPPORT: { description: "신입 간호사의 나이트 배정을 줄이고 경력자를 우선 배정해요.", target: "신입 간호사" },
+  MAX_CONSECUTIVE_NIGHTS: { description: "나이트가 연속으로 너무 길어지지 않게 막아요.", target: "나이트 근무자" },
+};
+
 function toValueText(parameters: ApiRule["parameters"]): string {
   const entries = Object.entries(parameters ?? {});
-  if (entries.length === 0) return "-";
-  // TODO: 백엔드 확정 후 결정 (parameters 키 의미/단위를 몰라 key: value 그대로 표시)
+  if (parameters?.source === "ward.requiredStaff") return "병동 설정의 D·E·N 필요 인원";
+  if (typeof parameters?.max === "number") return `최대 ${parameters.max}일 연속`;
+  if (entries.length === 0) return "자동 적용";
   return entries.map(([k, v]) => `${k}: ${String(v)}`).join(", ");
 }
 
@@ -24,11 +33,12 @@ export function toRuleItem(rule: ApiRule): RuleItem {
     id: rule.id,
     code: rule.code,
     name: rule.name,
+    description: RULE_COPY[rule.code]?.description ?? "자동 편성에 적용되는 병동 기준이에요.",
     category: strength,
     strength,
     valueText: toValueText(rule.parameters),
     // TODO: 백엔드 확정 후 결정 (적용 대상 필드가 Rule에 없다)
-    targetText: "-",
+    targetText: RULE_COPY[rule.code]?.target ?? "모든 간호사",
     enabled: rule.enabled,
     version: rule.version,
   };
