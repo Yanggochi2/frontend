@@ -53,9 +53,12 @@ export type MembershipRequest = {
   id: string;
   // TODO: 백엔드 확정 후 결정 (status 열거값)
   status: string;
-  // TODO: 백엔드 확정 후 결정 (아래 필드 이름과 존재 여부)
-  applicantName?: string;
-  requestedAt?: string;
+  // 백엔드 docs/membership.md 기준 필드 (WARD-04 목록 응답)
+  name?: string;
+  email?: string;
+  createdAt?: string;
+  /** 승인 대기일 때만. 이름이 같고 계정이 없는 재직 간호사 id (WARD-05 nurseId로 연결) */
+  candidates?: string[];
   rejectionReason?: string;
 };
 

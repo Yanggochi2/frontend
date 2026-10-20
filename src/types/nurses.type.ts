@@ -14,6 +14,22 @@ export type Nurse = {
   careerMonths?: number;
   skill?: number;
   periodLabel?: string;
+  /** 수간호사 응답에만. 로그인 계정이 연결된 간호사인지 */
+  hasAccount?: boolean;
+  /** 유효한 개인 초대 코드가 나가 있는지 */
+  inviteActive?: boolean;
+};
+
+// 간호사 등록 폼의 입력값. 날짜는 YYYY-MM-DD 문자열, 숫자는 입력 그대로 문자열.
+export type NurseDraft = {
+  name: string;
+  hireDate: string;
+  dutyRole: DutyRole;
+  careerYears: string;
+  careerMonths: string;
+  skill: number;
+  status: NurseStatus;
+  periodStart: string;
 };
 
 export type NurseListResult = {

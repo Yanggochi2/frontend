@@ -1,64 +1,29 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import RnButton from "@/components/ui/RnButton";
-import RnOptionButton from "@/components/ui/RnOptionButton";
-import {
-  DUTY_ROLE_LABEL,
-  NURSE_STATUS_LABEL,
-  REGISTRABLE_STATUSES,
-  SKILL_LEVELS,
-} from "@/constants/nurses.constants";
+import { emptyNurseDraft, toNurseCreate } from "@/lib/nurseDraft";
 import { formatApiError } from "@/lib/formatApiError";
 import { createNurse } from "@/services/nursesApi";
-import type { DutyRole, NurseStatus } from "@/types/nurses.type";
-
-const inputCls =
-  "h-14 w-full rounded-[14px] bg-surface px-5 text-[18px] font-medium text-ink placeholder:text-ink-faint";
-
-function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
-  return (
-    <div className="flex min-w-0 flex-col gap-2.5">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[18px] font-bold text-ink">{label}</span>
-        {hint ? <span className="text-[15px] font-medium text-ink-faint">{hint}</span> : null}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-const DUTY_ROLES: DutyRole[] = ["GENERAL", "CHARGE", "PRECEPTOR", "NEW"];
+import type { NurseDraft } from "@/types/nurses.type";
+import NurseProfileFields from "./NurseProfileFields";
 
 export default function NurseForm() {
-  const [dutyRole, setDutyRole] = useState<DutyRole>("GENERAL");
-  const [status, setStatus] = useState<NurseStatus>("ACTIVE");
-  const [skill, setSkill] = useState(3);
+  const [draft, setDraft] = useState<NurseDraft>(() => emptyNurseDraft());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const str = (k: string) => String(form.get(k) ?? "").trim();
-    const num = (k: string) => Number(form.get(k) || 0);
     setBusy(true);
     setError(null);
     try {
       // 권한(role)은 이 화면에서 설정하지 않는다. 새로 등록하는 간호사는 항상 일반 간호사이고,
       // 수간호사 지정은 별도 기능(WARD-09 권한 부여)으로만 한다.
       // TODO: preceptorOf 선택 UI는 시안에 없다.
-      await createNurse({
-        name: str("name"),
-        dutyRole,
-        status,
-        joinedAt: str("hireDate"),
-        careerMonths: num("careerYears") * 12 + num("careerMonths"),
-        skillLevel: skill,
-        affiliationStart: str("periodStart"),
-      });
+      await createNurse(toNurseCreate(draft));
       router.push("/nurses");
     } catch (err) {
       setError(formatApiError(err));
@@ -71,58 +36,7 @@ export default function NurseForm() {
     <form onSubmit={onSubmit} className="flex flex-col gap-8">
       <div className="flex items-start gap-6">
         <div className="grid w-full max-w-[904px] flex-1 grid-cols-2 gap-x-6 gap-y-7 rounded-[20px] border border-line bg-white p-8">
-          <Field label="이름">
-            <input type="text" name="name" required maxLength={50} placeholder="이름을 입력해요" className={inputCls} />
-          </Field>
-          <Field label="입사일">
-            <input type="date" name="hireDate" required aria-label="입사일" className={inputCls} />
-          </Field>
-
-          <Field label="듀티 역할" hint="차지·프리셉터·신입은 근무 배정 규칙이 달라요">
-            <div className="flex flex-wrap gap-2">
-              {DUTY_ROLES.map((r) => (
-                <RnOptionButton key={r} selected={dutyRole === r} onClick={() => setDutyRole(r)}>
-                  {DUTY_ROLE_LABEL[r]}
-                </RnOptionButton>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="총 경력" hint="입사 전 경력까지 합쳐요">
-            <div className="flex items-center gap-2.5">
-              <input type="number" min={0} name="careerYears" defaultValue={0} aria-label="경력 년" className={`${inputCls} max-w-[150px]`} />
-              <span className="text-[18px] font-medium text-ink-sub">년</span>
-              <input type="number" min={0} max={11} name="careerMonths" defaultValue={0} aria-label="경력 개월" className={`${inputCls} max-w-[150px]`} />
-              <span className="text-[18px] font-medium text-ink-sub">개월</span>
-            </div>
-          </Field>
-          <Field label="숙련도" hint="수간호사만 볼 수 있어요">
-            <div className="flex flex-wrap gap-2">
-              {SKILL_LEVELS.map((lv) => (
-                <RnOptionButton
-                  key={lv}
-                  selected={skill === lv}
-                  onClick={() => setSkill(lv)}
-                  className="w-[72px] text-[20px]"
-                >
-                  {lv}
-                </RnOptionButton>
-              ))}
-            </div>
-          </Field>
-
-          <Field label="상태">
-            <div className="flex flex-wrap gap-2">
-              {REGISTRABLE_STATUSES.map((s) => (
-                <RnOptionButton key={s} selected={status === s} onClick={() => setStatus(s)}>
-                  {NURSE_STATUS_LABEL[s]}
-                </RnOptionButton>
-              ))}
-            </div>
-          </Field>
-          <Field label="소속 시작일" hint="이 날짜 전 칸은 편집할 수 없어요">
-            <input type="date" name="periodStart" required aria-label="소속 시작일" className={inputCls} />
-          </Field>
+          <NurseProfileFields draft={draft} onChange={(patch) => setDraft((d) => ({ ...d, ...patch }))} />
         </div>
 
         <aside className="flex w-[416px] shrink-0 flex-col gap-3.5 rounded-[20px] bg-brand-soft p-7">
