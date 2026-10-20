@@ -51,7 +51,7 @@ export type ApiSchedule = {
   nurses: ApiScheduleNurse[];
   cells: ApiScheduleCell[];
   coverage: ApiCoverage[];
-  statistics?: unknown; // TODO: 백엔드 확정 후 결정 (명세에 통계 API 없음)
+  statistics?: ApiNurseStatistic[]; // 수간호사는 전원, 일반 간호사는 본인만
   confirmedAt: string | null;
 };
 
@@ -92,7 +92,7 @@ export type ApiGenerationJob = {
   hardViolationCount: number;
   metrics: unknown; // TODO: 백엔드 확정 후 결정
   conflicts: unknown; // TODO: 백엔드 확정 후 결정
-  relaxations: unknown; // TODO: 백엔드 확정 후 결정 (relaxationIds로 쓰이는 항목의 모양)
+  relaxations: ApiRelaxation[]; // 해 없음(NO_SOLUTION)일 때 완화할 수 있는 규칙들
   error?: string | null; // 실패(FAILED) 사유. 명세에는 없고 백엔드 응답에 있다
 };
 
@@ -104,3 +104,20 @@ export type ApiGenerationStop = { applyBestResult: boolean };
 export type ApiGenerationRelaxations = { relaxationIds: string[] };
 export type ApiGenerationPartialApply = { baseVersion: number };
 export type ApiScheduleWithViolations = { schedule: ApiSchedule; violations: ApiViolation[] }; // GEN-05
+
+// 근무표 응답의 간호사별 집계 (듀티 코드별 개수 + 주말·공휴일 근무)
+export type ApiNurseStatistic = {
+  nurseId: string;
+  D: number;
+  E: number;
+  N: number;
+  O: number;
+  AL: number;
+  ED?: number;
+  offTarget: number | null;
+  weekendWork: number;
+  holidayWork: number;
+};
+
+// GEN-04 완화안. id를 relaxationIds로 보내면 그 규칙을 SOFT로 낮춰 다시 생성한다
+export type ApiRelaxation = { id: string; ruleCode: string; ruleId: string; description: string };

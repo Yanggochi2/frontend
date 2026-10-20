@@ -135,7 +135,6 @@ export async function getGenerationFailure(jobId: string): Promise<GenerationFai
     problems = (await getScheduleViolations(job.scheduleId, { severity: "HARD", size: 100 })).data.map((v) => v.message);
   } catch {}
   const noSolution = job.status === "NO_SOLUTION";
-  // TODO: conflicts / relaxations 모양이 명세에 없다. 완화 선택지는 확정 후 매핑한다 (지금 백엔드는 빈 배열).
   return {
     jobId,
     yearMonth: schedule.yearMonth,
@@ -151,7 +150,13 @@ export async function getGenerationFailure(jobId: string): Promise<GenerationFai
           : "규칙이나 인원을 조정한 뒤 다시 만들어 주세요."),
     },
     problems,
-    options: [],
+    options: (job.relaxations ?? []).map((r, i) => ({
+      id: r.id,
+      badge: { label: "완화", tone: "brand" as const },
+      title: r.description,
+      description: "이 규칙을 권장(SOFT)으로 낮추고 다시 만들어요. 규칙 설정에도 반영돼요.",
+      primary: i === 0,
+    })),
   };
 }
 
