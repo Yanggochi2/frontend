@@ -1,22 +1,27 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import RnButton from "@/components/ui/RnButton";
-import { emptyNurseDraft, toNurseCreate } from "@/lib/nurseDraft";
+import { emptyNurseDraft, nurseDraftError, toNurseCreate } from "@/lib/nurseDraft";
 import { formatApiError } from "@/lib/formatApiError";
 import { createNurse } from "@/services/nursesApi";
 import type { NurseDraft } from "@/types/nurses.type";
 import NurseProfileFields from "./NurseProfileFields";
+import NurseRegisteredDialog from "./NurseRegisteredDialog";
 
 export default function NurseForm() {
   const [draft, setDraft] = useState<NurseDraft>(() => emptyNurseDraft());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [registered, setRegistered] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const invalid = nurseDraftError(draft);
+    if (invalid) {
+      setError(invalid);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -24,7 +29,7 @@ export default function NurseForm() {
       // 수간호사 지정은 별도 기능(WARD-09 권한 부여)으로만 한다.
       // TODO: preceptorOf 선택 UI는 시안에 없다.
       await createNurse(toNurseCreate(draft));
-      router.push("/nurses");
+      setRegistered(draft.name.trim());
     } catch (err) {
       setError(formatApiError(err));
     } finally {
@@ -44,8 +49,9 @@ export default function NurseForm() {
           {[
             "· 근무표에 이 간호사의 줄이 생겨요",
             "· 소속 시작일 전 날짜는 회색으로 막혀요",
-            "· 일반 간호사에게는 이름과 역할만 보여요",
-            "· 차지, 신입 같은 역할은 규칙에 따라 자동으로 검사돼요",
+            "· 숙련 그룹이 같은 간호사끼리 근무표에서 묶여 보여요",
+            "· 임신·휴직 같은 근무 제한은 자동 생성 규칙에 들어가요",
+            "· 일반 간호사에게는 이름만 보여요",
           ].map((t) => (
             <p key={t} className="text-[17px] font-medium text-ink">
               {t}
@@ -67,6 +73,17 @@ export default function NurseForm() {
           등록하기
         </RnButton>
       </div>
+
+      {registered ? (
+        <NurseRegisteredDialog
+          name={registered}
+          onAddAnother={() => {
+            setDraft(emptyNurseDraft());
+            setRegistered(null);
+            setError(null);
+          }}
+        />
+      ) : null}
     </form>
   );
 }
