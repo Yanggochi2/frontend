@@ -1,4 +1,4 @@
-import { apiRequest, apiRequestList } from "@/lib/apiClient";
+import { ApiError, apiRequest, apiRequestList } from "@/lib/apiClient";
 import { REQUEST_REASON_ETC, REQUEST_REASONS } from "@/constants/requests.constants";
 import { getNurseNameMap } from "@/services/nursesApi";
 import type {
@@ -56,11 +56,18 @@ export function mapWorkRequest(r: ApiWorkRequest, nurseNames: Map<string, string
 
 // REQ-03 수간호사 신청 목록. REQ-02(getMyRequests)와 같은 화면 타입으로 돌려준다.
 // yearMonth가 없으면 전체 기간 (신청은 대개 다음 달 이후라 이번 달만 보면 대기 건이 빠진다. 사이드바 배지와 같은 기준)
+// 병동 전체 목록은 수간호사만 된다. 일반 간호사(403)는 내 신청 목록을 승인/반려 버튼 없이 보여 준다.
 export async function getRequests(query: WorkRequestQuery = {}): Promise<RequestListResult> {
   const yearMonth = query.yearMonth;
-  const list = await apiRequestList<ApiWorkRequest>(REQUESTS_PATH, { query: { size: 100, ...query } });
-  // TODO: 100건을 넘으면 페이지 이동 UI가 필요하다 (meta.totalPages)
-  const items = list.data.map((r) => mapWorkRequest(r));
+  let items: RequestItem[];
+  try {
+    const list = await apiRequestList<ApiWorkRequest>(REQUESTS_PATH, { query: { size: 100, ...query } });
+    // TODO: 100건을 넘으면 페이지 이동 UI가 필요하다 (meta.totalPages)
+    items = list.data.map((r) => mapWorkRequest(r));
+  } catch (e) {
+    if (!(e instanceof ApiError && e.status === 403)) throw e;
+    items = (await getMyRequests({ size: 100, ...query })).map((r) => ({ ...r, decidable: false }));
+  }
   return {
     items,
     pendingCount: items.filter((i) => i.status === "PENDING").length,

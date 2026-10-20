@@ -58,7 +58,7 @@ export default function RequestsTable({ items }: { items: RequestItem[] }) {
                   <RnChip tone={STATUS_TONE[r.status]}>{STATUS_LABEL[r.status]}</RnChip>
                 </td>
                 <td className={`${cell} text-[17px] font-medium text-ink-sub`}>
-                  {r.status === "PENDING" ? (
+                  {r.status === "PENDING" && r.decidable !== false ? (
                     <RequestRowActions id={r.id} />
                   ) : r.status === "CANCELLED" ? (
                     "취소됨"

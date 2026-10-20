@@ -12,11 +12,12 @@ export type RequestItem = {
   /** 화면 표시용 문자열 (예: "10/14 (수)", "10/20 ~ 10/22") */
   targetDateLabel: string;
   reason: string;
-  /** TODO: 백엔드 확정 후 결정 — 명세 WorkRequest에 신청 시각 필드가 없다 */
   requestedAtLabel?: string;
   status: RequestStatus;
   /** 승인/반려된 건의 처리일 (예: "10/01") */
   processedAtLabel?: string;
+  /** false면 승인/반려 버튼을 숨긴다 (일반 간호사가 보는 내 신청) */
+  decidable?: boolean;
 };
 
 export type RequestListResult = {
