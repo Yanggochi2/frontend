@@ -14,7 +14,7 @@ type Props = {
   onScroll: () => void;
 };
 
-const DAY_TEXT = { default: "text-ink", sat: "text-ink", sun: "text-danger", holiday: "text-danger" } as const;
+const DAY_TEXT = { default: "text-ink", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
 const WEEKDAY_TEXT = { default: "text-ink-sub", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
 
 // 하단 인원 행. 세로 스크롤에도 보이도록 아래에서부터 쌓아 고정한다 (행 높이 h-11).
