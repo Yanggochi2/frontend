@@ -18,17 +18,17 @@ function periodLabel(n: ApiNurse): string | undefined {
   return `${ym(n.affiliationStart)} ~ ${n.affiliationEnd ? ym(n.affiliationEnd) : "재직"}`;
 }
 
-// 받은 필드만 옮긴다. 없는 필드를 채워 넣지 않는다.
+// 받은 필드만 옮긴다. 없는 필드를 채워 넣지 않는다. 일반 간호사에게 숨긴 필드는 백엔드가 null로 준다.
 export function mapNurse(n: ApiNurse): Nurse {
   return {
     id: n.id,
     name: n.name,
     role: n.role,
     dutyRole: n.dutyRole as DutyRole | undefined,
-    status: n.status as NurseStatus | undefined,
-    careerYears: n.careerMonths === undefined ? undefined : Math.floor(n.careerMonths / 12),
-    careerMonths: n.careerMonths === undefined ? undefined : n.careerMonths % 12,
-    skill: n.skillLevel,
+    status: (n.status ?? undefined) as NurseStatus | undefined,
+    careerYears: n.careerMonths == null ? undefined : Math.floor(n.careerMonths / 12),
+    careerMonths: n.careerMonths == null ? undefined : n.careerMonths % 12,
+    skill: n.skillLevel ?? undefined,
     periodLabel: periodLabel(n),
   };
 }
@@ -71,20 +71,20 @@ export async function createNurse(body: NurseCreate): Promise<Nurse> {
   return mapNurse(data);
 }
 
-// NUR-04. role은 보내지 않는다. TODO: 응답의 Violation[] 처리는 백엔드 확정 후 결정
+// NUR-04. role은 보내지 않는다. 응답은 { nurse, violations, warnings }. TODO: violations 표시는 화면 시안 확정 후
 export async function updateNurse(id: string, patch: NursePatch): Promise<Nurse> {
-  const data = await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}`, {
+  const { nurse } = await apiRequest<{ nurse: ApiNurse }>(`${NURSES_PATH}/${encodeURIComponent(id)}`, {
     method: "PATCH",
     body: patch,
   });
-  return mapNurse(data);
+  return mapNurse(nurse);
 }
 
-// NUR-05. affiliationEnd는 YYYY-MM-DD. TODO: 응답의 Violation[] 처리는 백엔드 확정 후 결정
+// NUR-05. affiliationEnd는 YYYY-MM-DD. 응답은 { nurse, violations, warnings }
 export async function retireNurse(id: string, affiliationEnd: string): Promise<Nurse> {
-  const data = await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}/retire`, {
+  const { nurse } = await apiRequest<{ nurse: ApiNurse }>(`${NURSES_PATH}/${encodeURIComponent(id)}/retire`, {
     method: "POST",
     body: { affiliationEnd },
   });
-  return mapNurse(data);
+  return mapNurse(nurse);
 }

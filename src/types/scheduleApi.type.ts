@@ -103,4 +103,4 @@ export type ApiGenerationStart = {
 export type ApiGenerationStop = { applyBestResult: boolean };
 export type ApiGenerationRelaxations = { relaxationIds: string[] };
 export type ApiGenerationPartialApply = { baseVersion: number };
-export type ApiScheduleWithViolations = ApiSchedule & { violations: ApiViolation[] }; // GEN-05 (추측: 병합 형태)
+export type ApiScheduleWithViolations = { schedule: ApiSchedule; violations: ApiViolation[] }; // GEN-05

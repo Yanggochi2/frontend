@@ -16,8 +16,8 @@ function formatRequestedAt(iso?: string): string {
 function toJoinRequest(r: MembershipRequest): JoinRequest {
   return {
     id: r.id,
-    name: r.applicantName ?? "-",
-    requestedAt: formatRequestedAt(r.requestedAt),
+    name: r.name ?? "-",
+    requestedAt: formatRequestedAt(r.createdAt),
     // TODO: 백엔드 확정 후 결정 (신청에 쓰인 병동 코드를 응답이 주는지)
     wardCode: "-",
     grantedRoleLabel: "일반 간호사",

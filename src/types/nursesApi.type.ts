@@ -9,13 +9,13 @@ export type ApiNurse = {
   name: string;
   role: ApiNurseRole;
   dutyRole?: ApiDutyRole;
-  status?: ApiNurseStatus;
+  status?: ApiNurseStatus | null;
   joinedAt?: string;
-  careerMonths?: number;
-  skillLevel?: number;
+  careerMonths?: number | null;
+  skillLevel?: number | null;
   affiliationStart?: string;
   affiliationEnd?: string | null;
-  preceptorOf?: string | null;
+  preceptorOf?: string[] | null; // 담당 신입 간호사 id 목록
   version?: number;
 };
 
@@ -30,7 +30,7 @@ export type NurseCreate = {
   affiliationStart: string;
   affiliationEnd?: string | null;
   /** 같은 병동의 NEW 간호사만 */
-  preceptorOf?: string | null;
+  preceptorOf?: string[] | null; // 담당 신입 간호사 id 목록
 };
 
 // NUR-04 본문. role 제외.

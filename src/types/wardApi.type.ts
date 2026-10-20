@@ -26,6 +26,8 @@ export type MeResponse = {
   user: UserSummary;
   membership: Membership | null;
   ward: ApiWard | null;
+  // 소속 전 승인 대기 화면용. 가장 최근 가입 신청 (없으면 null)
+  membershipRequest: MembershipRequest | null;
 };
 
 // WARD-01. role/병동 ID를 본문에 담지 않는다.
@@ -51,12 +53,13 @@ export type JoinWardRequest = { joinCode: string };
 // WARD-03~06 MembershipRequest. 데이터 모델 절에 필드가 없다.
 export type MembershipRequest = {
   id: string;
-  // TODO: 백엔드 확정 후 결정 (status 열거값)
-  status: string;
-  // TODO: 백엔드 확정 후 결정 (아래 필드 이름과 존재 여부)
-  applicantName?: string;
-  requestedAt?: string;
-  rejectionReason?: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+  wardName: string;
+  hospitalName: string;
+  name: string; // 신청자 이름
+  email: string;
+  createdAt: string; // 신청 시각 (UTC ISO)
+  rejectionReason: string | null;
 };
 
 // WARD-07/08 JoinCode. 모델이 명세에 없다.

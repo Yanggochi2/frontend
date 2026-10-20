@@ -30,9 +30,13 @@ export function getGenerationJob(jobId: string) {
 }
 
 // GEN-03. applyBestResult에 따라 GenerationJob 또는 Schedule이 온다 (명세에 구분 필드 없음).
-export function stopGeneration(jobId: string, body: ApiGenerationStop) {
-  // TODO: 응답이 Job인지 Schedule인지 구분하는 방법은 백엔드 확정 후 결정
-  return apiRequest<ApiGenerationJob | ApiSchedule>(`${GENERATIONS}/${jobId}/stop`, { method: "POST", body });
+// 백엔드는 생성을 요청 안에서 끝내므로 대개 이미 끝난 작업이다(409 JOB_ALREADY_FINISHED). 그때는 결과가 이미 근무표에 있다.
+export async function stopGeneration(jobId: string, body: ApiGenerationStop): Promise<void> {
+  try {
+    await apiRequest<ApiGenerationJob>(`${GENERATIONS}/${jobId}/stop`, { method: "POST", body });
+  } catch (e) {
+    if (!(e instanceof ApiError && e.code === "JOB_ALREADY_FINISHED")) throw e;
+  }
 }
 
 // GEN-04. 완화 선택 후 새 작업이 시작된다.
@@ -80,7 +84,7 @@ export function generationHref(job: ApiGenerationJob, yearMonth: string): string
 export async function applyPartialResultForJob(jobId: string): Promise<ApiSchedule> {
   const job = await getGenerationJob(jobId);
   const schedule = await getScheduleById(job.scheduleId);
-  return applyPartialResult(jobId, { baseVersion: schedule.version });
+  return (await applyPartialResult(jobId, { baseVersion: schedule.version })).schedule;
 }
 
 // ---- 화면용 ----
