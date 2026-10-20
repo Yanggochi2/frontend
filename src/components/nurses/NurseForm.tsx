@@ -6,14 +6,13 @@ import RnButton from "@/components/ui/RnButton";
 import RnOptionButton from "@/components/ui/RnOptionButton";
 import {
   DUTY_ROLE_LABEL,
-  NURSE_ROLE_LABEL,
   NURSE_STATUS_LABEL,
   REGISTRABLE_STATUSES,
   SKILL_LEVELS,
 } from "@/constants/nurses.constants";
 import { formatApiError } from "@/lib/formatApiError";
 import { createNurse } from "@/services/nursesApi";
-import type { DutyRole, NurseRole, NurseStatus } from "@/types/nurses.type";
+import type { DutyRole, NurseStatus } from "@/types/nurses.type";
 
 const inputCls =
   "h-14 w-full rounded-[14px] bg-surface px-5 text-[18px] font-medium text-ink placeholder:text-ink-faint";
@@ -30,11 +29,9 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   );
 }
 
-const ROLES: NurseRole[] = ["NURSE", "HEAD_NURSE"];
 const DUTY_ROLES: DutyRole[] = ["GENERAL", "CHARGE", "PRECEPTOR", "NEW"];
 
 export default function NurseForm() {
-  const [role, setRole] = useState<NurseRole>("NURSE");
   const [dutyRole, setDutyRole] = useState<DutyRole>("GENERAL");
   const [status, setStatus] = useState<NurseStatus>("ACTIVE");
   const [skill, setSkill] = useState(3);
@@ -50,7 +47,8 @@ export default function NurseForm() {
     setBusy(true);
     setError(null);
     try {
-      // TODO: 권한(role) 선택은 NUR-01 본문에 없어 보내지 않는다. 수간호사 지정은 WARD-09.
+      // 권한(role)은 이 화면에서 설정하지 않는다. 새로 등록하는 간호사는 항상 일반 간호사이고,
+      // 수간호사 지정은 별도 기능(WARD-09 권한 부여)으로만 한다.
       // TODO: preceptorOf 선택 UI는 시안에 없다.
       await createNurse({
         name: str("name"),
@@ -80,15 +78,6 @@ export default function NurseForm() {
             <input type="date" name="hireDate" required aria-label="입사일" className={inputCls} />
           </Field>
 
-          <Field label="권한">
-            <div className="flex flex-wrap gap-2">
-              {ROLES.map((r) => (
-                <RnOptionButton key={r} selected={role === r} onClick={() => setRole(r)}>
-                  {NURSE_ROLE_LABEL[r]}
-                </RnOptionButton>
-              ))}
-            </div>
-          </Field>
           <Field label="듀티 역할" hint="차지·프리셉터·신입은 근무 배정 규칙이 달라요">
             <div className="flex flex-wrap gap-2">
               {DUTY_ROLES.map((r) => (
