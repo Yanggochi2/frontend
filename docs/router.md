@@ -29,6 +29,15 @@
 | `/onboarding/pending` | 첫 화면 · 승인 대기 |
 | `/onboarding/create-ward` | 첫 화면 · 병동 개설 |
 
+## 로그인·회원가입 — `src/app/(auth)/`
+| 경로 | 화면 |
+|---|---|
+| `/login` | 로그인. 성공하면 `GET /me`로 소속이 있으면 `/schedule`, 없으면 `/onboarding/select-ward` |
+| `/signup` | 회원가입. 가입 후 바로 로그인하고 소속 선택으로 간다 |
+
+- 병동 초대 링크는 `/signup?code=XXXX`. 코드는 로그인·가입을 거쳐 `/onboarding/select-ward?code=XXXX`로 넘어가 입력칸에 미리 채워진다.
+- 앱 화면에서 `/me`가 401이면 `/login`으로 보낸다. 로그아웃 후에도 `/login`.
+
 ## 랜딩 — `src/app/(marketing)/`
 | 경로 | 화면 |
 |---|---|

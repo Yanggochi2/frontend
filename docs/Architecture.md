@@ -12,6 +12,7 @@
 src/
   app/                 라우트(page, layout만). 조립만 한다.
     (app)/             사이드바 있는 화면
+    (auth)/            로그인·회원가입
     (onboarding)/      사이드바 없는 처음 가입 화면
     (marketing)/       서비스 소개 랜딩 (/)
   components/

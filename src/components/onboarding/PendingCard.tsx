@@ -1,5 +1,6 @@
 import OnboardingButton from "@/components/ui/OnboardingButton";
 import OnboardingCard from "@/components/ui/OnboardingCard";
+import PendingCheckButton from "./PendingCheckButton";
 import PendingLogoutButton from "./PendingLogoutButton";
 import type { PendingInfo } from "@/types/onboarding.type";
 
@@ -32,6 +33,7 @@ export default function PendingCard({ info }: Props) {
           <dd>{info.requestedAt}</dd>
         </div>
       </dl>
+      <PendingCheckButton />
       <div className="flex flex-wrap justify-center gap-3">
         <OnboardingButton variant="secondary" href="/onboarding/select-ward">
           코드 다시 입력
