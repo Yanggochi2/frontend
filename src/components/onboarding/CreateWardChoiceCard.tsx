@@ -8,6 +8,9 @@ export default function CreateWardChoiceCard() {
       <p className="text-[17px] font-medium text-ink-sub">
         수간호사로 시작해요. 병동 코드는 만든 뒤에 받아요
       </p>
+      <p className="rounded-[14px] bg-surface px-4 py-3 text-base font-medium text-ink-sub">
+        병동 코드를 받은 간호사는 왼쪽에 코드를 입력해 주세요
+      </p>
       <OnboardingButton variant="secondary" href="/onboarding/create-ward">
         병동 만들기
       </OnboardingButton>
