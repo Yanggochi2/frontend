@@ -10,7 +10,7 @@ type Props = {
   rows: GridRow[];
   coverage: CoverageStatus[] | null;
   selected: { row: number; col: number } | null;
-  onCellClick: (row: number, col: number, el: HTMLElement) => void;
+  onCellClick?: (row: number, col: number, el: HTMLElement) => void; // 없으면 보기 전용
   onScroll: () => void;
 };
 
@@ -114,8 +114,8 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                     <td key={col} title={cell.violations?.join("\n")} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
                       <button
                         type="button"
-                        disabled={cell.editable === false}
-                        onClick={(e) => onCellClick(index, col, e.currentTarget)}
+                        disabled={!onCellClick || cell.editable === false}
+                        onClick={(e) => onCellClick?.(index, col, e.currentTarget)}
                         aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}${cell.charge ? " 차지" : ""}${cell.approvedOff ? " 희망 오프" : ""}`}
                         className={`flex size-full items-center justify-center ${style ? style.cell : "text-ink"} ${labelSize}`}
                       >
