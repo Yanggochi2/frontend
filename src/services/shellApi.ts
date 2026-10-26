@@ -1,6 +1,5 @@
-import { cache } from "react";
 import { apiRequest, apiRequestList } from "@/lib/apiClient";
-import type { Role, ShellInfo } from "@/types/shell.type";
+import type { ShellInfo } from "@/types/shell.type";
 import type { MeResponse } from "@/types/wardApi.type";
 
 async function pendingTotal(path: string): Promise<number> {
@@ -36,14 +35,3 @@ export async function getShellInfo(): Promise<ShellInfo | null> {
     pendingApprovalCount,
   };
 }
-
-// 화면 문구와 버튼을 역할별로 나눌 때 쓴다. 역할 판정은 서버(GET /me)이고, 못 불러오면 null이다.
-// null이면 수간호사 화면을 그대로 둔다 (서버에 닿지 못한 틀 화면과 같은 기준).
-export const getMyRole = cache(async (): Promise<Role | null> => {
-  try {
-    const me = await apiRequest<MeResponse>("/me");
-    return me.membership?.role ?? null;
-  } catch {
-    return null;
-  }
-});

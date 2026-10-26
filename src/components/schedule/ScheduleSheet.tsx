@@ -21,14 +21,13 @@ const POPOVER_HEIGHT = 170;
 const POPOVER_PROBLEM_LINE = 26;
 
 
-// canManage: 수간호사만 true. 간호사는 확정된 근무표를 보기만 하므로 편집 도구와 확정 버튼을 숨긴다.
-export default function ScheduleSheet({ sheet, canManage = true }: { sheet: ScheduleSheetData; canManage?: boolean }) {
+export default function ScheduleSheet({ sheet }: { sheet: ScheduleSheetData }) {
   const editor = useScheduleEditor(sheet);
   const { rows, setDuty } = editor;
   const [brush, setBrush] = useState<EditableDutyCode | null>(null);
   const [checkOnly, setCheckOnly] = useState(false);
   const [popover, setPopover] = useState<Popover | null>(null);
-  const [showEmptyGuide, setShowEmptyGuide] = useState(canManage && sheet.unassigned);
+  const [showEmptyGuide, setShowEmptyGuide] = useState(sheet.unassigned);
   const generation = useGenerationStart();
   const api = sheet.api;
 
@@ -111,18 +110,16 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
               )}
             </div>
           </div>
-          {canManage ? (
-            <ScheduleToolbar
-              brush={brush}
-              onBrushChange={setBrush}
-              canUndo={editor.canUndo}
-              onUndo={editor.undo}
-              canRedo={editor.canRedo}
-              onRedo={editor.redo}
-              checkOnly={checkOnly}
-              onCheckOnlyChange={setCheckOnly}
-            />
-          ) : null}
+          <ScheduleToolbar
+            brush={brush}
+            onBrushChange={setBrush}
+            canUndo={editor.canUndo}
+            onUndo={editor.undo}
+            canRedo={editor.canRedo}
+            onRedo={editor.redo}
+            checkOnly={checkOnly}
+            onCheckOnlyChange={setCheckOnly}
+          />
           {editor.saveError ? (
             <p role="alert" className="text-[16px] font-bold text-danger">
               {editor.saveError}
@@ -181,14 +178,12 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
           }}
         />
       ) : null}
-      {canManage ? (
-        <ScheduleBottomBar
-          scheduleId={api.scheduleId}
-          yearMonth={sheet.yearMonth}
-          status={api.status}
-          hardViolationCount={editor.hardViolationCount}
-        />
-      ) : null}
+      <ScheduleBottomBar
+        scheduleId={api.scheduleId}
+        yearMonth={sheet.yearMonth}
+        status={api.status}
+        hardViolationCount={editor.hardViolationCount}
+      />
     </>
   );
 }

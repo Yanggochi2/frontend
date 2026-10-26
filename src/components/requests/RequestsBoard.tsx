@@ -21,11 +21,9 @@ const KIND_FILTERS: { value: RequestKind | "ALL"; label: string }[] = [
 export default function RequestsBoard({
   items,
   monthLabel,
-  mine = false,
 }: {
   items: RequestItem[];
   monthLabel: string;
-  mine?: boolean;
 }) {
   const [status, setStatus] = useState<RequestStatus>("PENDING");
   const [kind, setKind] = useState<RequestKind | "ALL">("ALL");
@@ -52,7 +50,7 @@ export default function RequestsBoard({
         {/* TODO: 월 선택 UI는 시안에 없음. 지금은 표시만 한다. */}
         <RnFilterChip selected={false}>{monthLabel}</RnFilterChip>
       </div>
-      <RequestsTable items={visible} mine={mine} />
+      <RequestsTable items={visible} />
     </>
   );
 }

@@ -81,17 +81,6 @@ export async function getMyRequests(query: WorkRequestQuery = {}): Promise<Reque
   return list.data.map((r) => mapWorkRequest(r));
 }
 
-// REQ-02 간호사 본인 신청 목록을 신청 화면 타입으로 돌려준다. getRequests와 같이 전체 기간 기준이다
-// (신청은 대개 다음 달 이후라 이번 달만 보면 대기 건이 빠진다).
-export async function getMyRequestList(): Promise<RequestListResult> {
-  const items = await getMyRequests({ size: 100 });
-  return {
-    items,
-    pendingCount: items.filter((i) => i.status === "PENDING").length,
-    monthLabel: "전체 기간",
-  };
-}
-
 // REQ-04
 export async function getRequest(id: string): Promise<RequestItem> {
   const [data, names] = await Promise.all([
