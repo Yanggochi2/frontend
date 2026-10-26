@@ -87,7 +87,9 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
   return (
     <>
       <div className="flex min-h-0 w-full flex-1 flex-col gap-2 rounded-[28px] bg-surface px-5 py-3">
-        <p className="shrink-0 text-right text-[15px] font-medium text-ink-sub">셀을 눌러 바로 수정 · 자동 저장</p>
+        {canManage ? (
+          <p className="shrink-0 text-right text-[15px] font-medium text-ink-sub">셀을 눌러 바로 수정 · 자동 저장</p>
+        ) : null}
         <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 rounded-[20px] bg-white px-5 py-4">
           <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -135,7 +137,7 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
               rows={gridRows}
               coverage={editor.coverage}
               selected={sheet.selectedCell}
-              onCellClick={handleCellClick}
+              onCellClick={canManage ? handleCellClick : undefined}
               onScroll={closePopover}
             />
             {showEmptyGuide ? (

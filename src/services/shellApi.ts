@@ -12,10 +12,13 @@ async function pendingTotal(path: string): Promise<number> {
   }
 }
 
+// 레이아웃과 페이지가 한 요청 안에서 /me를 한 번만 부르도록 묶는다.
+const getMe = cache(() => apiRequest<MeResponse>("/me"));
+
 // GET /me → ShellInfo. 소속이 없으면 null (호출한 쪽에서 소속 선택으로 보낸다).
 // TODO: 사이드바 배지 건수 전용 API는 명세에 없다. 수간호사에게만 목록 meta.totalElements로 대신 센다 (WARD-04, REQ-03).
 export async function getShellInfo(): Promise<ShellInfo | null> {
-  const me = await apiRequest<MeResponse>("/me");
+  const me = await getMe();
   if (!me.membership || !me.ward) return null;
 
   const role = me.membership.role;
@@ -41,7 +44,7 @@ export async function getShellInfo(): Promise<ShellInfo | null> {
 // null이면 수간호사 화면을 그대로 둔다 (서버에 닿지 못한 틀 화면과 같은 기준).
 export const getMyRole = cache(async (): Promise<Role | null> => {
   try {
-    const me = await apiRequest<MeResponse>("/me");
+    const me = await getMe();
     return me.membership?.role ?? null;
   } catch {
     return null;
