@@ -20,6 +20,12 @@ export type Nurse = {
   inviteActive?: boolean;
 };
 
+export type NurseDetail = Nurse & {
+  joinedAt: string;
+  affiliationStart: string;
+  version: number;
+};
+
 // 간호사 등록 폼의 입력값. 날짜는 YYYY-MM-DD 문자열, 숫자는 입력 그대로 문자열.
 export type NurseDraft = {
   name: string;

@@ -1,7 +1,8 @@
 import { apiRequest, apiRequestList } from "@/lib/apiClient";
-import type { DutyRole, Nurse, NurseListResult, NurseStatus } from "@/types/nurses.type";
+import type { DutyRole, Nurse, NurseDetail, NurseListResult, NurseStatus } from "@/types/nurses.type";
 import type {
   ApiNurse,
+  ApiNurseMutationResult,
   NurseCreate,
   NurseListQuery,
   NursePatch,
@@ -35,6 +36,13 @@ export function mapNurse(n: ApiNurse): Nurse {
   };
 }
 
+function mapNurseDetail(n: ApiNurse): NurseDetail {
+  if (!n.joinedAt || !n.affiliationStart || n.version === undefined) {
+    throw new Error("간호사 상세 정보가 올바르지 않아요.");
+  }
+  return { ...mapNurse(n), joinedAt: n.joinedAt, affiliationStart: n.affiliationStart, version: n.version };
+}
+
 // NUR-02.
 // 화면의 정렬·역할 필터·퇴사자 토글은 클라이언트에서 처리하므로 기본값으로 퇴사자까지 받는다.
 export async function getNurses(query: NurseListQuery = {}): Promise<NurseListResult> {
@@ -65,8 +73,8 @@ export async function getNurseNameMap(): Promise<Map<string, string>> {
 }
 
 // NUR-03
-export async function getNurse(id: string): Promise<Nurse> {
-  return mapNurse(await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}`));
+export async function getNurse(id: string): Promise<NurseDetail> {
+  return mapNurseDetail(await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}`));
 }
 
 // NUR-01 (Idempotency-Key). role은 보내지 않는다.
@@ -79,13 +87,13 @@ export async function createNurse(body: NurseCreate): Promise<Nurse> {
   return mapNurse(data);
 }
 
-// NUR-04. role은 보내지 않는다. 응답은 { nurse, violations, warnings }. TODO: violations 표시는 화면 시안 확정 후
+// NUR-04. role은 보내지 않는다. 위반·경고는 저장 결과와 함께 오며 목록을 다시 불러올 때 반영된다.
 export async function updateNurse(id: string, patch: NursePatch): Promise<Nurse> {
-  const { nurse } = await apiRequest<{ nurse: ApiNurse }>(`${NURSES_PATH}/${encodeURIComponent(id)}`, {
+  const data = await apiRequest<ApiNurseMutationResult>(`${NURSES_PATH}/${encodeURIComponent(id)}`, {
     method: "PATCH",
     body: patch,
   });
-  return mapNurse(nurse);
+  return mapNurse(data.nurse);
 }
 
 // NUR-05. affiliationEnd는 YYYY-MM-DD. 응답은 { nurse, violations, warnings }

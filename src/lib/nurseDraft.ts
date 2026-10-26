@@ -1,5 +1,5 @@
 import type { NurseCreate } from "@/types/nursesApi.type";
-import type { NurseDraft } from "@/types/nurses.type";
+import type { NurseDetail, NurseDraft } from "@/types/nurses.type";
 
 export function emptyNurseDraft(name = ""): NurseDraft {
   return {
@@ -24,5 +24,21 @@ export function toNurseCreate(d: NurseDraft): NurseCreate {
     careerMonths: Number(d.careerYears || 0) * 12 + Number(d.careerMonths || 0),
     skillLevel: d.skill,
     affiliationStart: d.periodStart,
+  };
+}
+
+export function toNurseDraft(nurse: NurseDetail): NurseDraft {
+  const totalMonths = nurse.careerYears === undefined
+    ? 0
+    : nurse.careerYears * 12 + (nurse.careerMonths ?? 0);
+  return {
+    name: nurse.name,
+    hireDate: nurse.joinedAt,
+    dutyRole: nurse.dutyRole ?? "GENERAL",
+    careerYears: String(Math.floor(totalMonths / 12)),
+    careerMonths: String(totalMonths % 12),
+    skill: nurse.skill ?? 3,
+    status: nurse.status ?? "ACTIVE",
+    periodStart: nurse.affiliationStart,
   };
 }
