@@ -27,6 +27,18 @@ export function toNurseCreate(d: NurseDraft): NurseCreate {
   };
 }
 
+// 받지 못한 필드는 폼에 기본값으로 채워지므로, 수정할 때는 처음 값에서 바뀐 필드만 보낸다.
+// 그래야 건드리지 않은 칸의 기본값이 서버 값을 덮어쓰지 않는다.
+export function toNursePatch(initial: NurseDraft, current: NurseDraft): Partial<NurseCreate> {
+  const before = toNurseCreate(initial);
+  const after = toNurseCreate(current);
+  const patch: Partial<NurseCreate> = {};
+  (Object.keys(after) as (keyof NurseCreate)[]).forEach((key) => {
+    if (after[key] !== before[key]) Object.assign(patch, { [key]: after[key] });
+  });
+  return patch;
+}
+
 export function toNurseDraft(nurse: NurseDetail): NurseDraft {
   return {
     name: nurse.name,
