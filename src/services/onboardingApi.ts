@@ -19,14 +19,13 @@ export async function getSelectWardInfo(): Promise<SelectWardInfo> {
   return SELECT_WARD_INFO;
 }
 
-// TODO: 내 가입 신청을 조회하는 API가 명세에 없다. GET /me의 ward/membership으로 대신하며,
-// 신청 시각(requestedAt)의 출처와 승인 대기 중 ward 노출 여부는 백엔드 확정 후 결정한다.
+// 승인 대기 중에는 membership/ward가 null이고, 신청 정보는 GET /me의 membershipRequest에 온다.
 export async function getPendingInfo(): Promise<PendingInfo> {
-  const me = await apiRequest<MeResponse>("/me");
+  const { membershipRequest: r } = await apiRequest<MeResponse>("/me");
   return {
-    hospitalName: me.ward?.hospitalName ?? "-",
-    wardName: me.ward?.wardName ?? "-",
-    requestedAt: me.membership?.joinedAt ?? "-",
+    hospitalName: r?.hospitalName ?? "-",
+    wardName: r?.wardName ?? "-",
+    requestedAt: r?.createdAt ? new Date(r.createdAt).toLocaleString("ko-KR") : "-",
   };
 }
 

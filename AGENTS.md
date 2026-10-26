@@ -154,6 +154,20 @@
 
 보고는 한국어로 짧고 직접적으로 한다. 직접 확인하지 못한 것은 확인하지 못했다고 쓴다.
 
+## 12-1. Scope Restriction Rules
+
+- Only modify files and folders directly related to the requested task.
+- Do not touch unrelated files, folders, modules, or configurations.
+- Keep changes minimal and preserve the existing code structure and architecture.
+- Do not perform unrelated refactoring, formatting, renaming, or cleanup.
+- Never overwrite, revert, delete, or discard existing user changes.
+- Create new files only when necessary.
+- Before expanding the scope, verify that the additional changes are essential.
+- After completing the task, review the diff and ensure no unrelated files were modified.
+- Run relevant tests or checks when possible.
+
+**Core Rule: Make only the changes necessary to complete the requested task. Leave everything else untouched.**
+
 ## 13. 금지 사항
 - 문서를 확인하지 않고 라우트 추가
 - 기존 구조와 다른 폴더 구조 생성

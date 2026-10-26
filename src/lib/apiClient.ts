@@ -1,8 +1,14 @@
 import type { ApiErrorBody, ApiListResult, ApiResult } from "@/types/api.type";
 
-// 호출 주소는 환경 변수로 분리한다. 예: https://example.com/api/v1
+// 호출 주소는 환경 변수로 분리한다. 기본 구성은 "/api/v1" (next.config.ts의 rewrites가 백엔드로 넘긴다).
+// 같은 출처로 부르므로 백엔드의 SameSite=Strict 쿠키가 그대로 동작한다.
+// 서버 컴포넌트는 상대 경로로 fetch할 수 없으므로 BACKEND_ORIGIN을 앞에 붙여 백엔드로 직접 보낸다.
 // 비어 있으면 모든 요청이 API_NOT_CONFIGURED ApiError로 실패한다.
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+const PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+const BASE_URL =
+  typeof window === "undefined" && PUBLIC_BASE_URL.startsWith("/")
+    ? `${process.env.BACKEND_ORIGIN ?? ""}${PUBLIC_BASE_URL}`
+    : PUBLIC_BASE_URL;
 
 export class ApiError extends Error {
   readonly status: number;

@@ -7,6 +7,7 @@ import type { RuleFilterKey, RuleItem, RulesData } from "@/types/rules.type";
 import HolidayPanel from "./HolidayPanel";
 import RuleEditorDialog from "./RuleEditorDialog";
 import RulesTable from "./RulesTable";
+import { RULE_TEMPLATES } from "@/constants/ruleTemplates";
 
 // 규칙 화면 본문: 탭, 규칙 목록, 추가·수정 창, 공휴일 탭
 export default function RulesBoard({ filters, rules: initialRules }: RulesData) {
@@ -29,7 +30,8 @@ export default function RulesBoard({ filters, rules: initialRules }: RulesData) 
             {f.label}
           </AdminFilterChip>
         ))}
-        {active === "HOLIDAY" ? null : (
+        {/* 백엔드 규칙은 병동마다 고정이라 추가할 수 있는 규칙이 없으면 버튼을 숨긴다 */}
+        {active === "HOLIDAY" || !RULE_TEMPLATES.some((t) => t.addable) ? null : (
           <div className="ml-auto">
             <AdminButton variant="primary" onClick={() => setEditing(null)}>
               + 규칙 추가
