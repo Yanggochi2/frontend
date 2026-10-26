@@ -58,8 +58,8 @@ export const RULE_TEMPLATES: RuleTemplate[] = [
   },
   {
     code: "CHARGE_DAY_ONLY",
-    name: "차지 간호사 데이 근무",
-    parts: ["차지 간호사는 데이 근무만 (근무마다 차지 배치와 함께 켤 수 없어 기본 꺼짐)"],
+    name: "차지 허용 근무",
+    parts: ["차지 간호사가 맡을 수 있는 근무를 정해요 (기본 D·E·N 모두)"],
     addable: false,
     defaultStrength: "REQUIRED",
   },
