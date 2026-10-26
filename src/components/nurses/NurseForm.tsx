@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import RnButton from "@/components/ui/RnButton";
-import { emptyNurseDraft, toNurseCreate, toNurseDraft } from "@/lib/nurseDraft";
+import { emptyNurseDraft, toNurseCreate, toNurseDraft, toNursePatch } from "@/lib/nurseDraft";
 import { formatApiError } from "@/lib/formatApiError";
 import { createNurse, updateNurse } from "@/services/nursesApi";
 import type { NurseDetail, NurseDraft } from "@/types/nurses.type";
@@ -12,7 +12,8 @@ import NurseRegisteredDialog from "./NurseRegisteredDialog";
 
 export default function NurseForm({ nurse }: { nurse?: NurseDetail }) {
   const editing = nurse !== undefined;
-  const [draft, setDraft] = useState<NurseDraft>(() => nurse ? toNurseDraft(nurse) : emptyNurseDraft());
+  const [initialDraft] = useState<NurseDraft>(() => (nurse ? toNurseDraft(nurse) : emptyNurseDraft()));
+  const [draft, setDraft] = useState<NurseDraft>(initialDraft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [registered, setRegistered] = useState<string | null>(null);
@@ -23,16 +24,17 @@ export default function NurseForm({ nurse }: { nurse?: NurseDetail }) {
     setBusy(true);
     setError(null);
     try {
-      const values = toNurseCreate(draft);
       if (nurse) {
-        await updateNurse(nurse.id, { ...values, version: nurse.version });
+        const patch = toNursePatch(initialDraft, draft);
+        // 바꾼 칸이 없으면 저장 요청 없이 명단으로 돌아간다
+        if (Object.keys(patch).length > 0) await updateNurse(nurse.id, { ...patch, version: nurse.version });
         router.push("/nurses");
         router.refresh();
       } else {
         // 권한(role)은 이 화면에서 설정하지 않는다. 새로 등록하는 간호사는 항상 일반 간호사이고,
         // 수간호사 지정은 별도 기능(WARD-09 권한 부여)으로만 한다.
         // TODO: preceptorOf 선택 UI는 시안에 없다.
-        await createNurse(values);
+        await createNurse(toNurseCreate(draft));
         setRegistered(draft.name.trim());
       }
     } catch (err) {
