@@ -68,7 +68,7 @@ export type ScheduleSheetApiState = {
 };
 
 // 근무표 행 정렬. default는 서버가 준 순서
-export type ScheduleRowSort = "default" | "name" | "dutyRole" | "career";
+export type ScheduleRowSort = "skill" | "name";
 
 export type ScheduleBrush = { code: EditableDutyCode; label: string };
 
