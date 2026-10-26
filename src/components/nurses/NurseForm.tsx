@@ -8,12 +8,14 @@ import { formatApiError } from "@/lib/formatApiError";
 import { createNurse, updateNurse } from "@/services/nursesApi";
 import type { NurseDetail, NurseDraft } from "@/types/nurses.type";
 import NurseProfileFields from "./NurseProfileFields";
+import NurseRegisteredDialog from "./NurseRegisteredDialog";
 
 export default function NurseForm({ nurse }: { nurse?: NurseDetail }) {
   const editing = nurse !== undefined;
   const [draft, setDraft] = useState<NurseDraft>(() => nurse ? toNurseDraft(nurse) : emptyNurseDraft());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [registered, setRegistered] = useState<string | null>(null);
   const router = useRouter();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -24,13 +26,15 @@ export default function NurseForm({ nurse }: { nurse?: NurseDetail }) {
       const values = toNurseCreate(draft);
       if (nurse) {
         await updateNurse(nurse.id, { ...values, version: nurse.version });
+        router.push("/nurses");
+        router.refresh();
       } else {
         // 권한(role)은 이 화면에서 설정하지 않는다. 새로 등록하는 간호사는 항상 일반 간호사이고,
         // 수간호사 지정은 별도 기능(WARD-09 권한 부여)으로만 한다.
+        // TODO: preceptorOf 선택 UI는 시안에 없다.
         await createNurse(values);
+        setRegistered(draft.name.trim());
       }
-      router.push("/nurses");
-      router.refresh();
     } catch (err) {
       setError(formatApiError(err));
     } finally {
@@ -79,6 +83,17 @@ export default function NurseForm({ nurse }: { nurse?: NurseDetail }) {
           {editing ? "저장하기" : "등록하기"}
         </RnButton>
       </div>
+
+      {registered ? (
+        <NurseRegisteredDialog
+          name={registered}
+          onAddAnother={() => {
+            setDraft(emptyNurseDraft());
+            setRegistered(null);
+            setError(null);
+          }}
+        />
+      ) : null}
     </form>
   );
 }
