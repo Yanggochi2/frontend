@@ -1,19 +1,19 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import RnButton from "@/components/ui/RnButton";
 import { emptyNurseDraft, toNurseCreate } from "@/lib/nurseDraft";
 import { formatApiError } from "@/lib/formatApiError";
 import { createNurse } from "@/services/nursesApi";
 import type { NurseDraft } from "@/types/nurses.type";
 import NurseProfileFields from "./NurseProfileFields";
+import NurseRegisteredDialog from "./NurseRegisteredDialog";
 
 export default function NurseForm() {
   const [draft, setDraft] = useState<NurseDraft>(() => emptyNurseDraft());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [registered, setRegistered] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,7 +24,7 @@ export default function NurseForm() {
       // 수간호사 지정은 별도 기능(WARD-09 권한 부여)으로만 한다.
       // TODO: preceptorOf 선택 UI는 시안에 없다.
       await createNurse(toNurseCreate(draft));
-      router.push("/nurses");
+      setRegistered(draft.name.trim());
     } catch (err) {
       setError(formatApiError(err));
     } finally {
@@ -67,6 +67,17 @@ export default function NurseForm() {
           등록하기
         </RnButton>
       </div>
+
+      {registered ? (
+        <NurseRegisteredDialog
+          name={registered}
+          onAddAnother={() => {
+            setDraft(emptyNurseDraft());
+            setRegistered(null);
+            setError(null);
+          }}
+        />
+      ) : null}
     </form>
   );
 }
