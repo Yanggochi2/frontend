@@ -13,7 +13,7 @@ const currentMonthLabel = () => {
 };
 
 export default async function StatsPage() {
-  // TODO: 통계 API 명세 없음 — 지금은 항상 빈 결과라 빈 상태 화면이 나온다.
+  // 이번 달 근무표의 간호사별 집계 (statsApi.ts)
   let data: StatsData | null = null;
   try {
     data = await getStats();

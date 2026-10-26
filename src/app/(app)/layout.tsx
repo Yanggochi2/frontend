@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { ApiError } from "@/lib/apiClient";
 import AppShell from "@/components/layout/AppShell";
+import { getEntryPath } from "@/services/authApi";
 import { getShellInfo } from "@/services/shellApi";
 import type { ShellInfo } from "@/types/shell.type";
 
@@ -27,8 +28,16 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   }
   if (unauthenticated) redirect("/login");
   // 소속이 없으면 소속 선택으로 보낸다 (docs/router.md 진입 분기).
-  // TODO: 승인 대기(membership.status) 분기는 status 열거값 확정 후 /onboarding/pending으로 보낸다.
-  if (!shell) redirect("/onboarding/select-ward");
+  if (!shell) redirect(await entryWithoutWard());
 
   return <AppShell shell={shell}>{children}</AppShell>;
+}
+
+// 소속이 없을 때: 가입 승인 대기면 대기 화면, 아니면 소속 선택 (docs/router.md 진입 분기)
+async function entryWithoutWard(): Promise<string> {
+  try {
+    return await getEntryPath();
+  } catch {
+    return "/onboarding/select-ward";
+  }
 }

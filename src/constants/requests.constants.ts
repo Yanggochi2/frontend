@@ -2,12 +2,11 @@ import type { RequestKind } from "@/types/requests.type";
 
 // 🔶 미확정 값 모음. 확정되면 서버 값으로 교체한다.
 
-// TODO(🔶 REQ-01) 사유 코드 목록 미확정. 화면 임시 값. 코드 값(value)도 백엔드 확정 전 임시다.
-// 명세상 확정인 것은 ETC(reasonDetail 필수)뿐이다.
+// 사유 코드. 값은 백엔드 REASON_CODES와 같아야 한다 (PERSONAL, FAMILY, HEALTH, STUDY, ETC). ETC는 reasonDetail 필수
 export const REQUEST_REASON_ETC = "ETC";
 export const REQUEST_REASONS = [
   { value: "PERSONAL", label: "개인사정" },
-  { value: "FAMILY_EVENT", label: "가족행사" },
+  { value: "FAMILY", label: "가족행사" },
   { value: "HEALTH", label: "건강" },
   { value: "STUDY", label: "학업" },
   { value: REQUEST_REASON_ETC, label: "기타" },

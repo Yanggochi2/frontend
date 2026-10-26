@@ -33,7 +33,7 @@ export type ApiRulePatchBody = {
 
 // RULE-02 응답: Rule + ViolationSummary[]
 // TODO: 백엔드 확정 후 결정 (ViolationSummary 모양이 명세에 없다)
-export type ApiRulePatchResult = ApiRule & { violationSummary?: unknown[] };
+export type ApiRulePatchResult = { rule: ApiRule; violationSummary: unknown[] };
 
 // RULE-04
 // 백엔드 응답 기준. 병동이 등록한 날만 오고, isHoliday=false는 공휴일 해제다.

@@ -3,6 +3,7 @@ import ScheduleChip from "@/components/ui/ScheduleChip";
 import SchedulePageHeader from "@/components/ui/SchedulePageHeader";
 import type { GenerationFailure } from "@/types/schedule.type";
 import GeneratePartialApplyButton from "./GeneratePartialApplyButton";
+import GenerateRelaxButton from "./GenerateRelaxButton";
 
 export default function GenerateFailed({ data }: { data: GenerationFailure }) {
   return (
@@ -26,7 +27,7 @@ export default function GenerateFailed({ data }: { data: GenerationFailure }) {
           </ul>
         </section>
       ) : null}
-      {/* TODO: 완화 선택지(relaxations)는 백엔드 확정 후. 지금은 빈 배열이라 목록을 그리지 않는다 */}
+      {/* 완화 선택지: 해가 없을 때 백엔드가 SOFT로 낮출 수 있는 규칙을 준다 */}
       {data.options.length > 0 ? (
         <ul className="grid w-full grid-cols-3 gap-6">
           {data.options.map((o) => (
@@ -34,10 +35,7 @@ export default function GenerateFailed({ data }: { data: GenerationFailure }) {
               <ScheduleChip tone={o.badge.tone}>{o.badge.label}</ScheduleChip>
               <p className="text-[20px] font-bold text-ink">{o.title}</p>
               <p className="text-[16px] font-medium text-ink-sub">{o.description}</p>
-              {/* TODO: 이 방법으로 다시 만들기 동작은 백엔드 확정 후 */}
-              <ScheduleButton variant={o.primary ? "brand" : "neutral"} size="xs">
-                이 방법으로 다시 만들기
-              </ScheduleButton>
+              <GenerateRelaxButton jobId={data.jobId} relaxationId={o.id} yearMonth={data.yearMonth} primary={o.primary} />
             </li>
           ))}
         </ul>

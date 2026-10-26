@@ -52,7 +52,7 @@ export async function patchRule(ruleId: string, body: ApiRulePatchBody): Promise
     method: "PATCH",
     body,
   });
-  return toRuleItem(result);
+  return toRuleItem(result.rule);
 }
 
 // ⚠️ 명세에 없는 API. TODO: 백엔드 확정 후 결정 (경로, 본문, 중복 code 처리)
