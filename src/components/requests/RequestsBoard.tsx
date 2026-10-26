@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import RnFilterChip, { RnFilterDivider } from "@/components/ui/RnFilterChip";
+import { shiftMonth } from "@/lib/schedulePeriod";
 import type { RequestItem, RequestKind, RequestStatus } from "@/types/requests.type";
 import RequestsTable from "./RequestsTable";
 
@@ -18,15 +20,24 @@ const KIND_FILTERS: { value: RequestKind | "ALL"; label: string }[] = [
   // TODO: 희망 근무(PREFERRED_SHIFT) 필터 칩은 시안에 없음
 ];
 
+const monthLabel = (ym: string) => `${ym.slice(0, 4)}년 ${Number(ym.slice(5, 7))}월`;
+const arrowCls = "flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-[20px] font-bold text-ink-sub";
+
+// yearMonth: 거르는 달(YYYY-MM). null이면 전체 기간. 달은 URL(?ym=)로 바꾼다.
 export default function RequestsBoard({
   items,
-  monthLabel,
+  yearMonth,
+  thisMonth,
   mine = false,
 }: {
   items: RequestItem[];
-  monthLabel: string;
+  yearMonth: string | null;
+  thisMonth: string;
   mine?: boolean;
 }) {
+  const router = useRouter();
+  const shown = yearMonth ?? thisMonth;
+  const go = (ym: string | null) => router.push(ym ? `/requests?ym=${ym}` : "/requests");
   const [status, setStatus] = useState<RequestStatus>("PENDING");
   const [kind, setKind] = useState<RequestKind | "ALL">("ALL");
 
@@ -49,8 +60,18 @@ export default function RequestsBoard({
           </RnFilterChip>
         ))}
         <RnFilterDivider />
-        {/* TODO: 월 선택 UI는 시안에 없음. 지금은 표시만 한다. */}
-        <RnFilterChip selected={false}>{monthLabel}</RnFilterChip>
+        <RnFilterChip selected={yearMonth === null} onClick={() => go(null)}>
+          전체 기간
+        </RnFilterChip>
+        <button type="button" aria-label="이전 달" onClick={() => go(shiftMonth(shown, -1))} className={arrowCls}>
+          ‹
+        </button>
+        <RnFilterChip selected={yearMonth !== null} onClick={() => go(shown)}>
+          {monthLabel(shown)}
+        </RnFilterChip>
+        <button type="button" aria-label="다음 달" onClick={() => go(shiftMonth(shown, 1))} className={arrowCls}>
+          ›
+        </button>
       </div>
       <RequestsTable items={visible} mine={mine} />
     </>
