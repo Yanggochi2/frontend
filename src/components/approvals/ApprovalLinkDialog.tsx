@@ -7,7 +7,7 @@ import AdminChip from "@/components/ui/AdminChip";
 import RnOptionButton from "@/components/ui/RnOptionButton";
 import { DUTY_ROLE_LABEL } from "@/constants/nurses.constants";
 import { useSubmit } from "@/hooks/useSubmit";
-import { emptyNurseDraft, nurseDraftError, toNurseCreate } from "@/lib/nurseDraft";
+import { emptyNurseDraft, toNurseCreate } from "@/lib/nurseDraft";
 import { approveJoinRequest } from "@/services/approvalsApi";
 import { createNurse } from "@/services/nursesApi";
 import type { JoinRequest } from "@/types/approvals.type";
@@ -41,7 +41,7 @@ export default function ApprovalLinkDialog({ request, unlinkedNurses, onApproved
   const [draft, setDraft] = useState<NurseDraft>(() => emptyNurseDraft(request.name === "-" ? "" : request.name));
   // 등록은 됐는데 승인이 실패하면, 다시 눌렀을 때 같은 간호사를 또 만들지 않고 이어서 승인한다
   const createdId = useRef<string | null>(null);
-  const { submit, loading, error, setError } = useSubmit();
+  const { submit, loading, error } = useSubmit();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && !loading && onClose();
@@ -56,11 +56,6 @@ export default function ApprovalLinkDialog({ request, unlinkedNurses, onApproved
 
   async function approveRegister(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const invalid = createdId.current ? null : nurseDraftError(draft);
-    if (invalid) {
-      setError(invalid);
-      return;
-    }
     const ok = await submit(async () => {
       if (!createdId.current) createdId.current = (await createNurse(toNurseCreate(draft))).id;
       await approveJoinRequest(request.id, createdId.current);

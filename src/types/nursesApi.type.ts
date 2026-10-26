@@ -55,13 +55,3 @@ export type NurseListQuery = {
 };
 
 // TODO: 백엔드 확정 후 결정 — NUR-04/05의 "Nurse+Violation[]" 응답 래핑 형태는 명세에 없다.
-
-// 비즈니스 로직(10-19, 2장)으로 등록 때 더 받는 값. NUR-01 본문에 함께 보낸다.
-// TODO: 백엔드 확정 후 결정 (필드 이름, 필수 여부). 지금 백엔드는 모르는 필드를 무시한다
-export type NurseProfileExtra = {
-  wardCareerMonths: number;
-  restriction: "NONE" | "PREGNANT" | "POSTPARTUM_RETURN" | "NIGHT_KEEP" | "ON_LEAVE";
-  skillGroup: string;
-  isPreceptor: boolean;
-  history?: string;
-};

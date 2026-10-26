@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import RnButton from "@/components/ui/RnButton";
 
 type Props = {
@@ -8,14 +11,27 @@ type Props = {
 // 등록 완료 안내.
 // 지금은 간호사가 직접 가입해 병동 코드로 신청하면, 가입 승인에서 이 간호사 행과 연결한다.
 // TODO: "등록하면 계정 발급 → 첫 로그인 때 비밀번호 설정" 흐름(10-20 확정안)이 백엔드에 생기면 안내를 바꾼다
+// Esc는 "한 명 더 등록"과 같다 (창을 닫고 빈 폼으로).
 export default function NurseRegisteredDialog({ name, onAddAnother }: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => dialogRef.current?.focus(), []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onAddAnother();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onAddAnother]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="nurse-registered-title"
-        className="flex w-[520px] flex-col gap-5 rounded-[20px] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+        className="flex w-[520px] flex-col outline-none gap-5 rounded-[20px] bg-white p-8 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
       >
         <h2 id="nurse-registered-title" className="text-[26px] font-bold text-ink">
           {name} 간호사를 등록했어요
