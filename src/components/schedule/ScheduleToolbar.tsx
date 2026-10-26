@@ -1,5 +1,6 @@
+import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
 import ScheduleToggle from "@/components/ui/ScheduleToggle";
-import type { EditableDutyCode } from "@/types/schedule.type";
+import type { EditableDutyCode, ScheduleRowSort } from "@/types/schedule.type";
 import { BRUSH_BG, BRUSH_RING, DUTY_ORDER, DUTY_STYLE } from "./dutyStyle";
 
 type Props = {
@@ -11,7 +12,17 @@ type Props = {
   onRedo: () => void;
   checkOnly: boolean;
   onCheckOnlyChange: (value: boolean) => void;
+  sort: ScheduleRowSort;
+  onSortChange: (value: ScheduleRowSort) => void;
 };
+
+// 숙련 그룹 묶음은 그대로 두고 묶음 안의 순서만 바꾼다. 기본은 서버가 준 순서
+const SORT_OPTIONS: { value: ScheduleRowSort; label: string }[] = [
+  { value: "default", label: "기본" },
+  { value: "name", label: "이름" },
+  { value: "dutyRole", label: "직급" },
+  { value: "career", label: "경력" },
+];
 
 export default function ScheduleToolbar({
   brush,
@@ -22,6 +33,8 @@ export default function ScheduleToolbar({
   onRedo,
   checkOnly,
   onCheckOnlyChange,
+  sort,
+  onSortChange,
 }: Props) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -43,6 +56,10 @@ export default function ScheduleToolbar({
         })}
       </div>
       <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <p className="text-[16px] font-bold text-ink">정렬</p>
+          <ScheduleSegmented options={SORT_OPTIONS} value={sort} onChange={onSortChange} ariaLabel="간호사 정렬" />
+        </div>
         <button
           type="button"
           onClick={onUndo}

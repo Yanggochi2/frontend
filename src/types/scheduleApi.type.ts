@@ -1,5 +1,6 @@
 // docs/API.md 근무표·자동 생성 모델. 명세에 모양이 없는 필드는 unknown으로 두고 TODO로 남긴다.
 import type { PageMeta } from "./api.type";
+import type { ApiDutyRole } from "./nursesApi.type";
 
 // TODO(🔶 ED 교육): ED 코드는 미확정. 타입에서만 받아 주고 입력 UI는 만들지 않는다.
 export type ApiDutyCode = "D" | "E" | "N" | "O" | "AL" | "ED";
@@ -10,7 +11,9 @@ export type ApiScheduleNurse = {
   name: string;
   // TODO: 백엔드 확정 후 결정 (숙련 그룹 필드 이름. 비즈니스 로직 10-19 기준 추가 예정)
   skillGroup?: string | null;
-  // 그 밖의 Nurse 필드(숙련도·경력 등)는 역할별로 다르다. 받은 것만 표시한다.
+  // 아래와 그 밖의 Nurse 필드(숙련도·경력 등)는 역할별로 다르다. 받은 것만 표시한다.
+  dutyRole?: ApiDutyRole;
+  careerMonths?: number | null;
   [key: string]: unknown;
 };
 
