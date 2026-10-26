@@ -52,7 +52,7 @@ export default function NursesTable({ items }: { items: Nurse[] }) {
               <td className={`${cell} w-[260px] ${text}`}>{n.periodLabel ?? "-"}</td>
               <td className={`${cell} ${text}`}>
                 {n.status === "RETIRED" ? (
-                  <span className="text-ink-muted">수정 불가</span>
+                  <span className="text-ink-mute">수정 불가</span>
                 ) : (
                   <RnButton variant="secondary" href={`/nurses/${encodeURIComponent(n.id)}/edit`}>
                     수정

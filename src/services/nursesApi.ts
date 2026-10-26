@@ -87,7 +87,7 @@ export async function createNurse(body: NurseCreate): Promise<Nurse> {
   return mapNurse(data);
 }
 
-// NUR-04. role은 보내지 않는다. 위반·경고는 저장 결과와 함께 오며 목록을 다시 불러올 때 반영된다.
+// NUR-04. role은 보내지 않는다. 응답은 { nurse, violations, warnings }. TODO: violations·warnings 표시는 화면 시안 확정 후
 export async function updateNurse(id: string, patch: NursePatch): Promise<Nurse> {
   const data = await apiRequest<ApiNurseMutationResult>(`${NURSES_PATH}/${encodeURIComponent(id)}`, {
     method: "PATCH",
