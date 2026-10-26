@@ -7,7 +7,8 @@ import ScheduleButton from "@/components/ui/ScheduleButton";
 import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
 import { useGenerationStart } from "@/hooks/useGenerationStart";
 import { useScheduleEditor } from "@/hooks/useScheduleEditor";
-import type { EditableDutyCode, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
+import { compareNurses } from "@/lib/nurseSort";
+import type { EditableDutyCode, ScheduleRowSort, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
 import ScheduleBottomBar from "./ScheduleBottomBar";
 import ScheduleCellPopover from "./ScheduleCellPopover";
 import ScheduleGrid from "./ScheduleGrid";
@@ -27,6 +28,7 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
   const { rows, setDuty } = editor;
   const [brush, setBrush] = useState<EditableDutyCode | null>(null);
   const [checkOnly, setCheckOnly] = useState(false);
+  const [sort, setSort] = useState<ScheduleRowSort>("default");
   const [popover, setPopover] = useState<Popover | null>(null);
   const [showEmptyGuide, setShowEmptyGuide] = useState(canManage && sheet.unassigned);
   const generation = useGenerationStart();
@@ -67,8 +69,17 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
 
   const gridRows = useMemo(() => {
     const all = rows.map((row, index) => ({ row, index }));
+    if (sort !== "default") {
+      // 숙련 그룹 묶음(서버 순서대로 붙어 있음)은 유지하고 묶음 안에서만 정렬한다.
+      const groupOrder = [...new Set(rows.map((r) => r.group))];
+      all.sort(
+        (a, b) =>
+          groupOrder.indexOf(a.row.group) - groupOrder.indexOf(b.row.group) ||
+          compareNurses(sort, a.row, b.row),
+      );
+    }
     return checkOnly ? all.filter(({ row }) => row.needsCheck || row.cells.some((c) => c.flag)) : all;
-  }, [rows, checkOnly]);
+  }, [rows, checkOnly, sort]);
 
   const isMonth = sheet.view === "month";
   const period = { yearMonth: sheet.yearMonth, week: sheet.activeWeek };
@@ -121,6 +132,8 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
               onRedo={editor.redo}
               checkOnly={checkOnly}
               onCheckOnlyChange={setCheckOnly}
+              sort={sort}
+              onSortChange={setSort}
             />
           ) : null}
           {editor.saveError ? (

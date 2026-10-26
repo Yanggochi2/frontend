@@ -75,6 +75,15 @@ export async function getRequests(query: WorkRequestQuery = {}): Promise<Request
   };
 }
 
+// 근무표 칸 표시용 (REQ-03, 수간호사만). 그 달에 승인된 희망 오프를 "간호사id|YYYY-MM-DD"로 모은다.
+export async function getApprovedOffKeys(yearMonth: string): Promise<Set<string>> {
+  const list = await apiRequestList<ApiWorkRequest>(REQUESTS_PATH, {
+    query: { yearMonth, type: "PREFERRED_OFF", status: "APPROVED", size: 100 },
+  });
+  // TODO: 100건을 넘으면 다음 페이지도 받아야 한다 (meta.totalPages)
+  return new Set(list.data.flatMap((r) => r.targetDates.map((d) => `${r.applicantId}|${d}`)));
+}
+
 // REQ-02 내 신청 목록
 export async function getMyRequests(query: WorkRequestQuery = {}): Promise<RequestItem[]> {
   const list = await apiRequestList<ApiWorkRequest>(`${REQUESTS_PATH}/me`, { query });
