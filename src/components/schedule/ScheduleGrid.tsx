@@ -16,6 +16,9 @@ type Props = {
 
 const DAY_TEXT = { default: "text-ink", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
 const WEEKDAY_TEXT = { default: "text-ink-sub", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
+// 토·일·공휴일 열을 본문에서도 구분하도록 머리글과 근무가 없는 칸에 옅은 배경을 깐다.
+const HEAD_BG = { default: "bg-surface", sat: "bg-brand-soft", sun: "bg-danger-soft", holiday: "bg-danger-soft" } as const;
+const EMPTY_BG = { default: "bg-white", sat: "bg-brand-soft/60", sun: "bg-danger-soft/60", holiday: "bg-danger-soft/60" } as const;
 
 // 하단 인원 행. 세로 스크롤에도 보이도록 아래에서부터 쌓아 고정한다 (행 높이 h-11).
 const COVERAGE_ROWS: { duty: CoverageDuty; bottom: string }[] = [
@@ -68,7 +71,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                 key={d.date}
                 scope="col"
                 title={d.holidayName}
-                className={`sticky top-0 z-20 border-t border-r border-b border-grid p-0 font-normal ${headH} ${d.isToday ? "bg-line" : "bg-surface"}`}
+                className={`sticky top-0 z-20 border-t border-r border-b border-grid p-0 font-normal ${headH} ${d.isToday ? "bg-line" : HEAD_BG[d.tone]}`}
               >
                 <div className="flex flex-col items-center justify-center gap-0.5 leading-none">
                   {/* 주간 보기는 칸이 넓어 요일 자리에 공휴일 이름을 쓴다. 월간은 색으로만 구분하고 이름은 title로 */}
@@ -111,7 +114,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                   const label = style ? (isMonth ? style.monthLabel : style.weekLabel) : "";
                   const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
                   return (
-                    <td key={col} title={cell.violations?.join("\n")} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
+                    <td key={col} title={cell.violations?.join("\n")} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : EMPTY_BG[days[col].tone]}`}>
                       <button
                         type="button"
                         disabled={!onCellClick || cell.editable === false}

@@ -32,5 +32,7 @@ export type RequestFormOptions = {
   /** 오늘 날짜(일). 이전 날짜는 선택할 수 없다. */
   today: number;
   initialSelectedDay: number;
+  /** 그 달 공휴일. 일 → 이름. 받지 못하면 비어 있다 */
+  holidays: Record<number, string>;
   reasons: { value: string; label: string }[];
 };

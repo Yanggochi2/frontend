@@ -18,12 +18,14 @@ export default function RequestCalendar({
   year,
   month,
   today,
+  holidays,
   range,
   onChange,
 }: {
   year: number;
   month: number;
   today: number;
+  holidays: Record<number, string>; // 일 → 공휴일 이름
   range: DayRange;
   onChange: (r: DayRange) => void;
 }) {
@@ -57,12 +59,13 @@ export default function RequestCalendar({
         const col = idx % 7;
         const past = d < today;
         const selected = d >= range.start && d <= range.end;
+        const holiday = holidays[d];
         const color = past
           ? "text-ink-mute"
-          : col === 5
-            ? "text-brand"
-            : col === 6
-              ? "text-danger"
+          : col === 6 || holiday !== undefined
+            ? "text-danger"
+            : col === 5
+              ? "text-brand"
               : "text-ink";
         return (
           <button
@@ -70,6 +73,7 @@ export default function RequestCalendar({
             type="button"
             disabled={past}
             aria-pressed={selected}
+            title={holiday}
             onClick={() => pick(d)}
             className={`flex h-14 items-center justify-center rounded-[12px] text-[20px] ${
               selected
