@@ -17,7 +17,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   const canManage = (await getMyRole()) !== "NURSE";
   let data: SchedulePageData | null = null;
   try {
-    data = await getSchedulePage({ view: first(sp.view), ym: first(sp.ym), week: first(sp.week) });
+    data = await getSchedulePage({ view: first(sp.view), ym: first(sp.ym), week: first(sp.week), manage: canManage });
   } catch {
     data = null;
   }

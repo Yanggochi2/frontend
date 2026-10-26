@@ -10,8 +10,9 @@ import NursesTable from "./NursesTable";
 type RoleFilter = DutyRole | "ALL";
 
 const SORTS: { value: NurseSortKey; label: string }[] = [
+  { value: "default", label: "기본순" },
   { value: "name", label: "이름순" },
-  { value: "dutyRole", label: "직급순" },
+  { value: "dutyRole", label: "역할순" },
   { value: "career", label: "경력순" },
   { value: "skill", label: "숙련도순" },
 ];
@@ -30,7 +31,7 @@ const sortFields = (n: Nurse) => ({
 });
 
 export default function NursesBoard({ items }: { items: Nurse[] }) {
-  const [sort, setSort] = useState<NurseSortKey>("name");
+  const [sort, setSort] = useState<NurseSortKey>("default");
   const [role, setRole] = useState<RoleFilter>("ALL");
   const [includeRetired, setIncludeRetired] = useState(false);
 

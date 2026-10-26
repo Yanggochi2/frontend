@@ -72,6 +72,19 @@ export async function getNurseNameMap(): Promise<Map<string, string>> {
   }
 }
 
+// 근무표 행 정렬용. 근무표 nurses[]에 없는 수간호사 여부·총경력을 NUR-02에서 채운다. 실패하면 빈 맵.
+// TODO: 근무표 응답에 role·careerMonths가 오면 이 요청은 뺀다
+export async function getNurseSortInfoMap(): Promise<Map<string, Pick<ApiNurse, "role" | "careerMonths">>> {
+  try {
+    const list = await apiRequestList<ApiNurse>(NURSES_PATH, {
+      query: { includeRetired: true, size: 100 },
+    });
+    return new Map(list.data.map((n) => [n.id, { role: n.role, careerMonths: n.careerMonths }]));
+  } catch {
+    return new Map();
+  }
+}
+
 // NUR-03
 export async function getNurse(id: string): Promise<NurseDetail> {
   return mapNurseDetail(await apiRequest<ApiNurse>(`${NURSES_PATH}/${encodeURIComponent(id)}`));

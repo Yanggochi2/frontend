@@ -1,4 +1,4 @@
-import type { DutyRole } from "./nurses.type";
+import type { DutyRole, NurseRole } from "./nurses.type";
 import type { ScheduleStatus } from "./scheduleApi.type";
 
 // 근무표 화면 타입. 응답 필드는 백엔드 확정 후 결정 (TODO)
@@ -36,6 +36,7 @@ export type ScheduleRow = {
   nurseKey: string; // nurseId
   name: string;
   group?: string; // 숙련 그룹. 없으면 묶지 않는다
+  role?: NurseRole; // 정렬용(수간호사 먼저). 받은 것만
   dutyRole?: DutyRole; // 정렬용. 받은 것만
   careerMonths?: number; // 정렬용 총경력(개월). 받은 것만
   cells: ScheduleCell[];
@@ -80,6 +81,7 @@ export type SchedulePageParams = {
   view?: string;
   ym?: string;
   week?: string;
+  manage?: boolean; // 수간호사 화면이면 정렬용 간호사 정보(NUR-02)를 같이 받는다
 };
 
 export type GenerationStep = {
