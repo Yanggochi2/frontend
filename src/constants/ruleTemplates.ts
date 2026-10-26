@@ -59,9 +59,37 @@ export const RULE_TEMPLATES: RuleTemplate[] = [
   {
     code: "CHARGE_DAY_ONLY",
     name: "차지 간호사 데이 근무",
-    parts: ["차지 간호사는 데이 근무만"],
+    parts: ["차지 간호사는 데이 근무만 (근무마다 차지 배치와 함께 켤 수 없어 기본 꺼짐)"],
     addable: false,
     defaultStrength: "REQUIRED",
+  },
+  {
+    code: "CHARGE_EVERY_SHIFT",
+    name: "근무마다 차지",
+    parts: ["데이·이브닝·나이트마다 차지 간호사를 1명 이상 넣어요"],
+    addable: false,
+    defaultStrength: "REQUIRED",
+  },
+  {
+    code: "SENIOR_EVERY_SHIFT",
+    name: "근무마다 고연차",
+    parts: ["데이·이브닝·나이트마다 차지나 프리셉터를 1명 이상 넣어요"],
+    addable: false,
+    defaultStrength: "REQUIRED",
+  },
+  {
+    code: "NIGHT_ONLY_SHIFT",
+    name: "나이트 전담",
+    parts: ["나이트 전담 간호사는 나이트만 (월 15회 이내)"],
+    addable: false,
+    defaultStrength: "REQUIRED",
+  },
+  {
+    code: "SHIFT_BLOCK",
+    name: "같은 근무 이어서",
+    parts: ["같은 근무를 2일 이상 이어서 배치해요 (퐁당퐁당 피하기)"],
+    addable: false,
+    defaultStrength: "RECOMMENDED",
   },
   {
     code: "PREGNANT_NIGHT",

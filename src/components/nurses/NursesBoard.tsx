@@ -14,6 +14,7 @@ const ROLE_FILTERS: { value: RoleFilter; label: string }[] = [
   { value: "CHARGE", label: DUTY_ROLE_LABEL.CHARGE },
   { value: "PRECEPTOR", label: DUTY_ROLE_LABEL.PRECEPTOR },
   { value: "NEW", label: DUTY_ROLE_LABEL.NEW },
+  { value: "NIGHT_ONLY", label: DUTY_ROLE_LABEL.NIGHT_ONLY },
 ];
 
 const careerMonths = (n: Nurse) => (n.careerYears ?? 0) * 12 + (n.careerMonths ?? 0);

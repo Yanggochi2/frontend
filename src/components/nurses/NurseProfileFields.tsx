@@ -25,7 +25,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   );
 }
 
-const DUTY_ROLES: DutyRole[] = ["GENERAL", "CHARGE", "PRECEPTOR", "NEW"];
+const DUTY_ROLES: DutyRole[] = ["GENERAL", "CHARGE", "PRECEPTOR", "NEW", "NIGHT_ONLY"];
 
 type Props = {
   draft: NurseDraft;

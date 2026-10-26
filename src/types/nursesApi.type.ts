@@ -1,6 +1,6 @@
 // docs/API.md NUR-01~05 모델. 일반 간호사 응답에는 숙련도·경력·상태 등이 없을 수 있어 optional로 둔다.
 export type ApiNurseRole = "HEAD_NURSE" | "NURSE";
-export type ApiDutyRole = "CHARGE" | "PRECEPTOR" | "NEW" | "GENERAL";
+export type ApiDutyRole = "CHARGE" | "PRECEPTOR" | "NEW" | "GENERAL" | "NIGHT_ONLY";
 export type ApiNurseStatus = "ACTIVE" | "PREGNANT" | "ON_LEAVE" | "RETIRED";
 
 // TODO: 백엔드 확정 후 결정 — id 타입, 역할별로 어떤 필드가 빠지는지
