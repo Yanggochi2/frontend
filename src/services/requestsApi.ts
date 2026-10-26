@@ -1,5 +1,6 @@
 import { ApiError, apiRequest, apiRequestList } from "@/lib/apiClient";
-import { REQUEST_REASON_ETC, REQUEST_REASONS } from "@/constants/requests.constants";
+import { REQUEST_MONTHS_AHEAD, REQUEST_REASON_ETC, REQUEST_REASONS } from "@/constants/requests.constants";
+import { shiftMonth, todayKst } from "@/lib/schedulePeriod";
 import { getNurseNameMap } from "@/services/nursesApi";
 import { getHolidays } from "@/services/rulesApi";
 import type {
@@ -111,16 +112,20 @@ export async function getRequest(id: string): Promise<RequestItem> {
   return mapWorkRequest(data, names);
 }
 
-export async function getRequestFormOptions(): Promise<RequestFormOptions> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+// ym(YYYY-MM)은 이번 달 ~ REQUEST_MONTHS_AHEAD달 뒤 안에서만 연다. 없거나 범위 밖이면 이번 달.
+export async function getRequestFormOptions(ym?: string): Promise<RequestFormOptions> {
+  const now = todayKst();
+  const last = shiftMonth(now.yearMonth, REQUEST_MONTHS_AHEAD);
+  const yearMonth = ym && /^\d{4}-(0[1-9]|1[0-2])$/.test(ym) && ym >= now.yearMonth && ym <= last ? ym : now.yearMonth;
+  const isThisMonth = yearMonth === now.yearMonth;
   return {
-    year,
-    month,
-    today: now.getDate(),
-    initialSelectedDay: now.getDate(),
-    holidays: await getHolidayDays(`${year}-${String(month).padStart(2, "0")}`),
+    year: Number(yearMonth.slice(0, 4)),
+    month: Number(yearMonth.slice(5)),
+    prevYearMonth: isThisMonth ? null : shiftMonth(yearMonth, -1),
+    nextYearMonth: yearMonth === last ? null : shiftMonth(yearMonth, 1),
+    today: isThisMonth ? now.day : 0,
+    initialSelectedDay: isThisMonth ? now.day : 1,
+    holidays: await getHolidayDays(yearMonth),
     reasons: REQUEST_REASONS,
   };
 }

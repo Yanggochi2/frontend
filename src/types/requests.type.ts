@@ -29,7 +29,10 @@ export type RequestListResult = {
 export type RequestFormOptions = {
   year: number;
   month: number;
-  /** 오늘 날짜(일). 이전 날짜는 선택할 수 없다. */
+  /** 이전·다음 달로 갈 수 있으면 그 달(YYYY-MM). 범위 밖이면 null */
+  prevYearMonth: string | null;
+  nextYearMonth: string | null;
+  /** 오늘 날짜(일). 이전 날짜는 선택할 수 없다. 이번 달이 아니면 0 */
   today: number;
   initialSelectedDay: number;
   /** 그 달 공휴일. 일 → 이름. 받지 못하면 비어 있다 */

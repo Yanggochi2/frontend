@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import RnButton from "@/components/ui/RnButton";
 import { REQUEST_KIND_OPTIONS, REQUEST_REASON_ETC } from "@/constants/requests.constants";
@@ -10,7 +11,7 @@ import type { RequestFormOptions, RequestKind } from "@/types/requests.type";
 import RequestCalendar, { formatRange, type DayRange } from "./RequestCalendar";
 
 export default function RequestForm({ options }: { options: RequestFormOptions }) {
-  const { year, month, today, initialSelectedDay, holidays, reasons } = options;
+  const { year, month, prevYearMonth, nextYearMonth, today, initialSelectedDay, holidays, reasons } = options;
   const router = useRouter();
   const [kind, setKind] = useState<RequestKind>("ANNUAL_LEAVE");
   const [reason, setReason] = useState(reasons[0]?.value ?? "");
@@ -112,11 +113,10 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
         </section>
 
         <section className="flex w-full max-w-[680px] flex-1 flex-col gap-4 rounded-[20px] border border-line bg-white px-7 py-[26px]">
-          <div className="flex h-8 items-center gap-3 text-[24px] font-bold text-ink-sub">
+          <div className="flex h-11 items-center gap-3 text-[24px] font-bold text-ink-sub">
             <h2 className="flex-1 text-[22px] text-ink">{`${year}년 ${month}월`}</h2>
-            {/* TODO: 월 이동은 시안에 동작 정의 없음. 표시만 한다. */}
-            <span aria-hidden>‹</span>
-            <span aria-hidden>›</span>
+            <MonthLink ym={prevYearMonth} label="이전 달">‹</MonthLink>
+            <MonthLink ym={nextYearMonth} label="다음 달">›</MonthLink>
           </div>
           <RequestCalendar year={year} month={month} today={today} holidays={holidays} range={range} onChange={setRange} />
           <p className="w-full max-w-[624px] rounded-[14px] bg-brand-soft px-5 py-3.5 text-[17px] font-bold whitespace-pre text-brand">
@@ -139,5 +139,21 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
         </RnButton>
       </div>
     </form>
+  );
+}
+
+// 갈 수 없는 달이면 흐리게 두고 누를 수 없다.
+function MonthLink({ ym, label, children }: { ym: string | null; label: string; children: string }) {
+  const cls = "flex size-11 items-center justify-center rounded-[14px] bg-surface";
+  if (!ym)
+    return (
+      <span aria-disabled aria-label={label} className={`${cls} text-ink-faint`}>
+        {children}
+      </span>
+    );
+  return (
+    <Link href={`/requests/new?ym=${ym}`} aria-label={label} className={`${cls} text-ink-sub`}>
+      {children}
+    </Link>
   );
 }

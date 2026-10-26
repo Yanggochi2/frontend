@@ -9,7 +9,7 @@
 | `/schedule/generate` | 자동 생성 시작(`?ym=`) · 진행(`?jobId=`) | 자동 생성 진행 (시작 화면은 시안 없음) |
 | `/schedule/generate/failed` | 생성 실패 · 해 없음 | 생성 실패 · 해 없음 |
 | `/requests` | 신청 관리 | 신청 관리, 빈 상태 · 신청 관리 |
-| `/requests/new` | 새 신청 | 새 신청 |
+| `/requests/new` | 새 신청 (`?ym=`로 달 이동) | 새 신청 |
 | `/nurses` | 간호사 명단 | 간호사 명단, 빈 상태 · 간호사 명단 |
 | `/nurses/new` | 간호사 등록 | 간호사 등록 |
 | `/nurses/[nurseId]/edit` | 간호사 정보 수정 | 간호사 등록 화면 확장 |

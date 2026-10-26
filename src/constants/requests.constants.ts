@@ -12,6 +12,9 @@ export const REQUEST_REASONS = [
   { value: REQUEST_REASON_ETC, label: "기타" },
 ];
 
+// TODO(🔶 REQ-01) 신청할 수 있는 달 범위 미확정. 지금은 이번 달부터 2달 뒤까지 넘길 수 있게 둔다.
+export const REQUEST_MONTHS_AHEAD = 2;
+
 // TODO(🔶 REQ-01) 월 신청 건수 제한 미확정. 값이 정해지면 폼에서 안내/검증에 쓴다.
 export const MONTHLY_REQUEST_LIMIT: number | null = null;
 
