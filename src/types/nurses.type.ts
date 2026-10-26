@@ -29,7 +29,8 @@ export type NurseDetail = Nurse & {
 // 간호사 등록 폼의 입력값. 날짜는 YYYY-MM-DD 문자열, 숫자는 입력 그대로 문자열.
 export type NurseDraft = {
   name: string;
-  hireDate: string;
+  /** 입사년도 (YYYY). 서버로는 그 해 1월 1일로 보낸다 */
+  hireYear: string;
   dutyRole: DutyRole;
   careerYears: string;
   careerMonths: string;

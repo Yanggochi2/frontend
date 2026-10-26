@@ -47,13 +47,16 @@ export default function NurseProfileFields({ draft, onChange }: Props) {
           className={inputCls}
         />
       </Field>
-      <Field label="입사일">
+      <Field label="입사년도">
         <input
-          type="date"
+          type="number"
           required
-          aria-label="입사일"
-          value={draft.hireDate}
-          onChange={(e) => onChange({ hireDate: e.target.value })}
+          min={1970}
+          max={new Date().getFullYear()}
+          placeholder="예: 2022"
+          aria-label="입사년도"
+          value={draft.hireYear}
+          onChange={(e) => onChange({ hireYear: e.target.value })}
           className={inputCls}
         />
       </Field>
