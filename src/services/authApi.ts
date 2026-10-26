@@ -22,10 +22,10 @@ export async function logout(): Promise<void> {
   await apiRequest<void>("/auth/logout", { method: "POST" });
 }
 
-// 로그인 직후 어디로 보낼지: 소속이 있으면 근무표, 없으면 소속 선택(초대 코드가 있으면 넘긴다).
-// TODO: 승인 대기·반려 상태를 알 수 있는 API가 명세에 없다. 확정되면 /onboarding/pending 분기를 넣는다.
+// 로그인 직후 어디로 보낼지: 소속이 있으면 근무표, 가입 승인 대기면 대기 화면, 없으면 소속 선택(초대 코드가 있으면 넘긴다).
 export async function getEntryPath(joinCode?: string): Promise<string> {
   const me = await apiRequest<MeResponse>("/me");
   if (me.membership && me.ward) return "/schedule";
+  if (me.membershipRequest?.status === "PENDING") return "/onboarding/pending";
   return joinCode ? `/onboarding/select-ward?code=${encodeURIComponent(joinCode)}` : "/onboarding/select-ward";
 }

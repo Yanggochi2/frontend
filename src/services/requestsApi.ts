@@ -1,4 +1,4 @@
-import { apiRequest, apiRequestList } from "@/lib/apiClient";
+import { ApiError, apiRequest, apiRequestList } from "@/lib/apiClient";
 import { REQUEST_REASON_ETC, REQUEST_REASONS } from "@/constants/requests.constants";
 import { getNurseNameMap } from "@/services/nursesApi";
 import type {
@@ -44,8 +44,8 @@ export function mapWorkRequest(r: ApiWorkRequest, nurseNames: Map<string, string
   const reasonLabel = REQUEST_REASONS.find((o) => o.value === r.reasonCode)?.label ?? r.reasonCode;
   return {
     id: r.id,
-    // TODO: 백엔드 확정 후 결정 — 신청자 이름 필드가 없어 간호사 목록으로 찾고, 없으면 applicantId를 보여준다.
-    nurseName: nurseNames.get(r.applicantId) ?? r.applicantId,
+    nurseName: r.applicantName ?? nurseNames.get(r.applicantId) ?? r.applicantId,
+    requestedAtLabel: formatProcessedAt(r.createdAt),
     kind: r.type,
     targetDateLabel: formatTargetDates(r.targetDates),
     reason: r.reasonCode === REQUEST_REASON_ETC && r.reasonDetail ? r.reasonDetail : reasonLabel,
@@ -54,25 +54,24 @@ export function mapWorkRequest(r: ApiWorkRequest, nurseNames: Map<string, string
   };
 }
 
-function currentYearMonth() {
-  const now = new Date();
-  return { year: now.getFullYear(), month: now.getMonth() + 1 };
-}
-
 // REQ-03 수간호사 신청 목록. REQ-02(getMyRequests)와 같은 화면 타입으로 돌려준다.
+// yearMonth가 없으면 전체 기간 (신청은 대개 다음 달 이후라 이번 달만 보면 대기 건이 빠진다. 사이드바 배지와 같은 기준)
+// 병동 전체 목록은 수간호사만 된다. 일반 간호사(403)는 내 신청 목록을 승인/반려 버튼 없이 보여 준다.
 export async function getRequests(query: WorkRequestQuery = {}): Promise<RequestListResult> {
-  const { year, month } = currentYearMonth();
-  const yearMonth = query.yearMonth ?? `${year}-${pad(month)}`;
-  const [list, names] = await Promise.all([
-    apiRequestList<ApiWorkRequest>(REQUESTS_PATH, { query: { size: 100, ...query, yearMonth } }),
-    getNurseNameMap(),
-  ]);
-  // TODO: 100건을 넘으면 페이지 이동 UI가 필요하다 (meta.totalPages)
-  const items = list.data.map((r) => mapWorkRequest(r, names));
+  const yearMonth = query.yearMonth;
+  let items: RequestItem[];
+  try {
+    const list = await apiRequestList<ApiWorkRequest>(REQUESTS_PATH, { query: { size: 100, ...query } });
+    // TODO: 100건을 넘으면 페이지 이동 UI가 필요하다 (meta.totalPages)
+    items = list.data.map((r) => mapWorkRequest(r));
+  } catch (e) {
+    if (!(e instanceof ApiError && e.status === 403)) throw e;
+    items = (await getMyRequests({ size: 100, ...query })).map((r) => ({ ...r, decidable: false }));
+  }
   return {
     items,
     pendingCount: items.filter((i) => i.status === "PENDING").length,
-    monthLabel: `${yearMonth.slice(0, 4)}년 ${Number(yearMonth.slice(5, 7))}월`,
+    monthLabel: yearMonth ? `${yearMonth.slice(0, 4)}년 ${Number(yearMonth.slice(5, 7))}월` : "전체 기간",
   };
 }
 
@@ -82,15 +81,14 @@ export async function getMyRequests(query: WorkRequestQuery = {}): Promise<Reque
   return list.data.map((r) => mapWorkRequest(r));
 }
 
-// REQ-02 간호사 본인 신청 목록을 신청 화면 타입으로 돌려준다 (이번 달 기준, getRequests와 같은 모양).
+// REQ-02 간호사 본인 신청 목록을 신청 화면 타입으로 돌려준다. getRequests와 같이 전체 기간 기준이다
+// (신청은 대개 다음 달 이후라 이번 달만 보면 대기 건이 빠진다).
 export async function getMyRequestList(): Promise<RequestListResult> {
-  const { year, month } = currentYearMonth();
-  const yearMonth = `${year}-${pad(month)}`;
-  const items = await getMyRequests({ yearMonth, size: 100 });
+  const items = await getMyRequests({ size: 100 });
   return {
     items,
     pendingCount: items.filter((i) => i.status === "PENDING").length,
-    monthLabel: `${year}년 ${month}월`,
+    monthLabel: "전체 기간",
   };
 }
 
@@ -124,9 +122,9 @@ export async function createRequest(body: WorkRequestCreate): Promise<RequestIte
   return mapWorkRequest(data);
 }
 
-// REQ-05 (Idempotency-Key). TODO: 백엔드 확정 후 결정 — 응답의 scheduleImpact 구조
+// REQ-05 (Idempotency-Key). 응답은 { request, scheduleImpact }
 export async function approveRequest(id: string): Promise<RequestItem> {
-  const data = await apiRequest<ApiWorkRequest>(`${REQUESTS_PATH}/${encodeURIComponent(id)}/approve`, {
+  const { request: data } = await apiRequest<{ request: ApiWorkRequest }>(`${REQUESTS_PATH}/${encodeURIComponent(id)}/approve`, {
     method: "POST",
     idempotencyKey: idempotencyKey(),
   });

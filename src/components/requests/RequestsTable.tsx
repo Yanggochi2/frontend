@@ -67,9 +67,9 @@ export default function RequestsTable({ items, mine = false }: { items: RequestI
                   {r.status === "PENDING" ? (
                     mine ? (
                       <RequestCancelButton id={r.id} />
-                    ) : (
+                    ) : r.decidable !== false ? (
                       <RequestRowActions id={r.id} />
-                    )
+                    ) : null
                   ) : r.status === "CANCELLED" ? (
                     "취소됨"
                   ) : (

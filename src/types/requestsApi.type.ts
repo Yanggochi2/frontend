@@ -7,6 +7,9 @@ export type PreferredDuty = "D" | "E" | "N";
 export type ApiWorkRequest = {
   id: string;
   applicantId: string;
+  applicantName: string;
+  /** 신청 시각, UTC ISO 8601 */
+  createdAt: string;
   type: WorkRequestType;
   /** YYYY-MM-DD 목록 */
   targetDates: string[];

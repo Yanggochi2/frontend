@@ -16,7 +16,7 @@ const currentMonthLabel = () => {
 // 수간호사는 병동 전체(공정성), 간호사는 본인 통계만 본다 (SCH-04).
 export default async function StatsPage() {
   const mine = (await getMyRole()) === "NURSE";
-  // TODO: 통계 API 명세 없음 — 지금은 항상 빈 결과라 빈 상태 화면이 나온다.
+  // 이번 달 근무표의 간호사별 집계 (statsApi.ts)
   let data: StatsData | null = null;
   try {
     data = await getStats();
