@@ -116,11 +116,19 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                         type="button"
                         disabled={!onCellClick || cell.editable === false}
                         onClick={(e) => onCellClick?.(index, col, e.currentTarget)}
-                        aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}${cell.charge ? " 차지" : ""}`}
+                        aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}${cell.charge ? " 차지" : ""}${cell.approvedOff ? " 희망 오프" : ""}`}
                         className={`flex size-full items-center justify-center ${style ? style.cell : "text-ink"} ${labelSize}`}
                       >
                         {label}
                       </button>
+                      {cell.approvedOff ? (
+                        <span
+                          aria-hidden
+                          className={`pointer-events-none absolute top-0.5 left-0.5 rounded-[6px] bg-ink-sub px-1 leading-tight font-bold text-white ${isMonth ? "text-[10px]" : "text-[12px]"}`}
+                        >
+                          {isMonth ? "희" : "희망"}
+                        </span>
+                      ) : null}
                       {cell.charge ? (
                         <span
                           aria-hidden

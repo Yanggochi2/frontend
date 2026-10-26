@@ -1,3 +1,4 @@
+import type { DutyRole } from "./nurses.type";
 import type { ScheduleStatus } from "./scheduleApi.type";
 
 // 근무표 화면 타입. 응답 필드는 백엔드 확정 후 결정 (TODO)
@@ -20,6 +21,7 @@ export type ScheduleCell = {
   violations?: string[]; // 이 칸에 걸린 하드 위반 메시지
   editable?: boolean; // 없으면 편집 가능
   charge?: boolean; // 그날 그 근무의 차지 간호사
+  approvedOff?: boolean; // 그날 승인된 희망 오프가 있다
 };
 
 export type ScheduleDay = {
@@ -34,6 +36,8 @@ export type ScheduleRow = {
   nurseKey: string; // nurseId
   name: string;
   group?: string; // 숙련 그룹. 없으면 묶지 않는다
+  dutyRole?: DutyRole; // 정렬용. 받은 것만
+  careerMonths?: number; // 정렬용 총경력(개월). 받은 것만
   cells: ScheduleCell[];
   needsCheck?: boolean;
 };
@@ -61,6 +65,9 @@ export type ScheduleSheetApiState = {
   status: ScheduleStatus;
   hardViolationCount: number; // 병동 단위 위반(인원 미달 등)까지 센다. 0이어야 확정할 수 있다
 };
+
+// 근무표 행 정렬. default는 서버가 준 순서
+export type ScheduleRowSort = "default" | "name" | "dutyRole" | "career";
 
 export type ScheduleBrush = { code: EditableDutyCode; label: string };
 
