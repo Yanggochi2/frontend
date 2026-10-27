@@ -50,8 +50,9 @@ function groupStarts(rows: GridRow[]): Map<number, { name: string; count: number
 
 export default function ScheduleGrid({ view, days, rows, coverage, selected, onCellClick, onScroll }: Props) {
   const isMonth = view === "month";
-  const nameW = isMonth ? "w-[96px]" : "w-[151px]";
-  const rowH = "h-10";
+  const nameW = isMonth ? "w-[112px]" : "w-[151px]";
+  // 월간: 28~30명이 24인치 한 화면에 들어오도록 최소 높이만 정하고, 남는 높이는 표(h-full)가 행에 나눠 준다.
+  const rowH = isMonth ? "h-7" : "h-10";
   const headH = "h-12";
   const starts = groupStarts(rows);
 
@@ -76,15 +77,15 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
               >
                 <div className="flex flex-col items-center justify-center gap-0.5 leading-none">
                   {/* 주간 보기는 칸이 넓어 요일 자리에 공휴일 이름을 쓴다. 월간은 색으로만 구분하고 이름은 title로 */}
-                  <span className={`max-w-full truncate px-1 ${isMonth ? "text-[12px]" : "text-[15px]"} font-medium ${WEEKDAY_TEXT[d.tone]}`}>
+                  <span className={`max-w-full truncate px-1 text-[15px] font-medium ${WEEKDAY_TEXT[d.tone]}`}>
                     {d.holidayName && !isMonth ? `${d.weekday} · ${d.holidayName}` : d.weekday}
                   </span>
-                  <span className={`${isMonth ? "text-[16px]" : "text-[22px]"} font-bold ${DAY_TEXT[d.tone]}`}>{d.date}</span>
+                  <span className={`${isMonth ? "text-[20px]" : "text-[22px]"} font-bold ${DAY_TEXT[d.tone]}`}>{d.date}</span>
                 </div>
               </th>
             ))}
             {isMonth ? (
-              <th scope="col" className={`sticky top-0 right-0 z-30 w-[64px] border-t border-r border-b border-grid bg-surface text-[14px] font-bold text-ink-sub ${headH}`}>
+              <th scope="col" className={`sticky top-0 right-0 z-30 w-[72px] border-t border-r border-b border-grid bg-surface text-[16px] font-bold text-ink-sub ${headH}`}>
                 OFF 수
               </th>
             ) : (
@@ -100,7 +101,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
               <tr key={row.nurseKey}>
                 <th
                   scope="row"
-                  className={`sticky left-0 z-10 border-r border-b border-l border-grid bg-white text-left ${isMonth ? "text-[17px]" : "text-[20px]"} font-bold text-ink ${nameW} ${rowH} ${groupTop} pl-4`}
+                  className={`sticky left-0 z-10 border-r border-b border-l border-grid bg-white text-left leading-tight text-[20px] font-bold text-ink ${nameW} ${rowH} ${groupTop} pl-4`}
                 >
                   {start ? (
                     <span className={`block leading-tight font-bold text-primary ${isMonth ? "text-[11px]" : "text-[13px]"}`}>
@@ -113,7 +114,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                   const isSelected = selected?.row === index && selected.col === col;
                   const style = cell.duty ? DUTY_STYLE[cell.duty] : null;
                   const label = style ? (isMonth ? style.monthLabel : style.weekLabel) : "";
-                  const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
+                  const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[15px]" : "text-[20px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
                   return (
                     <td key={col} title={cell.violations?.join("\n")} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : EMPTY_BG[days[col].tone]}`}>
                       <button
@@ -121,7 +122,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                         disabled={!onCellClick || cell.editable === false}
                         onClick={(e) => onCellClick?.(index, col, e.currentTarget)}
                         aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}${cell.charge ? " 차지" : ""}${cell.approvedOff ? " 희망 오프" : ""}`}
-                        className={`flex size-full items-center justify-center ${style ? style.cell : "text-ink"} ${labelSize}`}
+                        className={`flex size-full items-center justify-center leading-none ${style ? style.cell : "text-ink"} ${labelSize}`}
                       >
                         {label}
                       </button>
@@ -151,7 +152,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                   );
                 })}
                 {isMonth ? (
-                  <td className={`sticky right-0 z-10 border-r border-b border-grid bg-white text-center text-[17px] font-medium text-ink ${rowH} ${groupTop}`}>
+                  <td className={`sticky right-0 z-10 border-r border-b border-grid bg-white text-center text-[20px] leading-none font-medium text-ink ${rowH} ${groupTop}`}>
                     {row.cells.filter((c) => c.duty === "O").length}
                   </td>
                 ) : (

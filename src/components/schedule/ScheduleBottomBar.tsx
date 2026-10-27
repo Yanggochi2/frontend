@@ -51,19 +51,19 @@ export default function ScheduleBottomBar({ scheduleId, yearMonth, status, hardV
   }
 
   return (
-    <div className="flex shrink-0 items-center justify-end gap-3 pt-3">
+    <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
       {status === "DRAFT" && blocked ? (
-        <p className="mr-auto text-[17px] font-bold text-danger">규칙 위반 {hardViolationCount}건을 고쳐야 확정할 수 있어요</p>
+        <p className="text-[17px] font-bold text-danger">규칙 위반 {hardViolationCount}건을 고쳐야 확정할 수 있어요</p>
       ) : null}
       {status === "CONFIRMED" ? (
-        <p className="mr-auto text-[17px] font-bold text-ok">확정된 근무표예요. 간호사들에게 공개됐어요</p>
+        <p className="text-[17px] font-bold text-ok">확정된 근무표예요. 간호사들에게 공개됐어요</p>
       ) : null}
       <div className="flex items-center gap-3">
         {status === "DRAFT" ? (
           <>
             <ScheduleButton
               variant="primary-soft"
-              size="bar"
+              size="sm"
               onClick={() => open("regenerate")}
               disabled={offline}
               className="disabled:opacity-50"
@@ -72,7 +72,7 @@ export default function ScheduleBottomBar({ scheduleId, yearMonth, status, hardV
             </ScheduleButton>
             <ScheduleButton
               variant="primary"
-              size="bar"
+              size="sm"
               onClick={() => open("confirm")}
               disabled={offline || blocked}
               className="disabled:opacity-50"
@@ -82,7 +82,7 @@ export default function ScheduleBottomBar({ scheduleId, yearMonth, status, hardV
           </>
         ) : null}
         {status === "CONFIRMED" ? (
-          <ScheduleButton variant="primary-soft" size="bar" onClick={() => open("cancel")}>
+          <ScheduleButton variant="primary-soft" size="sm" onClick={() => open("cancel")}>
             확정 취소
           </ScheduleButton>
         ) : null}
