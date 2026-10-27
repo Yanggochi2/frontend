@@ -31,7 +31,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   if (!data) {
     // 서버에 연결하지 못해도 근무표 틀(날짜 열, 도구 모음, 버튼)은 그대로 보여 준다.
     return (
-      <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col gap-3 px-6 py-4">
+      <div className="flex h-full w-full flex-col gap-3 px-6 py-3">
         <ApiOfflineBanner retryHref="/schedule" />
         <ScheduleSheet
           key={`offline-${params.view ?? ""}-${params.ym ?? ""}-${params.week ?? ""}`}
@@ -45,7 +45,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
     // 확정·확정 취소·자동 생성 뒤 다시 불러오면 버전이 바뀌므로 편집 상태를 새로 시작한다.
     const { view, yearMonth, activeWeek, unassigned, api } = data.sheet;
     return (
-      <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col px-6 py-4">
+      <div className="flex h-full w-full flex-col px-6 py-3">
         <ScheduleSheet
           key={`${view}-${yearMonth}-${activeWeek}-${unassigned}-${api.version}`}
           sheet={data.sheet}

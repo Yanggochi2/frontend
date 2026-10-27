@@ -95,12 +95,10 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
 
   return (
     <>
-      <div className="flex min-h-0 w-full flex-1 flex-col gap-2 rounded-[28px] bg-surface px-5 py-3">
-        {canManage ? (
-          <p className="shrink-0 text-right text-[15px] font-medium text-ink-sub">셀을 눌러 바로 수정 · 자동 저장</p>
-        ) : null}
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 rounded-[20px] bg-white px-5 py-4">
-          <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-3">
+      {/* 24인치(1920×1080)에서 월간 근무표가 스크롤 없이 한 화면에 들어오도록 위아래 여백과 줄 수를 줄였다. */}
+      <div className="flex min-h-0 w-full flex-1 flex-col">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 rounded-[20px] border border-line bg-white px-5 py-3">
+          <div className="flex min-h-[52px] flex-wrap items-center gap-x-6 gap-y-2">
             <div className="flex items-center gap-3">
               <h2 className="text-[28px] leading-normal font-bold text-ink">{sheet.title}</h2>
               <Link href={prevHref} aria-label="이전" className="flex size-11 items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
@@ -109,6 +107,7 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
               <Link href={nextHref} aria-label="다음" className="flex size-11 items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
                 ›
               </Link>
+              {canManage ? <p className="text-[15px] font-medium text-ink-sub">셀을 눌러 바로 수정 · 자동 저장</p> : null}
             </div>
             <div className="flex items-center gap-3">
               <ScheduleSegmented
@@ -121,6 +120,16 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
                 <ScheduleSegmented options={weekOptions} value={String(sheet.activeWeek)} ariaLabel="주 선택" />
               )}
             </div>
+            {canManage ? (
+              <div className="ml-auto">
+                <ScheduleBottomBar
+                  scheduleId={api.scheduleId}
+                  yearMonth={sheet.yearMonth}
+                  status={api.status}
+                  hardViolationCount={editor.hardViolationCount}
+                />
+              </div>
+            ) : null}
           </div>
           {canManage ? (
             <ScheduleToolbar
@@ -180,7 +189,6 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
             ) : null}
           </div>
         </section>
-        <p className="shrink-0 text-right text-[15px] font-medium text-ink-sub">{sheet.lastSavedLabel}</p>
       </div>
       {popover ? (
         <ScheduleCellPopover
@@ -192,14 +200,6 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
             setDuty(popover.row, popover.col, code);
             closePopover();
           }}
-        />
-      ) : null}
-      {canManage ? (
-        <ScheduleBottomBar
-          scheduleId={api.scheduleId}
-          yearMonth={sheet.yearMonth}
-          status={api.status}
-          hardViolationCount={editor.hardViolationCount}
         />
       ) : null}
     </>
