@@ -1,4 +1,5 @@
 import RnChip from "@/components/ui/RnChip";
+import RnButton from "@/components/ui/RnButton";
 import { DUTY_ROLE_LABEL, NURSE_ROLE_LABEL, NURSE_STATUS_LABEL } from "@/constants/nurses.constants";
 import type { Nurse } from "@/types/nurses.type";
 
@@ -50,8 +51,13 @@ export default function NursesTable({ items }: { items: Nurse[] }) {
               <td className={`${cell} w-[110px] ${text}`}>{n.skill ?? "-"}</td>
               <td className={`${cell} w-[260px] ${text}`}>{n.periodLabel ?? "-"}</td>
               <td className={`${cell} ${text}`}>
-                {/* TODO: 간호사 정보 수정(NUR-04) 화면은 미제작 */}
-                수정
+                {n.status === "RETIRED" ? (
+                  <span className="text-ink-mute">수정 불가</span>
+                ) : (
+                  <RnButton variant="secondary" href={`/nurses/${encodeURIComponent(n.id)}/edit`}>
+                    수정
+                  </RnButton>
+                )}
               </td>
             </tr>
           ))}

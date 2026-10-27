@@ -10,6 +10,8 @@ import type {
   ApiViolation,
   ApiViolationQuery,
 } from "@/types/scheduleApi.type";
+import { getNurseSortInfoMap } from "./nursesApi";
+import { getApprovedOffKeys } from "./requestsApi";
 import { getHolidays } from "./rulesApi";
 import type {
   CoverageDuty,
@@ -21,6 +23,7 @@ import type {
   SchedulePageData,
   SchedulePageParams,
 } from "@/types/schedule.type";
+import type { NurseRole } from "@/types/nurses.type";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const SCHEDULES = "/wards/me/schedules";
@@ -106,6 +109,8 @@ function toSheet(
   schedule: ApiSchedule,
   violations: ApiViolation[],
   holidays: Map<string, string>,
+  approvedOff: Set<string>, // "간호사id|YYYY-MM-DD"
+  sortInfo: Map<string, { role?: NurseRole; careerMonths?: number | null }>,
   view: "week" | "month",
   activeWeek: number,
 ): ScheduleSheetData {
@@ -121,10 +126,18 @@ function toSheet(
       nurseKey: n.id,
       name: n.name,
       group: n.skillGroup ?? undefined,
+      role: sortInfo.get(n.id)?.role,
+      dutyRole: n.dutyRole,
+      careerMonths: n.careerMonths ?? sortInfo.get(n.id)?.careerMonths ?? undefined,
       cells: dates.map((d) => {
         const c = cellMap.get(`${n.id}|${d}`);
         // 칸이 없으면 소속 기간 밖으로 보고 편집 불가로 둔다 (추측).
-        return { duty: c?.dutyCode ?? null, editable: c ? c.editable : false, charge: c?.isCharge || undefined };
+        return {
+          duty: c?.dutyCode ?? null,
+          editable: c ? c.editable : false,
+          charge: c?.isCharge || undefined,
+          approvedOff: approvedOff.has(`${n.id}|${d}`) || undefined,
+        };
       }),
     })),
   );
@@ -176,15 +189,20 @@ export async function getSchedulePage(params: SchedulePageParams = {}): Promise<
   if (schedule.nurses.length === 0) return { kind: "no-nurses", periodLabel };
 
   let violations: ApiViolation[] = [];
+  let approvedOff = new Set<string>();
   const holidaysJob = getHolidayNames(schedule.yearMonth);
+  const sortInfoJob = params.manage ? getNurseSortInfoMap() : Promise.resolve(new Map<string, { role?: NurseRole; careerMonths?: number | null }>());
   if (schedule.status === "DRAFT") {
-    // 위반 목록은 수간호사만 받는다. 실패해도 시트는 보여 준다.
+    // 위반 목록과 승인된 희망 오프는 수간호사만 받는다. 실패해도 시트는 보여 준다.
+    const offJob = getApprovedOffKeys(schedule.yearMonth).catch(() => approvedOff);
     try {
       violations = (await getScheduleViolations(schedule.id, { severity: "HARD", size: 100 })).data;
     } catch {}
+    approvedOff = await offJob;
   }
-  const holidays = await holidaysJob;
-  return { kind: "sheet", sheet: toSheet(schedule, violations, holidays, params.view === "month" ? "month" : "week", week) };
+  const [holidays, sortInfo] = await Promise.all([holidaysJob, sortInfoJob]);
+  const view = params.view === "month" ? "month" : "week";
+  return { kind: "sheet", sheet: toSheet(schedule, violations, holidays, approvedOff, sortInfo, view, week) };
 }
 
 // 서버에 연결하지 못했을 때 보여 줄 빈 근무표 틀. 날짜 열은 실제 오늘 날짜로 만들고 간호사 행은 없다.

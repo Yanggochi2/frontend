@@ -1,6 +1,6 @@
 // docs/API.md NUR-01~05 모델. 일반 간호사 응답에는 숙련도·경력·상태 등이 없을 수 있어 optional로 둔다.
 export type ApiNurseRole = "HEAD_NURSE" | "NURSE";
-export type ApiDutyRole = "CHARGE" | "PRECEPTOR" | "NEW" | "GENERAL";
+export type ApiDutyRole = "CHARGE" | "PRECEPTOR" | "NEW" | "GENERAL" | "NIGHT_ONLY";
 export type ApiNurseStatus = "ACTIVE" | "PREGNANT" | "ON_LEAVE" | "RETIRED";
 
 // TODO: 백엔드 확정 후 결정 — id 타입, 역할별로 어떤 필드가 빠지는지
@@ -37,9 +37,14 @@ export type NurseCreate = {
   preceptorOf?: string[] | null; // 담당 신입 간호사 id 목록
 };
 
-// NUR-04 본문. role 제외.
-// TODO: 백엔드 확정 후 결정 — VERSION_CONFLICT 검사를 위해 version을 본문에 담는지 헤더인지
+// NUR-04 본문. role 제외. version은 낙관적 잠금 검사용으로 본문에 담는다.
 export type NursePatch = Partial<NurseCreate> & { version?: number };
+
+export type ApiNurseMutationResult = {
+  nurse: ApiNurse;
+  violations: unknown[];
+  warnings: string[];
+};
 
 // NUR-02 쿼리
 export type NurseListQuery = {
@@ -53,5 +58,3 @@ export type NurseListQuery = {
   page?: number;
   size?: number;
 };
-
-// TODO: 백엔드 확정 후 결정 — NUR-04/05의 "Nurse+Violation[]" 응답 래핑 형태는 명세에 없다.

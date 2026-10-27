@@ -23,7 +23,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
   };
   let data: SchedulePageData | null = null;
   try {
-    data = await getSchedulePage(params);
+    data = await getSchedulePage({ ...params, manage: canManage });
   } catch {
     data = null;
   }

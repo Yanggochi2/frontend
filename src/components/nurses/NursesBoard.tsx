@@ -4,36 +4,46 @@ import { useState } from "react";
 import RnFilterChip, { RnFilterDivider } from "@/components/ui/RnFilterChip";
 import type { DutyRole, Nurse } from "@/types/nurses.type";
 import { DUTY_ROLE_LABEL } from "@/constants/nurses.constants";
+import { compareNurses, type NurseSortKey } from "@/lib/nurseSort";
 import NursesTable from "./NursesTable";
 
-type Sort = "name" | "career";
 type RoleFilter = DutyRole | "ALL";
+
+const SORTS: { value: NurseSortKey; label: string }[] = [
+  { value: "skill", label: "숙련도순" },
+  { value: "name", label: "이름순" },
+];
 
 const ROLE_FILTERS: { value: RoleFilter; label: string }[] = [
   { value: "ALL", label: "전체 역할" },
   { value: "CHARGE", label: DUTY_ROLE_LABEL.CHARGE },
   { value: "PRECEPTOR", label: DUTY_ROLE_LABEL.PRECEPTOR },
   { value: "NEW", label: DUTY_ROLE_LABEL.NEW },
+  { value: "NIGHT_ONLY", label: DUTY_ROLE_LABEL.NIGHT_ONLY },
 ];
 
-const careerMonths = (n: Nurse) => (n.careerYears ?? 0) * 12 + (n.careerMonths ?? 0);
+const sortFields = (n: Nurse) => ({
+  ...n,
+  careerMonths: n.careerYears === undefined ? undefined : n.careerYears * 12 + (n.careerMonths ?? 0),
+});
 
 export default function NursesBoard({ items }: { items: Nurse[] }) {
-  const [sort, setSort] = useState<Sort>("name");
+  const [sort, setSort] = useState<NurseSortKey>("skill");
   const [role, setRole] = useState<RoleFilter>("ALL");
   const [includeRetired, setIncludeRetired] = useState(false);
 
   const visible = items
     .filter((n) => (includeRetired || n.status !== "RETIRED") && (role === "ALL" || n.dutyRole === role))
-    .sort((a, b) =>
-      sort === "name" ? a.name.localeCompare(b.name, "ko") : careerMonths(b) - careerMonths(a),
-    );
+    .sort((a, b) => compareNurses(sort, sortFields(a), sortFields(b)));
 
   return (
     <>
       <div className="flex w-full flex-wrap items-center gap-3">
-        <RnFilterChip selected={sort === "name"} onClick={() => setSort("name")}>이름순</RnFilterChip>
-        <RnFilterChip selected={sort === "career"} onClick={() => setSort("career")}>경력순</RnFilterChip>
+        {SORTS.map((s) => (
+          <RnFilterChip key={s.value} selected={sort === s.value} onClick={() => setSort(s.value)}>
+            {s.label}
+          </RnFilterChip>
+        ))}
         <RnFilterDivider />
         {ROLE_FILTERS.map((f) => (
           <RnFilterChip key={f.value} selected={role === f.value} onClick={() => setRole(f.value)}>

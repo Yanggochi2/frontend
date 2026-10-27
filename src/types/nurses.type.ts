@@ -1,5 +1,5 @@
 export type NurseRole = "HEAD_NURSE" | "NURSE";
-export type DutyRole = "GENERAL" | "CHARGE" | "PRECEPTOR" | "NEW";
+export type DutyRole = "GENERAL" | "CHARGE" | "PRECEPTOR" | "NEW" | "NIGHT_ONLY";
 export type NurseStatus = "ACTIVE" | "PREGNANT" | "ON_LEAVE" | "RETIRED";
 
 // TODO: 응답 필드는 백엔드 확정 후 결정. 일반 간호사 응답에는 숙련도·경력·상태가 없을 수 있다(서버 규칙).
@@ -20,10 +20,17 @@ export type Nurse = {
   inviteActive?: boolean;
 };
 
+export type NurseDetail = Nurse & {
+  joinedAt: string;
+  affiliationStart: string;
+  version: number;
+};
+
 // 간호사 등록 폼의 입력값. 날짜는 YYYY-MM-DD 문자열, 숫자는 입력 그대로 문자열.
 export type NurseDraft = {
   name: string;
-  hireDate: string;
+  /** 입사년도 (YYYY). 서버로는 그 해 1월 1일로 보낸다 */
+  hireYear: string;
   dutyRole: DutyRole;
   careerYears: string;
   careerMonths: string;

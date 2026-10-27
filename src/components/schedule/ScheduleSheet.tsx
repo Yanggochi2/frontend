@@ -7,7 +7,8 @@ import ScheduleButton from "@/components/ui/ScheduleButton";
 import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
 import { useGenerationStart } from "@/hooks/useGenerationStart";
 import { useScheduleEditor } from "@/hooks/useScheduleEditor";
-import type { EditableDutyCode, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
+import { compareNurses } from "@/lib/nurseSort";
+import type { EditableDutyCode, ScheduleRowSort, ScheduleSheetData, ScheduleView } from "@/types/schedule.type";
 import ScheduleBottomBar from "./ScheduleBottomBar";
 import ScheduleCellPopover from "./ScheduleCellPopover";
 import ScheduleGrid from "./ScheduleGrid";
@@ -27,6 +28,7 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
   const { rows, setDuty } = editor;
   const [brush, setBrush] = useState<EditableDutyCode | null>(null);
   const [checkOnly, setCheckOnly] = useState(false);
+  const [sort, setSort] = useState<ScheduleRowSort>("skill");
   const [popover, setPopover] = useState<Popover | null>(null);
   const [showEmptyGuide, setShowEmptyGuide] = useState(canManage && sheet.unassigned);
   const generation = useGenerationStart();
@@ -67,8 +69,15 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
 
   const gridRows = useMemo(() => {
     const all = rows.map((row, index) => ({ row, index }));
+    // 숙련 그룹 묶음(서버 순서대로 붙어 있음)은 유지하고 묶음 안에서만 정렬한다.
+    const groupOrder = [...new Set(rows.map((r) => r.group))];
+    all.sort(
+      (a, b) =>
+        groupOrder.indexOf(a.row.group) - groupOrder.indexOf(b.row.group) ||
+        compareNurses(sort, a.row, b.row),
+    );
     return checkOnly ? all.filter(({ row }) => row.needsCheck || row.cells.some((c) => c.flag)) : all;
-  }, [rows, checkOnly]);
+  }, [rows, checkOnly, sort]);
 
   const isMonth = sheet.view === "month";
   const period = { yearMonth: sheet.yearMonth, week: sheet.activeWeek };
@@ -87,7 +96,9 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
   return (
     <>
       <div className="flex min-h-0 w-full flex-1 flex-col gap-2 rounded-[28px] bg-surface px-5 py-3">
-        <p className="shrink-0 text-right text-[15px] font-medium text-ink-sub">셀을 눌러 바로 수정 · 자동 저장</p>
+        {canManage ? (
+          <p className="shrink-0 text-right text-[15px] font-medium text-ink-sub">셀을 눌러 바로 수정 · 자동 저장</p>
+        ) : null}
         <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 rounded-[20px] bg-white px-5 py-4">
           <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -121,6 +132,8 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
               onRedo={editor.redo}
               checkOnly={checkOnly}
               onCheckOnlyChange={setCheckOnly}
+              sort={sort}
+              onSortChange={setSort}
             />
           ) : null}
           {editor.saveError ? (
@@ -135,7 +148,7 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
               rows={gridRows}
               coverage={editor.coverage}
               selected={sheet.selectedCell}
-              onCellClick={handleCellClick}
+              onCellClick={canManage ? handleCellClick : undefined}
               onScroll={closePopover}
             />
             {showEmptyGuide ? (

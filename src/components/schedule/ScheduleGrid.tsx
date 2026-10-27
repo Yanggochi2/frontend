@@ -10,12 +10,16 @@ type Props = {
   rows: GridRow[];
   coverage: CoverageStatus[] | null;
   selected: { row: number; col: number } | null;
-  onCellClick: (row: number, col: number, el: HTMLElement) => void;
+  onCellClick?: (row: number, col: number, el: HTMLElement) => void; // 없으면 보기 전용
   onScroll: () => void;
 };
 
 const DAY_TEXT = { default: "text-ink", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
 const WEEKDAY_TEXT = { default: "text-ink-sub", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
+// 토·일·공휴일 열을 본문에서도 구분하도록 머리글과 근무가 없는 칸에 옅은 배경을 깐다.
+// 빈 칸은 근무 색(N 연보라·E 연주황)과 헷갈리지 않게 30%로 아주 옅게. 하단 인원 행은 인원 칩이 잘 보이도록 흰색 그대로.
+const HEAD_BG = { default: "bg-surface", sat: "bg-brand-soft", sun: "bg-danger-soft", holiday: "bg-danger-soft" } as const;
+const EMPTY_BG = { default: "bg-white", sat: "bg-brand-soft/30", sun: "bg-danger-soft/30", holiday: "bg-danger-soft/30" } as const;
 
 // 하단 인원 행. 세로 스크롤에도 보이도록 아래에서부터 쌓아 고정한다 (행 높이 h-11).
 const COVERAGE_ROWS: { duty: CoverageDuty; bottom: string }[] = [
@@ -68,7 +72,7 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                 key={d.date}
                 scope="col"
                 title={d.holidayName}
-                className={`sticky top-0 z-20 border-t border-r border-b border-grid p-0 font-normal ${headH} ${d.isToday ? "bg-line" : "bg-surface"}`}
+                className={`sticky top-0 z-20 border-t border-r border-b border-grid p-0 font-normal ${headH} ${d.isToday ? "bg-line" : HEAD_BG[d.tone]}`}
               >
                 <div className="flex flex-col items-center justify-center gap-0.5 leading-none">
                   {/* 주간 보기는 칸이 넓어 요일 자리에 공휴일 이름을 쓴다. 월간은 색으로만 구분하고 이름은 title로 */}
@@ -111,16 +115,24 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
                   const label = style ? (isMonth ? style.monthLabel : style.weekLabel) : "";
                   const labelSize = isMonth ? (cell.duty === "AL" || cell.duty === "ED" ? "text-[12px]" : "text-[16px]") : cell.duty === "AL" || cell.duty === "ED" ? "text-[18px]" : "text-[22px]";
                   return (
-                    <td key={col} title={cell.violations?.join("\n")} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : "bg-white"}`}>
+                    <td key={col} title={cell.violations?.join("\n")} className={`relative border-r border-b border-grid p-0 ${rowH} ${groupTop} ${style ? style.cell.split(" ")[0] : EMPTY_BG[days[col].tone]}`}>
                       <button
                         type="button"
-                        disabled={cell.editable === false}
-                        onClick={(e) => onCellClick(index, col, e.currentTarget)}
-                        aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}${cell.charge ? " 차지" : ""}`}
+                        disabled={!onCellClick || cell.editable === false}
+                        onClick={(e) => onCellClick?.(index, col, e.currentTarget)}
+                        aria-label={`${row.name} ${days[col].date}일 ${label || "미배정"}${cell.charge ? " 차지" : ""}${cell.approvedOff ? " 희망 오프" : ""}`}
                         className={`flex size-full items-center justify-center ${style ? style.cell : "text-ink"} ${labelSize}`}
                       >
                         {label}
                       </button>
+                      {cell.approvedOff ? (
+                        <span
+                          aria-hidden
+                          className={`pointer-events-none absolute top-0.5 left-0.5 rounded-[6px] bg-ink-sub px-1 leading-tight font-bold text-white ${isMonth ? "text-[10px]" : "text-[12px]"}`}
+                        >
+                          {isMonth ? "희" : "희망"}
+                        </span>
+                      ) : null}
                       {cell.charge ? (
                         <span
                           aria-hidden
