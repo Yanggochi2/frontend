@@ -7,8 +7,9 @@ export const MAX_CONSECUTIVE_NIGHT_DAYS = 3;
 export const OFF_TARGET_FORMULA_LABEL = "공휴일 수 + 1";
 // TODO(🔶 SCH-10) 통계 표의 OFF 목표 개수 (임시 12)
 export const OFF_TARGET_DAYS = 12;
-// TODO(🔶 RULE-01) 하루 필요 인원 (평일/주말/공휴일 구분 미확정, 임시 단일 값)
-export const REQUIRED_STAFF_PER_DAY = { D: 4, E: 3, N: 2 } as const;
+// 하루 필요 인원 기본값 D 7 · E 5 · N 5 (클라이언트 기준). 병동 개설·병동 설정·규칙 템플릿이 같이 쓴다.
+// TODO(🔶 RULE-01) 평일/주말/공휴일 구분은 미확정이라 단일 값으로 둔다.
+export const REQUIRED_STAFF_PER_DAY = { D: 7, E: 5, N: 5 } as const;
 // TODO(🔶 SCH-10) 통계에서 빨강으로 강조하는 OFF 부족 일수 기준 (Figma 샘플: 2일 부족은 강조, 1일 부족은 일반 표시)
 export const OFF_SHORTAGE_WARN_DAYS = 2;
 

@@ -29,6 +29,7 @@ export type ApiRulePatchBody = {
   severity?: ApiRuleSeverity;
   parameters?: Record<string, unknown>;
   reason?: string;
+  version?: number; // 낙관적 잠금. 다른 사람이 먼저 고쳤으면 409
 };
 
 // RULE-02 응답: Rule + ViolationSummary[]
