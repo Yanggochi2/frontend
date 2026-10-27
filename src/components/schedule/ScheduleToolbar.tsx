@@ -16,12 +16,10 @@ type Props = {
   onSortChange: (value: ScheduleRowSort) => void;
 };
 
-// 숙련 그룹 묶음은 그대로 두고 묶음 안의 순서만 바꾼다. 기본은 서버가 준 순서
+// 숙련 그룹 묶음은 그대로 두고 묶음 안의 순서만 바꾼다. 기준은 lib/nurseSort.ts
 const SORT_OPTIONS: { value: ScheduleRowSort; label: string }[] = [
-  { value: "default", label: "기본" },
+  { value: "skill", label: "숙련도" },
   { value: "name", label: "이름" },
-  { value: "dutyRole", label: "직급" },
-  { value: "career", label: "경력" },
 ];
 
 export default function ScheduleToolbar({
