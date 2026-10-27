@@ -48,7 +48,7 @@ export default async function NursesPage() {
         <>
           <RnPageHeader
             title="간호사 명단"
-            subtitle={`재직 ${result.activeCount}명 · 퇴사자는 ‘퇴사자 포함’을 켜면 보여요`}
+            subtitle={`재직 ${result.activeCount}명 · 퇴사자는 ‘퇴사자 보기’를 누르면 보여요`}
             action={
               <RnButton variant="primary" href="/nurses/new" className="px-[22px] text-[18px]">
                 간호사 등록

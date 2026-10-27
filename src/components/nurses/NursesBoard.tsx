@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import RnFilterChip, { RnFilterDivider } from "@/components/ui/RnFilterChip";
+import RnFilterChip from "@/components/ui/RnFilterChip";
+import ScheduleSegmented from "@/components/ui/ScheduleSegmented";
 import type { DutyRole, Nurse } from "@/types/nurses.type";
 import { DUTY_ROLE_LABEL } from "@/constants/nurses.constants";
 import { compareNurses, type NurseSortKey } from "@/lib/nurseSort";
@@ -14,46 +15,46 @@ const SORTS: { value: NurseSortKey; label: string }[] = [
   { value: "name", label: "이름순" },
 ];
 
-const ROLE_FILTERS: { value: RoleFilter; label: string }[] = [
-  { value: "ALL", label: "전체 역할" },
-  { value: "CHARGE", label: DUTY_ROLE_LABEL.CHARGE },
-  { value: "PRECEPTOR", label: DUTY_ROLE_LABEL.PRECEPTOR },
-  { value: "NEW", label: DUTY_ROLE_LABEL.NEW },
-  { value: "NIGHT_ONLY", label: DUTY_ROLE_LABEL.NIGHT_ONLY },
-];
+const ROLE_FILTERS: RoleFilter[] = ["ALL", "CHARGE", "PRECEPTOR", "GENERAL", "NEW", "NIGHT_ONLY"];
 
 const sortFields = (n: Nurse) => ({
   ...n,
   careerMonths: n.careerYears === undefined ? undefined : n.careerYears * 12 + (n.careerMonths ?? 0),
 });
 
+// 50대 사용자가 한눈에 알아보도록 정렬·역할 보기·퇴사자를 묶음으로 나누고, 역할 칩에 인원수를 붙인다.
 export default function NursesBoard({ items }: { items: Nurse[] }) {
   const [sort, setSort] = useState<NurseSortKey>("skill");
   const [role, setRole] = useState<RoleFilter>("ALL");
   const [includeRetired, setIncludeRetired] = useState(false);
 
-  const visible = items
-    .filter((n) => (includeRetired || n.status !== "RETIRED") && (role === "ALL" || n.dutyRole === role))
+  const pool = items.filter((n) => includeRetired || n.status !== "RETIRED");
+  const count = (f: RoleFilter) => (f === "ALL" ? pool.length : pool.filter((n) => n.dutyRole === f).length);
+  const retiredCount = items.filter((n) => n.status === "RETIRED").length;
+  const visible = pool
+    .filter((n) => role === "ALL" || n.dutyRole === role)
     .sort((a, b) => compareNurses(sort, sortFields(a), sortFields(b)));
 
   return (
     <>
-      <div className="flex w-full flex-wrap items-center gap-3">
-        {SORTS.map((s) => (
-          <RnFilterChip key={s.value} selected={sort === s.value} onClick={() => setSort(s.value)}>
-            {s.label}
+      <div className="flex w-full flex-wrap items-center gap-x-10 gap-y-3">
+        <div className="flex items-center gap-3">
+          <p className="text-[17px] font-bold text-ink">정렬</p>
+          <ScheduleSegmented options={SORTS} value={sort} onChange={setSort} ariaLabel="정렬" itemClassName="w-24" />
+        </div>
+        <div className="flex flex-wrap items-center gap-3" role="group" aria-label="역할로 보기">
+          <p className="text-[17px] font-bold text-ink">역할</p>
+          {ROLE_FILTERS.filter((f) => f === "ALL" || f === role || count(f) > 0).map((f) => (
+            <RnFilterChip key={f} selected={role === f} onClick={() => setRole(f)}>
+              {f === "ALL" ? "전체" : DUTY_ROLE_LABEL[f]} {count(f)}
+            </RnFilterChip>
+          ))}
+        </div>
+        <div className="ml-auto">
+          <RnFilterChip selected={includeRetired} onClick={() => setIncludeRetired((v) => !v)}>
+            {includeRetired ? "퇴사자 숨기기" : `퇴사자 보기 ${retiredCount}`}
           </RnFilterChip>
-        ))}
-        <RnFilterDivider />
-        {ROLE_FILTERS.map((f) => (
-          <RnFilterChip key={f.value} selected={role === f.value} onClick={() => setRole(f.value)}>
-            {f.label}
-          </RnFilterChip>
-        ))}
-        <RnFilterDivider />
-        <RnFilterChip selected={includeRetired} onClick={() => setIncludeRetired((v) => !v)}>
-          퇴사자 포함
-        </RnFilterChip>
+        </div>
       </div>
       <NursesTable items={visible} />
     </>
