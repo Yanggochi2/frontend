@@ -4,7 +4,7 @@ import type { NurseDetail, NurseDraft } from "@/types/nurses.type";
 export function emptyNurseDraft(name = ""): NurseDraft {
   return {
     name,
-    hireDate: "",
+    hireYear: "",
     dutyRole: "GENERAL",
     careerYears: "0",
     careerMonths: "0",
@@ -20,7 +20,8 @@ export function toNurseCreate(d: NurseDraft): NurseCreate {
     name: d.name.trim(),
     dutyRole: d.dutyRole,
     status: d.status,
-    joinedAt: d.hireDate,
+    // 명세서의 joinedAt은 날짜라서 입사년도를 그 해 1월 1일로 보낸다
+    joinedAt: `${d.hireYear}-01-01`,
     careerMonths: Number(d.careerYears || 0) * 12 + Number(d.careerMonths || 0),
     skillLevel: d.skill,
     affiliationStart: d.periodStart,
@@ -42,7 +43,7 @@ export function toNursePatch(initial: NurseDraft, current: NurseDraft): Partial<
 export function toNurseDraft(nurse: NurseDetail): NurseDraft {
   return {
     name: nurse.name,
-    hireDate: nurse.joinedAt,
+    hireYear: nurse.joinedAt.slice(0, 4),
     dutyRole: nurse.dutyRole ?? "GENERAL",
     careerYears: String(nurse.careerYears ?? 0),
     careerMonths: String(nurse.careerMonths ?? 0),
