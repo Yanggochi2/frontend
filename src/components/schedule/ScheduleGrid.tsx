@@ -17,8 +17,9 @@ type Props = {
 const DAY_TEXT = { default: "text-ink", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
 const WEEKDAY_TEXT = { default: "text-ink-sub", sat: "text-brand", sun: "text-danger", holiday: "text-danger" } as const;
 // 토·일·공휴일 열을 본문에서도 구분하도록 머리글과 근무가 없는 칸에 옅은 배경을 깐다.
+// 빈 칸은 근무 색(N 연보라·E 연주황)과 헷갈리지 않게 30%로 아주 옅게. 하단 인원 행은 인원 칩이 잘 보이도록 흰색 그대로.
 const HEAD_BG = { default: "bg-surface", sat: "bg-brand-soft", sun: "bg-danger-soft", holiday: "bg-danger-soft" } as const;
-const EMPTY_BG = { default: "bg-white", sat: "bg-brand-soft/60", sun: "bg-danger-soft/60", holiday: "bg-danger-soft/60" } as const;
+const EMPTY_BG = { default: "bg-white", sat: "bg-brand-soft/30", sun: "bg-danger-soft/30", holiday: "bg-danger-soft/30" } as const;
 
 // 하단 인원 행. 세로 스크롤에도 보이도록 아래에서부터 쌓아 고정한다 (행 높이 h-11).
 const COVERAGE_ROWS: { duty: CoverageDuty; bottom: string }[] = [
