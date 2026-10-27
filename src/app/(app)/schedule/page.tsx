@@ -45,7 +45,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
     // 확정·확정 취소·자동 생성 뒤 다시 불러오면 버전이 바뀌므로 편집 상태를 새로 시작한다.
     const { view, yearMonth, activeWeek, unassigned, api } = data.sheet;
     return (
-      <div className="flex h-full w-full flex-col px-6 py-3">
+      <div className="flex h-full w-full flex-col px-6 py-3 print:h-auto print:p-0">
         <ScheduleSheet
           key={`${view}-${yearMonth}-${activeWeek}-${unassigned}-${api.version}`}
           sheet={data.sheet}

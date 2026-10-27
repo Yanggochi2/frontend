@@ -52,12 +52,12 @@ export default function ScheduleGrid({ view, days, rows, coverage, selected, onC
   const isMonth = view === "month";
   const nameW = isMonth ? "w-[112px]" : "w-[151px]";
   // 월간: 28~30명이 24인치 한 화면에 들어오도록 최소 높이만 정하고, 남는 높이는 표(h-full)가 행에 나눠 준다.
-  const rowH = isMonth ? "h-7" : "h-10";
+  const rowH = isMonth ? "h-7 print:h-6" : "h-10";
   const headH = "h-12";
   const starts = groupStarts(rows);
 
   return (
-    <div onScroll={onScroll} className="absolute inset-0 overflow-auto">
+    <div onScroll={onScroll} className="absolute inset-0 overflow-auto print:static print:overflow-visible">
       {/* 시트 전체가 화면 안에 들어오도록 표를 영역 크기에 맞춘다. 영역이 너무 작을 때만 안에서 스크롤한다. */}
       <table className="h-full w-full table-fixed border-separate border-spacing-0">
         <thead>
