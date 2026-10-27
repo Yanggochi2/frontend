@@ -12,6 +12,7 @@ import type { EditableDutyCode, ScheduleRowSort, ScheduleSheetData, ScheduleView
 import ScheduleBottomBar from "./ScheduleBottomBar";
 import ScheduleCellPopover from "./ScheduleCellPopover";
 import ScheduleGrid from "./ScheduleGrid";
+import ScheduleShareButtons from "./ScheduleShareButtons";
 import ScheduleToolbar from "./ScheduleToolbar";
 
 type Popover = { row: number; col: number; top: number; left: number; above: boolean };
@@ -97,19 +98,19 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
     <>
       {/* 24인치(1920×1080)에서 월간 근무표가 스크롤 없이 한 화면에 들어오도록 위아래 여백과 줄 수를 줄였다. */}
       <div className="flex min-h-0 w-full flex-1 flex-col">
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 rounded-[20px] border border-line bg-white px-5 py-3">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 rounded-[20px] border border-line bg-white px-5 py-3 print:border-0 print:p-0">
           <div className="flex min-h-[52px] flex-wrap items-center gap-x-6 gap-y-2">
             <div className="flex items-center gap-3">
               <h2 className="text-[28px] leading-normal font-bold text-ink">{sheet.title}</h2>
-              <Link href={prevHref} aria-label="이전" className="flex size-11 items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
+              <Link href={prevHref} aria-label="이전" className="flex size-11 print:hidden items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
                 ‹
               </Link>
-              <Link href={nextHref} aria-label="다음" className="flex size-11 items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
+              <Link href={nextHref} aria-label="다음" className="flex size-11 print:hidden items-center justify-center rounded-[18px] bg-surface text-[22px] font-bold text-ink-sub">
                 ›
               </Link>
-              {canManage ? <p className="text-[15px] font-medium text-ink-sub">셀을 눌러 바로 수정 · 자동 저장</p> : null}
+              {canManage ? <p className="text-[15px] font-medium text-ink-sub print:hidden">셀을 눌러 바로 수정 · 자동 저장</p> : null}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 print:hidden">
               <ScheduleSegmented
                 options={viewOptions}
                 value={isMonth ? "month" : "week"}
@@ -120,8 +121,9 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
                 <ScheduleSegmented options={weekOptions} value={String(sheet.activeWeek)} ariaLabel="주 선택" />
               )}
             </div>
+            <ScheduleShareButtons scheduleId={api.scheduleId} yearMonth={sheet.yearMonth} canExport={canManage} />
             {canManage ? (
-              <div className="ml-auto">
+              <div className="ml-auto print:hidden">
                 <ScheduleBottomBar
                   scheduleId={api.scheduleId}
                   yearMonth={sheet.yearMonth}
@@ -132,25 +134,27 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
             ) : null}
           </div>
           {canManage ? (
-            <ScheduleToolbar
-              brush={brush}
-              onBrushChange={setBrush}
-              canUndo={editor.canUndo}
-              onUndo={editor.undo}
-              canRedo={editor.canRedo}
-              onRedo={editor.redo}
-              checkOnly={checkOnly}
-              onCheckOnlyChange={setCheckOnly}
-              sort={sort}
-              onSortChange={setSort}
-            />
+            <div className="print:hidden">
+              <ScheduleToolbar
+                brush={brush}
+                onBrushChange={setBrush}
+                canUndo={editor.canUndo}
+                onUndo={editor.undo}
+                canRedo={editor.canRedo}
+                onRedo={editor.redo}
+                checkOnly={checkOnly}
+                onCheckOnlyChange={setCheckOnly}
+                sort={sort}
+                onSortChange={setSort}
+              />
+            </div>
           ) : null}
           {editor.saveError ? (
             <p role="alert" className="text-[16px] font-bold text-danger">
               {editor.saveError}
             </p>
           ) : null}
-          <div className="relative min-h-0 flex-1">
+          <div className="relative min-h-0 flex-1 print:flex-none">
             <ScheduleGrid
               view={sheet.view}
               days={sheet.days}
@@ -161,7 +165,7 @@ export default function ScheduleSheet({ sheet, canManage = true }: { sheet: Sche
               onScroll={closePopover}
             />
             {showEmptyGuide ? (
-              <div className="absolute top-1/3 left-1/2 flex w-[min(432px,calc(100%-2rem))] -translate-x-1/2 flex-col items-center gap-3 rounded-[20px] border border-line bg-white p-5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+              <div className="absolute top-1/3 left-1/2 flex w-[min(432px,calc(100%-2rem))] print:hidden -translate-x-1/2 flex-col items-center gap-3 rounded-[20px] border border-line bg-white p-5 text-center shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
                 <p className="text-[22px] font-bold text-ink">아직 비어 있어요</p>
                 <p className="text-[16px] font-medium text-ink-sub">
                   칸을 눌러 근무를 넣거나, 자동 생성으로 한 번에 채워요. 연차는 이미 들어가 있어요.
