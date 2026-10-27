@@ -1,7 +1,6 @@
 import { ApiError, apiRequest, apiRequestList } from "@/lib/apiClient";
 import { REQUEST_REASON_ETC, REQUEST_REASONS } from "@/constants/requests.constants";
 import { getNurseNameMap } from "@/services/nursesApi";
-import { getHolidays } from "@/services/rulesApi";
 import type {
   RequestFormOptions,
   RequestItem,
@@ -113,27 +112,13 @@ export async function getRequest(id: string): Promise<RequestItem> {
 
 export async function getRequestFormOptions(): Promise<RequestFormOptions> {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
   return {
-    year,
-    month,
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
     today: now.getDate(),
     initialSelectedDay: now.getDate(),
-    holidays: await getHolidayDays(`${year}-${String(month).padStart(2, "0")}`),
     reasons: REQUEST_REASONS,
   };
-}
-
-// 달력 공휴일 표시용. RULE-04는 수간호사 전용이라 간호사는 403 → 표시 없이 비워 둔다.
-// TODO: 간호사도 공휴일을 받을 수 있게 되면 그대로 표시된다 (백엔드 확정 후 결정)
-async function getHolidayDays(yearMonth: string): Promise<Record<number, string>> {
-  try {
-    const list = await getHolidays(yearMonth);
-    return Object.fromEntries(list.filter((h) => h.isHoliday).map((h) => [Number(h.date.slice(8)), h.name || "공휴일"]));
-  } catch {
-    return {};
-  }
 }
 
 // REQ-01 (Idempotency-Key)

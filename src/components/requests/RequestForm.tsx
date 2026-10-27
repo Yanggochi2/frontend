@@ -10,7 +10,7 @@ import type { RequestFormOptions, RequestKind } from "@/types/requests.type";
 import RequestCalendar, { formatRange, type DayRange } from "./RequestCalendar";
 
 export default function RequestForm({ options }: { options: RequestFormOptions }) {
-  const { year, month, today, initialSelectedDay, holidays, reasons } = options;
+  const { year, month, today, initialSelectedDay, reasons } = options;
   const router = useRouter();
   const [kind, setKind] = useState<RequestKind>("ANNUAL_LEAVE");
   const [reason, setReason] = useState(reasons[0]?.value ?? "");
@@ -118,7 +118,7 @@ export default function RequestForm({ options }: { options: RequestFormOptions }
             <span aria-hidden>‹</span>
             <span aria-hidden>›</span>
           </div>
-          <RequestCalendar year={year} month={month} today={today} holidays={holidays} range={range} onChange={setRange} />
+          <RequestCalendar year={year} month={month} today={today} range={range} onChange={setRange} />
           <p className="w-full max-w-[624px] rounded-[14px] bg-brand-soft px-5 py-3.5 text-[17px] font-bold whitespace-pre text-brand">
             {`선택한 날짜  ${formatRange(month, year, range)}`}
           </p>
