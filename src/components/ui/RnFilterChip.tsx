@@ -16,8 +16,10 @@ export default function RnFilterChip({
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      className={`h-11 shrink-0 whitespace-nowrap rounded-full px-[18px] text-[16px] font-bold ${
-        selected ? "bg-ink text-white" : "bg-surface text-ink-sub"
+      className={`h-10 shrink-0 whitespace-nowrap rounded-full border px-4 text-[15px] font-bold transition-colors ${
+        selected
+          ? "border-primary bg-primary-soft text-primary"
+          : "border-line bg-white text-ink-sub hover:bg-surface"
       }`}
     >
       {children}

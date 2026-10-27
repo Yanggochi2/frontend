@@ -54,7 +54,7 @@ export default function NursesTable({ items }: { items: Nurse[] }) {
                 {n.status === "RETIRED" ? (
                   <span className="text-ink-mute">수정 불가</span>
                 ) : (
-                  <RnButton variant="secondary" href={`/nurses/${encodeURIComponent(n.id)}/edit`}>
+                  <RnButton variant="secondary" size="sm" href={`/nurses/${encodeURIComponent(n.id)}/edit`}>
                     수정
                   </RnButton>
                 )}
