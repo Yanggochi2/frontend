@@ -15,9 +15,15 @@ const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v
 export default async function SchedulePage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const canManage = (await getMyRole()) !== "NURSE";
+  const params = {
+    // 수간호사가 보기·기간 없이 처음 열면 월간으로 연다. 주간 링크는 ym·week를 달고 오므로 그대로 주간이다.
+    view: first(sp.view) ?? (canManage && !sp.ym && !sp.week ? "month" : undefined),
+    ym: first(sp.ym),
+    week: first(sp.week),
+  };
   let data: SchedulePageData | null = null;
   try {
-    data = await getSchedulePage({ view: first(sp.view), ym: first(sp.ym), week: first(sp.week), manage: canManage });
+    data = await getSchedulePage({ ...params, manage: canManage });
   } catch {
     data = null;
   }
@@ -28,8 +34,8 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
       <div className="mx-auto flex h-full w-full max-w-[1400px] flex-col gap-3 px-6 py-4">
         <ApiOfflineBanner retryHref="/schedule" />
         <ScheduleSheet
-          key={`offline-${sp.view ?? ""}-${sp.ym ?? ""}-${sp.week ?? ""}`}
-          sheet={getOfflineSheet({ view: first(sp.view), ym: first(sp.ym), week: first(sp.week) })}
+          key={`offline-${params.view ?? ""}-${params.ym ?? ""}-${params.week ?? ""}`}
+          sheet={getOfflineSheet(params)}
         />
       </div>
     );
