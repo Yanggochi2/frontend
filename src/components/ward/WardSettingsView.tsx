@@ -3,6 +3,7 @@ import AdminChip from "@/components/ui/AdminChip";
 import AdminNotice from "@/components/ui/AdminNotice";
 import type { ReactNode } from "react";
 import JoinCodeSection from "./JoinCodeSection";
+import RequiredStaffSection from "./RequiredStaffSection";
 import type { WardSettingsData } from "@/types/ward.type";
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
@@ -31,12 +32,15 @@ export default function WardSettingsView({ ward }: { ward: WardSettingsData | nu
         <InfoRow label="병원" value={ward?.hospitalName ?? "-"} />
         <InfoRow label="병동" value={ward?.wardName ?? "-"} />
         <InfoRow label="함께 일하는 간호사" value={ward ? `${ward.nurseCount}명` : "-"} />
-        <InfoRow
-          label="하루 필요 인원"
-          value={ward ? `D ${ward.dailyRequired.D}  ·  E ${ward.dailyRequired.E}  ·  N ${ward.dailyRequired.N}` : "-"}
-        />
         {ward?.ruleStartLabel ? <InfoRow label="규칙 시작 방식" value={ward.ruleStartLabel} /> : null}
         <AdminButton>정보 고치기</AdminButton>
+      </Card>
+      <Card title="하루 필요 인원">
+        {ward ? (
+          <RequiredStaffSection initial={ward.dailyRequired} />
+        ) : (
+          <p className="text-[18px] leading-normal font-bold text-ink">-</p>
+        )}
       </Card>
       <Card title="병동 코드">
         <JoinCodeSection initialCode={ward?.wardCode ?? "-"} />

@@ -14,7 +14,7 @@ export default async function WardSettingsPage() {
 
   return (
     <div className="flex min-w-0 flex-col gap-8 px-12 pt-12 pb-10">
-      <AdminPageHeader title="병동 설정" subtitle="병동 코드와 수간호사 권한을 관리해요" />
+      <AdminPageHeader title="병동 설정" subtitle="하루 필요 인원, 병동 코드와 수간호사 권한을 관리해요" />
       {ward ? (
         <WardSettingsView ward={ward} />
       ) : (

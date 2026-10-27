@@ -1,6 +1,8 @@
 // 규칙 템플릿: "조건 + 결과" 문장에 값을 채우는 방식 (비즈니스 로직 10-19, 4장).
 // 규칙 code와 parameters 키는 백엔드 기준이다.
 
+import { REQUIRED_STAFF_PER_DAY } from "./rules.constants";
+
 export type RuleParamField = {
   key: string;
   unit: string;
@@ -24,7 +26,7 @@ export const RULE_TEMPLATES: RuleTemplate[] = [
   {
     code: "COVERAGE",
     name: "듀티별 필요 인원",
-    parts: ["데이", { key: "D", unit: "명", min: 0, max: 30, defaultValue: 2 }, "이브닝", { key: "E", unit: "명", min: 0, max: 30, defaultValue: 2 }, "나이트", { key: "N", unit: "명", min: 0, max: 30, defaultValue: 1 }],
+    parts: ["데이", { key: "D", unit: "명", min: 0, max: 30, defaultValue: REQUIRED_STAFF_PER_DAY.D }, "이브닝", { key: "E", unit: "명", min: 0, max: 30, defaultValue: REQUIRED_STAFF_PER_DAY.E }, "나이트", { key: "N", unit: "명", min: 0, max: 30, defaultValue: REQUIRED_STAFF_PER_DAY.N }],
     addable: false,
     defaultStrength: "REQUIRED",
   },

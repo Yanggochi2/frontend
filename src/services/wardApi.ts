@@ -1,4 +1,5 @@
 import { apiRequest, apiRequestList } from "@/lib/apiClient";
+import { getRules, patchRule } from "@/services/rulesApi";
 import type { WardSettingsData } from "@/types/ward.type";
 import type { ApiWard, JoinCode, Membership, TransferResult } from "@/types/wardApi.type";
 
@@ -26,6 +27,17 @@ export async function getWardSettings(): Promise<WardSettingsData> {
     // TODO: 백엔드 확정 후 결정 (목록의 "나" 판별. Nurse에 userId가 없어 isMe를 알 수 없다)
     headNurses: heads.data.map((n) => ({ id: n.id, name: n.name, isMe: false })),
   };
+}
+
+// 하루 필요 인원 수정. 병동의 필요 인원은 COVERAGE 규칙 값이라 RULE-01로 찾아 RULE-02로 고친다.
+// 저장된 값을 돌려준다.
+export async function updateRequiredStaff(next: WardSettingsData["dailyRequired"]): Promise<WardSettingsData["dailyRequired"]> {
+  const { rules } = await getRules();
+  const coverage = rules.find((r) => r.code === "COVERAGE");
+  if (!coverage) throw new Error("필요 인원 규칙을 찾지 못했어요. 새로고침 후 다시 시도해 주세요.");
+  const saved = await patchRule(coverage.id, { parameters: next, version: coverage.version });
+  const p = saved.parameters as Partial<WardSettingsData["dailyRequired"]>;
+  return { D: Number(p.D ?? next.D), E: Number(p.E ?? next.E), N: Number(p.N ?? next.N) };
 }
 
 // WARD-08. 새 코드를 돌려준다.

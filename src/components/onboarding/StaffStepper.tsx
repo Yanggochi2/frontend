@@ -12,7 +12,7 @@ const stepBtn =
 export default function StaffStepper({ label, value, onChange }: Props) {
   return (
     <div className="flex h-14 items-center gap-3.5 rounded-[14px] bg-surface pr-2 pl-[18px] font-bold">
-      <span className="text-lg text-ink-sub">{label}</span>
+      <span className="text-lg whitespace-nowrap text-ink-sub">{label}</span>
       <output className="flex-1 text-xl text-ink" aria-label={`${label} 필요 인원`}>
         {value}
       </output>
