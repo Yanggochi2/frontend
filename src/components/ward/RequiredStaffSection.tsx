@@ -45,7 +45,7 @@ export default function RequiredStaffSection({ initial }: { initial: Staff }) {
 
   return (
     <>
-      <div className="grid w-full max-w-[720px] grid-cols-3 gap-3">
+      <div className="grid w-full max-w-[840px] grid-cols-3 gap-3">
         {SHIFTS.map(({ kind, label }) => (
           <StaffStepper key={kind} label={label} value={staff[kind]} onChange={(v) => change({ ...staff, [kind]: v })} />
         ))}
