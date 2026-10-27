@@ -5,9 +5,10 @@ import type { FairnessRow } from "@/types/stats.type";
 
 function offLabel(row: FairnessRow) {
   const lack = row.offTarget - row.offCount;
+  const carry = row.offCarry > 0 ? ` (이월 +${row.offCarry})` : "";
   return lack >= OFF_SHORTAGE_WARN_DAYS
-    ? { text: `${row.offCount} / ${row.offTarget} · ${lack}일 부족`, tone: "red" as const }
-    : { text: `${row.offCount} / ${row.offTarget}`, tone: "gray" as const };
+    ? { text: `${row.offCount} / ${row.offTarget}${carry} · ${lack}일 부족`, tone: "red" as const }
+    : { text: `${row.offCount} / ${row.offTarget}${carry}`, tone: "gray" as const };
 }
 
 export default function StatsTable({ rows }: { rows: FairnessRow[] }) {

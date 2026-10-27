@@ -7,7 +7,7 @@ export const SELECT_WARD_INFO: SelectWardInfo = {
 };
 
 export const CREATE_WARD_DEFAULTS: CreateWardDefaults = {
-  requiredStaff: { D: 4, E: 3, N: 2 },
+  requiredStaff: { D: 7, E: 5, N: 5 },
   presets: [
     // id는 백엔드 Preset 값 (STANDARD | MINIMAL)
     { id: "STANDARD", label: "일반 병동 기본값" },

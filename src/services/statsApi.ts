@@ -17,8 +17,9 @@ export async function getStats(yearMonth?: string): Promise<StatsData> {
       dayCount: s.D,
       eveningCount: s.E,
       nightCount: s.N,
-      offCount: s.O,
+      offCount: s.O + s.AL, // 백엔드 OFF 목표와 같이 연차도 쉰 날로 센다
       offTarget: s.offTarget ?? 0,
+      offCarry: s.offCarry ?? 0,
       weekendCount: s.weekendWork,
       holidayCount: s.holidayWork,
     }));

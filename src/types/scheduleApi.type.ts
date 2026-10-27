@@ -117,7 +117,8 @@ export type ApiNurseStatistic = {
   O: number;
   AL: number;
   ED?: number;
-  offTarget: number | null;
+  offTarget: number | null; // 지난달 이월분 포함
+  offCarry?: number; // 확정된 지난달에 못 쓰고 이월된 오프
   weekendWork: number;
   holidayWork: number;
 };

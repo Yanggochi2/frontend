@@ -6,6 +6,7 @@ export type FairnessRow = {
   nightCount: number;
   offCount: number;
   offTarget: number;
+  offCarry: number;
   weekendCount: number;
   holidayCount: number;
 };
