@@ -11,14 +11,15 @@
 - 스타일링은 **Tailwind CSS**로 한다. 기존에 쓰는 utility 조합과 설정에 있는 값(색, 간격 등)을 먼저 재사용하고, 임의 값(`[#123456]`, `[13px]` 같은 대괄호 값)은 꼭 필요할 때만 쓴다. 다른 스타일링 방식(CSS Module, styled-components 등)을 새로 들이지 않는다.
 
 ## 1-1. 작업 범위 (중요)
-- **이 레포의 일은 UI 구현뿐이다.** 백엔드는 나중에 별도로 만들고, 그때 API 연동을 한다.
+- **이 레포는 프론트엔드 전용이다.** 화면 구현과, 기존 API 클라이언트·서비스 계층을 거친 API 연동이 이 레포의 일이다. 백엔드(엔드포인트, 비즈니스 로직, DB)는 별도 레포에서 만든다. (12-2 참고)
 - **API를 직접 만들지 않는다.** 아래는 모두 금지한다.
   - Next.js의 서버 API 코드 (`app/api/**`의 Route Handler, `pages/api/**` 등)
   - 비즈니스 로직이나 DB 접근을 하는 Server Action, 서버 코드
   - 인증, 권한 판정, 데이터 저장을 프론트 서버에서 흉내 내는 코드
   - 백엔드가 있는 것처럼 보이는 가짜 서버(json-server, MSW 핸들러를 서비스 코드로 남기는 것 포함)
+- 백엔드로 요청을 넘기는 것은 지금처럼 `next.config.ts`의 rewrites(`/api/v1` → `BACKEND_ORIGIN`)로 한다. 프록시용 Route Handler를 따로 만들지 않는다.
 - **mock data를 쓰지 않는다.** 데이터는 항상 API에서 받는다. 9번 규칙을 따른다.
-- API 연동은 "나중에 백엔드 응답으로 갈아 끼우는 것"을 전제로 준비만 해 둔다. (요청 함수의 자리, 타입, loading/error/empty 처리)
+- API 연동은 `docs/API.md`와 기존 타입(`src/types/*Api.type.ts`)을 기준으로, `src/lib/apiClient.ts`와 서비스 계층(`src/services`)을 거쳐 한다. 요청 함수, 타입, loading/error/empty 처리를 함께 만든다.
 - 백엔드 명세가 필요한 판단(응답 필드 이름, 에러 코드, 인증 방식 등)은 만들어 내지 않는다. "백엔드 확정 후 결정"이라고 `TODO`로 남긴다.
 
 ## 2. 반드시 참고해야 하는 문서
@@ -93,6 +94,7 @@
 - 본인 리소스는 식별자 대신 `me`를 쓴다. 타인 식별자로 조회하는 경로를 만들지 않는다.
 - 화면 분기(메뉴, 버튼 노출)는 UI 편의일 뿐이다. 데이터 차단은 서버가 한다. 클라이언트는 **받은 필드만 표시**하고, 없는 필드(예: 일반 간호사 응답의 숙련도·경력·상태)를 있다고 가정하지 않는다.
 - 토큰은 쿠키(HttpOnly)로 전달된다. 코드에서 localStorage, 요청 본문, 쿼리스트링으로 토큰을 다루지 않는다.
+- 인증 정보와 비밀키(API 키, 비밀번호, 토큰 값 등)를 소스 코드에 직접 쓰지 않는다. 필요한 값은 환경 변수로 둔다.
 - 일반 간호사에게는 초안(DRAFT) 근무표를 보여주지 않는다. 확정본(CONFIRMED/ARCHIVED)만 조회한다.
 
 ### 6.2 근무표 도메인
@@ -168,6 +170,27 @@
 
 **Core Rule: Make only the changes necessary to complete the requested task. Leave everything else untouched.**
 
+## 12-2. API Integration Rules
+
+### Scope
+- This is a frontend-only repository. Do not implement backend endpoints, backend business logic, or database access.
+- Frontend API integration is allowed through the existing API client and service layers (`src/lib/apiClient.ts`, `src/services/`).
+- Do not create a duplicate API client or bypass the existing service layer without a clear requirement.
+
+### Errors and empty data
+- Never treat API failures as successful empty results.
+- Keep loading, empty, error, and offline states distinct.
+- Do not present fabricated or fallback business data as successfully retrieved API data.
+
+### Unconfirmed API specifications
+- Do not guess undocumented API fields, response formats, status values, or business rules.
+- Check the current API documentation (`docs/API.md`) and existing types (`src/types/`) before changing API integration code.
+- If required information is missing, preserve existing behavior where possible and document the unresolved issue (a `TODO` in code; product decisions go to `docs/open-questions.md`).
+
+### Domain constants and defaults
+- Do not change domain constants, rule codes, or default values (e.g. `src/constants/ruleTemplates.ts`) without checking the relevant specifications.
+- Keep frontend representations consistent with the backend contract and existing project documentation.
+
 ## 13. 금지 사항
 - 문서를 확인하지 않고 라우트 추가
 - 기존 구조와 다른 폴더 구조 생성
@@ -189,14 +212,14 @@
 - [ ] 화면 캡처(docs/screens/)와 일치하는가?
 - [ ] 기존 코드 스타일과 일관되는가?
 - [ ] 불필요한 import나 변수가 없는가?
-- [ ] loading/error/empty를 처리했는가?
-- [ ] API나 서버 코드를 직접 만들지 않았는가? (UI만 구현했는가?)
+- [ ] loading / empty / error / offline을 구분해 처리했는가? (API 실패를 0건·빈 목록처럼 보여 주지 않는가?)
+- [ ] 백엔드 API·서버 로직을 직접 만들지 않았는가? (API 연동은 apiClient·서비스 계층으로만 했는가?)
 - [ ] mock·샘플 데이터가 코드에 없고, 페이지·컴포넌트가 fetch를 직접 호출하지 않는가?
 - [ ] 🔶 항목이 TODO로 표시돼 있는가?
 - [ ] route 변경이 있다면 router.md를 수정했는가? 구조 변경이 있다면 Architecture.md를 수정했는가?
 
 ## 15. 기본 원칙 요약
-문서를 먼저 확인한다. 기존 구조를 따른다. 라우터 문서를 기준으로 페이지를 만든다. 권한은 서버가 정하고 화면은 받은 것만 보여준다. 이 레포는 Next.js UI만 만들고 API는 만들지 않는다(백엔드 준비 후 연동). API 로직은 UI와 분리한다. 컴포넌트는 작고 명확하게 유지한다. 구조가 바뀌면 문서도 함께 바꾼다.
+문서를 먼저 확인한다. 기존 구조를 따른다. 라우터 문서를 기준으로 페이지를 만든다. 권한은 서버가 정하고 화면은 받은 것만 보여준다. 이 레포는 프론트엔드(화면과 API 연동)만 하고 백엔드 API는 만들지 않는다. API 로직은 UI와 분리한다. 컴포넌트는 작고 명확하게 유지한다. 구조가 바뀌면 문서도 함께 바꾼다.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
