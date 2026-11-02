@@ -17,8 +17,9 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sea
     view: first(sp.view),
     ym: first(sp.ym),
     week: first(sp.week),
-    // 보기·기간 없이 처음 열면 근무표의 기본 보기(월간)로 연다. 주간 링크는 ym·week를 달고 오므로 그대로 주간이다.
-    entry: !sp.view && !sp.ym && !sp.week,
+    // 보기를 고르지 않고 열면(달만 정한 생성 완료 이동 포함) 근무표의 기본 보기(월간)로 연다.
+    // 주간 링크는 week를 달고 오므로 그대로 주간이다.
+    entry: !sp.view && !sp.week,
   };
   let data: SchedulePageData | null = null;
   try {

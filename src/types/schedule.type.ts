@@ -94,7 +94,7 @@ export type SchedulePageParams = {
   view?: string;
   ym?: string;
   week?: string;
-  entry?: boolean; // 보기·기간 없이 처음 열었다. 처음 보기는 근무표 응답의 defaultView를 따른다
+  entry?: boolean; // 보기·주차 없이 열었다(달만 정했을 수 있다). 처음 보기는 근무표 응답의 defaultView를 따른다
 };
 
 export type GenerationStep = {
